@@ -1,0 +1,24 @@
+services:
+  api:
+    volumes:
+      - ../api/core/tools/builtin_tool/_position.yaml:/app/api/core/tools/builtin_tool/_position.yaml
+      - ../api/core/tools/builtin_tool/provider.py:/app/api/core/tools/builtin_tool/provider.py
+      - ../api/core/tools/builtin_tool/providers/kiotviet:/app/api/core/tools/builtin_tool/providers/kiotviet
+      - ../api/controllers/console/workspace/tool_providers.py:/app/api/controllers/console/workspace/tool_providers.py
+      - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
+
+  worker:
+    volumes:
+      - ../api/core/tools/builtin_tool/_position.yaml:/app/api/core/tools/builtin_tool/_position.yaml
+      - ../api/core/tools/builtin_tool/provider.py:/app/api/core/tools/builtin_tool/provider.py
+      - ../api/core/tools/builtin_tool/providers/kiotviet:/app/api/core/tools/builtin_tool/providers/kiotviet
+      - ../api/controllers/console/workspace/tool_providers.py:/app/api/controllers/console/workspace/tool_providers.py
+      - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
+
+  worker_beat:
+    volumes:
+      - ../api/core/tools/builtin_tool/_position.yaml:/app/api/core/tools/builtin_tool/_position.yaml
+      - ../api/core/tools/builtin_tool/provider.py:/app/api/core/tools/builtin_tool/provider.py
+      - ../api/core/tools/builtin_tool/providers/kiotviet:/app/api/core/tools/builtin_tool/providers/kiotviet
+      - ../api/controllers/console/workspace/tool_providers.py:/app/api/controllers/console/workspace/tool_providers.py
+      - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
