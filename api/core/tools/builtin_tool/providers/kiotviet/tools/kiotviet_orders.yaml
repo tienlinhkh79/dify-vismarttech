@@ -1,0 +1,138 @@
+identity:
+  name: kiotviet_orders
+  author: Dify Community
+  label:
+    en_US: KiotViet Orders
+    vi_VN: KiotViet Đơn hàng
+description:
+  human:
+    en_US: Manage orders on KiotViet - list, create, update, cancel, delete, search by code/date/customer.
+    vi_VN: Quản lý đơn hàng trên KiotViet - danh sách, tạo, cập nhật, hủy, xóa, tìm kiếm.
+  llm: Manage KiotViet orders. Actions - list, get, create, update, cancel, delete, get_by_code, get_by_date_range, get_by_customer.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, get, create, update, cancel, delete, get_by_code, get_by_date_range, get_by_customer"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Orders
+      - value: get
+        label:
+          en_US: Get Order by ID
+      - value: create
+        label:
+          en_US: Create Order
+      - value: update
+        label:
+          en_US: Update Order
+      - value: cancel
+        label:
+          en_US: Cancel Order
+      - value: delete
+        label:
+          en_US: Delete Order
+      - value: get_by_code
+        label:
+          en_US: Get by Code
+      - value: get_by_date_range
+        label:
+          en_US: Get by Date Range
+      - value: get_by_customer
+        label:
+          en_US: Get by Customer
+  - name: order_id
+    type: number
+    required: false
+    label:
+      en_US: Order ID
+    llm_description: Order ID for get, update, cancel, delete
+    form: llm
+  - name: code
+    type: string
+    required: false
+    label:
+      en_US: Order Code
+    llm_description: Order code for get_by_code
+    form: llm
+  - name: branch_id
+    type: number
+    required: false
+    label:
+      en_US: Branch ID
+    llm_description: Branch ID (required for create)
+    form: llm
+  - name: customer_id
+    type: number
+    required: false
+    label:
+      en_US: Customer ID
+    llm_description: Customer ID for create
+    form: llm
+  - name: customer_identifier
+    type: string
+    required: false
+    label:
+      en_US: Customer Phone/Code
+    llm_description: Customer phone number or code for get_by_customer
+    form: llm
+  - name: order_details
+    type: string
+    required: false
+    label:
+      en_US: Order Details (JSON)
+    llm_description: 'JSON array of order items, e.g. [{"productId":1,"productCode":"SP001","productName":"Product 1","quantity":2,"price":100000}]'
+    form: llm
+  - name: description
+    type: string
+    required: false
+    label:
+      en_US: Description
+    llm_description: Order description or cancellation reason
+    form: llm
+  - name: discount
+    type: number
+    required: false
+    label:
+      en_US: Discount
+    llm_description: Discount amount
+    form: llm
+  - name: from_date
+    type: string
+    required: false
+    label:
+      en_US: From Date
+    llm_description: Start date (YYYY-MM-DD) for get_by_date_range
+    form: llm
+  - name: to_date
+    type: string
+    required: false
+    label:
+      en_US: To Date
+    llm_description: End date (YYYY-MM-DD) for get_by_date_range
+    form: llm
+  - name: status
+    type: string
+    required: false
+    label:
+      en_US: Status Filter (JSON)
+    llm_description: 'JSON array of status codes to filter, e.g. [1,2,3]. 1=Draft, 2=Processing, 3=Completed, 4=Cancelled'
+    form: llm
+  - name: page_size
+    type: number
+    required: false
+    label:
+      en_US: Page Size
+    llm_description: Number of items per page
+    form: llm
+  - name: current_item
+    type: number
+    required: false
+    label:
+      en_US: Current Item
+    llm_description: Starting position for pagination
+    form: llm

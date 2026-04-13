@@ -1,0 +1,114 @@
+identity:
+  name: kiotviet_vouchers
+  author: Dify Community
+  label:
+    en_US: KiotViet Vouchers
+    vi_VN: KiotViet Vouchers
+description:
+  human:
+    en_US: Manage vouchers and campaigns on KiotViet - list, create, update, delete campaigns, list/get vouchers.
+    vi_VN: Quản lý voucher và chiến dịch trên KiotViet.
+  llm: Manage KiotViet vouchers. Actions - list_campaigns, get_campaign, create_campaign, update_campaign, delete_campaign, list_vouchers, get_voucher, get_voucher_by_code.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list_campaigns, get_campaign, create_campaign, update_campaign, delete_campaign, list_vouchers, get_voucher, get_voucher_by_code"
+    form: llm
+    options:
+      - value: list_campaigns
+        label:
+          en_US: List Campaigns
+      - value: get_campaign
+        label:
+          en_US: Get Campaign
+      - value: create_campaign
+        label:
+          en_US: Create Campaign
+      - value: update_campaign
+        label:
+          en_US: Update Campaign
+      - value: delete_campaign
+        label:
+          en_US: Delete Campaign
+      - value: list_vouchers
+        label:
+          en_US: List Vouchers
+      - value: get_voucher
+        label:
+          en_US: Get Voucher
+      - value: get_voucher_by_code
+        label:
+          en_US: Get Voucher by Code
+  - name: campaign_id
+    type: number
+    required: false
+    label:
+      en_US: Campaign ID
+    form: llm
+  - name: voucher_id
+    type: number
+    required: false
+    label:
+      en_US: Voucher ID
+    form: llm
+  - name: code
+    type: string
+    required: false
+    label:
+      en_US: Code
+    llm_description: Campaign code for create, or voucher code for get_voucher_by_code
+    form: llm
+  - name: name
+    type: string
+    required: false
+    label:
+      en_US: Campaign Name
+    form: llm
+  - name: start_date
+    type: string
+    required: false
+    label:
+      en_US: Start Date
+    llm_description: Start date (YYYY-MM-DD) for campaign
+    form: llm
+  - name: end_date
+    type: string
+    required: false
+    label:
+      en_US: End Date
+    llm_description: End date (YYYY-MM-DD) for campaign
+    form: llm
+  - name: branch_id
+    type: number
+    required: false
+    label:
+      en_US: Branch ID
+    form: llm
+  - name: discount_type
+    type: number
+    required: false
+    label:
+      en_US: Discount Type
+    llm_description: "1=Fixed amount, 2=Percentage"
+    form: llm
+  - name: discount_value
+    type: number
+    required: false
+    label:
+      en_US: Discount Value
+    form: llm
+  - name: quantity
+    type: number
+    required: false
+    label:
+      en_US: Quantity
+    form: llm
+  - name: page_size
+    type: number
+    required: false
+    label:
+      en_US: Page Size
+    form: llm

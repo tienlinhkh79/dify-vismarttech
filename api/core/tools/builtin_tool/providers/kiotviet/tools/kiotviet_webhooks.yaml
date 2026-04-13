@@ -1,0 +1,74 @@
+identity:
+  name: kiotviet_webhooks
+  author: Dify Community
+  label:
+    en_US: KiotViet Webhooks
+    vi_VN: KiotViet Webhooks
+description:
+  human:
+    en_US: Manage webhooks on KiotViet - list, create, update, delete, enable, disable.
+    vi_VN: Quản lý webhooks trên KiotViet.
+  llm: Manage KiotViet webhooks. Actions - list, get, create, update, delete, enable, disable.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, get, create, update, delete, enable, disable"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List
+      - value: get
+        label:
+          en_US: Get by ID
+      - value: create
+        label:
+          en_US: Create
+      - value: update
+        label:
+          en_US: Update
+      - value: delete
+        label:
+          en_US: Delete
+      - value: enable
+        label:
+          en_US: Enable
+      - value: disable
+        label:
+          en_US: Disable
+  - name: webhook_id
+    type: number
+    required: false
+    label:
+      en_US: Webhook ID
+    form: llm
+  - name: url
+    type: string
+    required: false
+    label:
+      en_US: Webhook URL
+    llm_description: URL to receive webhook notifications
+    form: llm
+  - name: secret
+    type: string
+    required: false
+    label:
+      en_US: Webhook Secret
+    llm_description: Secret key for webhook signature verification
+    form: llm
+  - name: events
+    type: string
+    required: false
+    label:
+      en_US: Events (JSON)
+    llm_description: 'JSON array of webhook events, e.g. ["product.created","order.created"]'
+    form: llm
+  - name: page_size
+    type: number
+    required: false
+    label:
+      en_US: Page Size
+    form: llm

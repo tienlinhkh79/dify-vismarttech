@@ -1,0 +1,49 @@
+identity:
+  author: Dify Community
+  name: kiotviet
+  label:
+    en_US: KiotViet
+    vi_VN: KiotViet
+  description:
+    en_US: KiotViet retail management platform integration. Manage products, customers, orders, invoices, branches, and more.
+    vi_VN: Tích hợp nền tảng quản lý bán lẻ KiotViet. Quản lý sản phẩm, khách hàng, đơn hàng, hóa đơn, chi nhánh và nhiều hơn nữa.
+  icon: icon.svg
+  tags:
+    - business
+credentials_for_provider:
+  client_id:
+    type: text-input
+    required: true
+    label:
+      en_US: Client ID
+      vi_VN: Client ID
+    placeholder:
+      en_US: Enter your KiotViet Client ID
+      vi_VN: Nhập Client ID KiotViet của bạn
+    help:
+      en_US: Get your Client ID from the KiotViet Developer Portal
+      vi_VN: Lấy Client ID từ Cổng nhà phát triển KiotViet
+  client_secret:
+    type: secret-input
+    required: true
+    label:
+      en_US: Client Secret
+      vi_VN: Client Secret
+    placeholder:
+      en_US: Enter your KiotViet Client Secret
+      vi_VN: Nhập Client Secret KiotViet của bạn
+    help:
+      en_US: Get your Client Secret from the KiotViet Developer Portal
+      vi_VN: Lấy Client Secret từ Cổng nhà phát triển KiotViet
+  retailer_name:
+    type: text-input
+    required: true
+    label:
+      en_US: Retailer Name
+      vi_VN: Tên cửa hàng
+    placeholder:
+      en_US: Enter your KiotViet retailer name
+      vi_VN: Nhập tên cửa hàng KiotViet của bạn
+    help:
+      en_US: The retailer name as registered on KiotViet
+      vi_VN: Tên cửa hàng đã đăng ký trên KiotViet

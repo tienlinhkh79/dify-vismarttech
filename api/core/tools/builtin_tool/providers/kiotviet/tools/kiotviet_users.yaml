@@ -1,0 +1,59 @@
+identity:
+  name: kiotviet_users
+  author: Dify Community
+  label:
+    en_US: KiotViet Users
+    vi_VN: KiotViet Người dùng
+description:
+  human:
+    en_US: Manage users on KiotViet - list, get, search, filter by branch.
+    vi_VN: Quản lý người dùng trên KiotViet.
+  llm: Manage KiotViet users. Actions - list, get, search, get_active, get_by_branch.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, get, search, get_active, get_by_branch"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Users
+      - value: get
+        label:
+          en_US: Get User by ID
+      - value: search
+        label:
+          en_US: Search Users
+      - value: get_active
+        label:
+          en_US: Get Active Users
+      - value: get_by_branch
+        label:
+          en_US: Get Users by Branch
+  - name: user_id
+    type: number
+    required: false
+    label:
+      en_US: User ID
+    form: llm
+  - name: keyword
+    type: string
+    required: false
+    label:
+      en_US: Search Keyword
+    form: llm
+  - name: branch_id
+    type: number
+    required: false
+    label:
+      en_US: Branch ID
+    form: llm
+  - name: page_size
+    type: number
+    required: false
+    label:
+      en_US: Page Size
+    form: llm

@@ -1,0 +1,101 @@
+identity:
+  name: kiotviet_customers
+  author: Dify Community
+  label:
+    en_US: KiotViet Customers
+    vi_VN: KiotViet Khách hàng
+description:
+  human:
+    en_US: Manage customers on KiotViet - list, search, create, get by ID or phone number.
+    vi_VN: Quản lý khách hàng trên KiotViet - danh sách, tìm kiếm, tạo mới, tìm theo ID hoặc SĐT.
+  llm: Manage KiotViet customers. Actions - list, get, create, search, get_by_phone, get_by_group.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, get (by ID), create, search (by keyword), get_by_phone, get_by_group"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Customers
+      - value: get
+        label:
+          en_US: Get Customer by ID
+      - value: create
+        label:
+          en_US: Create Customer
+      - value: search
+        label:
+          en_US: Search Customers
+      - value: get_by_phone
+        label:
+          en_US: Get by Phone Number
+      - value: get_by_group
+        label:
+          en_US: Get by Group
+  - name: customer_id
+    type: number
+    required: false
+    label:
+      en_US: Customer ID
+    llm_description: Customer ID for get action
+    form: llm
+  - name: name
+    type: string
+    required: false
+    label:
+      en_US: Customer Name
+    llm_description: Customer name for create action
+    form: llm
+  - name: contact_number
+    type: string
+    required: false
+    label:
+      en_US: Contact Number
+    llm_description: Phone number for create or get_by_phone
+    form: llm
+  - name: email
+    type: string
+    required: false
+    label:
+      en_US: Email
+    llm_description: Customer email for create
+    form: llm
+  - name: address
+    type: string
+    required: false
+    label:
+      en_US: Address
+    llm_description: Customer address for create
+    form: llm
+  - name: keyword
+    type: string
+    required: false
+    label:
+      en_US: Search Keyword
+    llm_description: Search keyword for search action
+    form: llm
+  - name: group_id
+    type: number
+    required: false
+    label:
+      en_US: Group ID
+    llm_description: Customer group ID for get_by_group action
+    form: llm
+  - name: page_size
+    type: number
+    required: false
+    label:
+      en_US: Page Size
+    llm_description: Number of items per page (default 20)
+    form: llm
+  - name: current_item
+    type: number
+    required: false
+    label:
+      en_US: Current Item
+    llm_description: Starting position for pagination
+    form: llm

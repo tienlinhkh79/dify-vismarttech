@@ -1,0 +1,67 @@
+identity:
+  name: kiotviet_surcharges
+  author: Dify Community
+  label:
+    en_US: KiotViet Surcharges
+    vi_VN: KiotViet Phụ thu
+description:
+  human:
+    en_US: Manage surcharges on KiotViet - list, create, update, delete.
+    vi_VN: Quản lý phụ thu trên KiotViet.
+  llm: Manage KiotViet surcharges. Actions - list, get, create, update, delete.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, get, create, update, delete"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Surcharges
+      - value: get
+        label:
+          en_US: Get by ID
+      - value: create
+        label:
+          en_US: Create
+      - value: update
+        label:
+          en_US: Update
+      - value: delete
+        label:
+          en_US: Delete
+  - name: surcharge_id
+    type: number
+    required: false
+    label:
+      en_US: Surcharge ID
+    form: llm
+  - name: name
+    type: string
+    required: false
+    label:
+      en_US: Surcharge Name
+    form: llm
+  - name: value
+    type: number
+    required: false
+    label:
+      en_US: Value
+    llm_description: Surcharge value (amount or percentage)
+    form: llm
+  - name: is_percent
+    type: boolean
+    required: false
+    label:
+      en_US: Is Percentage
+    llm_description: True if value is a percentage, false if fixed amount
+    form: llm
+  - name: page_size
+    type: number
+    required: false
+    label:
+      en_US: Page Size
+    form: llm

@@ -1,0 +1,71 @@
+identity:
+  name: kiotviet_categories
+  author: Dify Community
+  label:
+    en_US: KiotViet Categories
+    vi_VN: KiotViet Danh mục
+description:
+  human:
+    en_US: Manage categories on KiotViet - list, create, update, delete, hierarchical view.
+    vi_VN: Quản lý danh mục trên KiotViet - danh sách, tạo, cập nhật, xóa, xem cây phân cấp.
+  llm: Manage KiotViet categories. Actions - list, get, create, update, delete, get_hierarchical.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, get, create, update, delete, get_hierarchical"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Categories
+      - value: get
+        label:
+          en_US: Get Category by ID
+      - value: create
+        label:
+          en_US: Create Category
+      - value: update
+        label:
+          en_US: Update Category
+      - value: delete
+        label:
+          en_US: Delete Category
+      - value: get_hierarchical
+        label:
+          en_US: Get Hierarchical
+  - name: category_id
+    type: number
+    required: false
+    label:
+      en_US: Category ID
+    llm_description: Category ID for get, update, delete
+    form: llm
+  - name: category_name
+    type: string
+    required: false
+    label:
+      en_US: Category Name
+    llm_description: Category name for create/update
+    form: llm
+  - name: parent_id
+    type: number
+    required: false
+    label:
+      en_US: Parent Category ID
+    llm_description: Parent category ID for creating sub-categories
+    form: llm
+  - name: description
+    type: string
+    required: false
+    label:
+      en_US: Description
+    form: llm
+  - name: page_size
+    type: number
+    required: false
+    label:
+      en_US: Page Size
+    form: llm

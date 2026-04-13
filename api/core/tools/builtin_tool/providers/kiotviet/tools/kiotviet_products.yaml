@@ -1,0 +1,128 @@
+identity:
+  name: kiotviet_products
+  author: Dify Community
+  label:
+    en_US: KiotViet Products
+    vi_VN: KiotViet Sản phẩm
+description:
+  human:
+    en_US: Manage products on KiotViet - list, search, create, update, delete, get by code/barcode, check inventory.
+    vi_VN: Quản lý sản phẩm trên KiotViet - danh sách, tìm kiếm, tạo mới, cập nhật, xóa, tìm theo mã/barcode, kiểm tra tồn kho.
+  llm: Manage KiotViet products. Actions - list, get, create, update, delete, search, get_by_code, get_by_barcode, get_inventory. Use action parameter to choose.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+      vi_VN: Hành động
+    human_description:
+      en_US: The action to perform
+      vi_VN: Hành động cần thực hiện
+    llm_description: "Action: list (list products), get (get by ID), create (create product), update (update product), delete (delete product), search (search by name), get_by_code (get by product code), get_by_barcode (get by barcode), get_inventory (check inventory levels)"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Products
+      - value: get
+        label:
+          en_US: Get Product by ID
+      - value: create
+        label:
+          en_US: Create Product
+      - value: update
+        label:
+          en_US: Update Product
+      - value: delete
+        label:
+          en_US: Delete Product
+      - value: search
+        label:
+          en_US: Search Products
+      - value: get_by_code
+        label:
+          en_US: Get Product by Code
+      - value: get_by_barcode
+        label:
+          en_US: Get Product by Barcode
+      - value: get_inventory
+        label:
+          en_US: Check Inventory
+  - name: product_id
+    type: number
+    required: false
+    label:
+      en_US: Product ID
+    llm_description: Product ID for get, update, delete actions
+    form: llm
+  - name: code
+    type: string
+    required: false
+    label:
+      en_US: Product Code
+    llm_description: Product code for get_by_code, or code when creating a product
+    form: llm
+  - name: barcode
+    type: string
+    required: false
+    label:
+      en_US: Barcode
+    llm_description: Product barcode for get_by_barcode action
+    form: llm
+  - name: name
+    type: string
+    required: false
+    label:
+      en_US: Product Name
+    llm_description: Product name for create/update, or search keyword for search action
+    form: llm
+  - name: category_id
+    type: number
+    required: false
+    label:
+      en_US: Category ID
+    llm_description: Category ID for filtering or when creating a product
+    form: llm
+  - name: base_price
+    type: number
+    required: false
+    label:
+      en_US: Base Price
+    llm_description: Base price when creating/updating a product
+    form: llm
+  - name: retail_price
+    type: number
+    required: false
+    label:
+      en_US: Retail Price
+    llm_description: Retail price when creating/updating a product
+    form: llm
+  - name: description
+    type: string
+    required: false
+    label:
+      en_US: Description
+    llm_description: Product description
+    form: llm
+  - name: page_size
+    type: number
+    required: false
+    label:
+      en_US: Page Size
+    llm_description: Number of items per page (default 20)
+    form: llm
+  - name: current_item
+    type: number
+    required: false
+    label:
+      en_US: Current Item
+    llm_description: Starting position for pagination (default 0)
+    form: llm
+  - name: branch_ids
+    type: string
+    required: false
+    label:
+      en_US: Branch IDs (JSON)
+    llm_description: "JSON array of branch IDs for inventory check, e.g. [1,2,3]"
+    form: llm

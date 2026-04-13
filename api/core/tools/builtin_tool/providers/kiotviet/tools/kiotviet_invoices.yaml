@@ -1,0 +1,129 @@
+identity:
+  name: kiotviet_invoices
+  author: Dify Community
+  label:
+    en_US: KiotViet Invoices
+    vi_VN: KiotViet Hóa đơn
+description:
+  human:
+    en_US: Manage invoices on KiotViet - list, create, update, cancel, delete, search.
+    vi_VN: Quản lý hóa đơn trên KiotViet - danh sách, tạo, cập nhật, hủy, xóa, tìm kiếm.
+  llm: Manage KiotViet invoices. Actions - list, get, create, update, cancel, delete, get_by_code, get_by_date_range, get_by_customer, get_by_order.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, get, create, update, cancel, delete, get_by_code, get_by_date_range, get_by_customer, get_by_order"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Invoices
+      - value: get
+        label:
+          en_US: Get Invoice by ID
+      - value: create
+        label:
+          en_US: Create Invoice
+      - value: cancel
+        label:
+          en_US: Cancel Invoice
+      - value: delete
+        label:
+          en_US: Delete Invoice
+      - value: get_by_code
+        label:
+          en_US: Get by Code
+      - value: get_by_date_range
+        label:
+          en_US: Get by Date Range
+      - value: get_by_customer
+        label:
+          en_US: Get by Customer
+      - value: get_by_order
+        label:
+          en_US: Get by Order
+  - name: invoice_id
+    type: number
+    required: false
+    label:
+      en_US: Invoice ID
+    llm_description: Invoice ID for get, cancel, delete
+    form: llm
+  - name: code
+    type: string
+    required: false
+    label:
+      en_US: Invoice Code
+    llm_description: Invoice code for get_by_code
+    form: llm
+  - name: branch_id
+    type: number
+    required: false
+    label:
+      en_US: Branch ID
+    llm_description: Branch ID (required for create)
+    form: llm
+  - name: customer_id
+    type: number
+    required: false
+    label:
+      en_US: Customer ID
+    form: llm
+  - name: customer_identifier
+    type: string
+    required: false
+    label:
+      en_US: Customer Phone/Code
+    llm_description: Customer phone or code for get_by_customer
+    form: llm
+  - name: order_id
+    type: number
+    required: false
+    label:
+      en_US: Order ID
+    llm_description: Order ID for get_by_order
+    form: llm
+  - name: invoice_details
+    type: string
+    required: false
+    label:
+      en_US: Invoice Details (JSON)
+    llm_description: 'JSON array of invoice items, e.g. [{"productId":1,"productCode":"SP001","productName":"Product","quantity":2,"price":500000}]'
+    form: llm
+  - name: total_payment
+    type: number
+    required: false
+    label:
+      en_US: Total Payment
+    llm_description: Total payment amount for create
+    form: llm
+  - name: description
+    type: string
+    required: false
+    label:
+      en_US: Description
+    llm_description: Invoice description or cancel reason
+    form: llm
+  - name: from_date
+    type: string
+    required: false
+    label:
+      en_US: From Date
+    llm_description: Start date (YYYY-MM-DD)
+    form: llm
+  - name: to_date
+    type: string
+    required: false
+    label:
+      en_US: To Date
+    llm_description: End date (YYYY-MM-DD)
+    form: llm
+  - name: page_size
+    type: number
+    required: false
+    label:
+      en_US: Page Size
+    form: llm

@@ -1,0 +1,72 @@
+identity:
+  name: kiotviet_branches
+  author: Dify Community
+  label:
+    en_US: KiotViet Branches
+    vi_VN: KiotViet Chi nhánh
+description:
+  human:
+    en_US: Manage branches on KiotViet - list, create, update, delete.
+    vi_VN: Quản lý chi nhánh trên KiotViet.
+  llm: Manage KiotViet branches. Actions - list, get, create, update, delete.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, get, create, update, delete"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Branches
+      - value: get
+        label:
+          en_US: Get Branch by ID
+      - value: create
+        label:
+          en_US: Create Branch
+      - value: update
+        label:
+          en_US: Update Branch
+      - value: delete
+        label:
+          en_US: Delete Branch
+  - name: branch_id
+    type: number
+    required: false
+    label:
+      en_US: Branch ID
+    form: llm
+  - name: name
+    type: string
+    required: false
+    label:
+      en_US: Branch Name
+    llm_description: Branch name for create/update
+    form: llm
+  - name: address
+    type: string
+    required: false
+    label:
+      en_US: Address
+    form: llm
+  - name: phone_number
+    type: string
+    required: false
+    label:
+      en_US: Phone Number
+    form: llm
+  - name: email
+    type: string
+    required: false
+    label:
+      en_US: Email
+    form: llm
+  - name: page_size
+    type: number
+    required: false
+    label:
+      en_US: Page Size
+    form: llm

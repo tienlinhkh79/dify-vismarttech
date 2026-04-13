@@ -1,168 +1,235 @@
-## README for docker Deployment
+![cover-v5-optimized](./images/GitHub_README_if.png)
 
-Welcome to the new `docker` directory for deploying Dify using Docker Compose. This README outlines the updates, deployment instructions, and migration details for existing users.
+<p align="center">
+  <a href="https://cloud.dify.ai">Dify Cloud</a> ·
+  <a href="https://docs.dify.ai/getting-started/install-self-hosted">Self-hosting</a> ·
+  <a href="https://docs.dify.ai">Documentation</a> ·
+  <a href="https://dify.ai/pricing">Dify edition overview</a>
+</p>
 
-### What's Updated
+<p align="center">
+    <a href="https://dify.ai" target="_blank">
+        <img alt="Static Badge" src="https://img.shields.io/badge/Product-F04438"></a>
+    <a href="https://dify.ai/pricing" target="_blank">
+        <img alt="Static Badge" src="https://img.shields.io/badge/free-pricing?logo=free&color=%20%23155EEF&label=pricing&labelColor=%20%23528bff"></a>
+    <a href="https://discord.gg/FngNHpbcY7" target="_blank">
+        <img src="https://img.shields.io/discord/1082486657678311454?logo=discord&labelColor=%20%235462eb&logoColor=%20%23f5f5f5&color=%20%235462eb"
+            alt="chat on Discord"></a>
+    <a href="https://reddit.com/r/difyai" target="_blank">  
+        <img src="https://img.shields.io/reddit/subreddit-subscribers/difyai?style=plastic&logo=reddit&label=r%2Fdifyai&labelColor=white"
+            alt="join Reddit"></a>
+    <a href="https://twitter.com/intent/follow?screen_name=dify_ai" target="_blank">
+        <img src="https://img.shields.io/twitter/follow/dify_ai?logo=X&color=%20%23f5f5f5"
+            alt="follow on X(Twitter)"></a>
+    <a href="https://www.linkedin.com/company/langgenius/" target="_blank">
+        <img src="https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff"
+            alt="follow on LinkedIn"></a>
+    <a href="https://hub.docker.com/u/langgenius" target="_blank">
+        <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/langgenius/dify-web?labelColor=%20%23FDB062&color=%20%23f79009"></a>
+    <a href="https://github.com/langgenius/dify/graphs/commit-activity" target="_blank">
+        <img alt="Commits last month" src="https://img.shields.io/github/commit-activity/m/langgenius/dify?labelColor=%20%2332b583&color=%20%2312b76a"></a>
+    <a href="https://github.com/langgenius/dify/" target="_blank">
+        <img alt="Issues closed" src="https://img.shields.io/github/issues-search?query=repo%3Alanggenius%2Fdify%20is%3Aclosed&label=issues%20closed&labelColor=%20%237d89b0&color=%20%235d6b98"></a>
+    <a href="https://github.com/langgenius/dify/discussions/" target="_blank">
+        <img alt="Discussion posts" src="https://img.shields.io/github/discussions/langgenius/dify?labelColor=%20%239b8afb&color=%20%237a5af8"></a>
+    <a href="https://insights.linuxfoundation.org/project/langgenius-dify" target="_blank">
+        <img alt="LFX Health Score" src="https://insights.linuxfoundation.org/api/badge/health-score?project=langgenius-dify"></a>
+    <a href="https://insights.linuxfoundation.org/project/langgenius-dify" target="_blank">
+        <img alt="LFX Contributors" src="https://insights.linuxfoundation.org/api/badge/contributors?project=langgenius-dify"></a>
+    <a href="https://insights.linuxfoundation.org/project/langgenius-dify" target="_blank">
+        <img alt="LFX Active Contributors" src="https://insights.linuxfoundation.org/api/badge/active-contributors?project=langgenius-dify"></a>
+</p>
 
-- **Certbot Container**: `docker-compose.yaml` now contains `certbot` for managing SSL certificates. This container automatically renews certificates and ensures secure HTTPS connections.\
-  For more information, refer `docker/certbot/README.md`.
+<p align="center">
+  <a href="./README.md"><img alt="README in English" src="https://img.shields.io/badge/English-d9d9d9"></a>
+  <a href="./docs/zh-TW/README.md"><img alt="繁體中文文件" src="https://img.shields.io/badge/繁體中文-d9d9d9"></a>
+  <a href="./docs/zh-CN/README.md"><img alt="简体中文文件" src="https://img.shields.io/badge/简体中文-d9d9d9"></a>
+  <a href="./docs/ja-JP/README.md"><img alt="日本語のREADME" src="https://img.shields.io/badge/日本語-d9d9d9"></a>
+  <a href="./docs/es-ES/README.md"><img alt="README en Español" src="https://img.shields.io/badge/Español-d9d9d9"></a>
+  <a href="./docs/fr-FR/README.md"><img alt="README en Français" src="https://img.shields.io/badge/Français-d9d9d9"></a>
+  <a href="./docs/tlh/README.md"><img alt="README tlhIngan Hol" src="https://img.shields.io/badge/Klingon-d9d9d9"></a>
+  <a href="./docs/ko-KR/README.md"><img alt="README in Korean" src="https://img.shields.io/badge/한국어-d9d9d9"></a>
+  <a href="./docs/ar-SA/README.md"><img alt="README بالعربية" src="https://img.shields.io/badge/العربية-d9d9d9"></a>
+  <a href="./docs/tr-TR/README.md"><img alt="Türkçe README" src="https://img.shields.io/badge/Türkçe-d9d9d9"></a>
+  <a href="./docs/vi-VN/README.md"><img alt="README Tiếng Việt" src="https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-d9d9d9"></a>
+  <a href="./docs/de-DE/README.md"><img alt="README in Deutsch" src="https://img.shields.io/badge/German-d9d9d9"></a>
+  <a href="./docs/it-IT/README.md"><img alt="README in Italiano" src="https://img.shields.io/badge/Italiano-d9d9d9"></a>
+  <a href="./docs/pt-BR/README.md"><img alt="README em Português do Brasil" src="https://img.shields.io/badge/Portugu%C3%AAs%20do%20Brasil-d9d9d9"></a>
+  <a href="./docs/sl-SI/README.md"><img alt="README Slovenščina" src="https://img.shields.io/badge/Sloven%C5%A1%C4%8Dina-d9d9d9"></a>
+  <a href="./docs/bn-BD/README.md"><img alt="README in বাংলা" src="https://img.shields.io/badge/বাংলা-d9d9d9"></a>
+  <a href="./docs/hi-IN/README.md"><img alt="README in हिन्दी" src="https://img.shields.io/badge/Hindi-d9d9d9"></a>
+</p>
 
-- **Persistent Environment Variables**: Environment variables are now managed through a `.env` file, ensuring that your configurations persist across deployments.
+Dify is an open-source LLM app development platform. Its intuitive interface combines AI workflow, RAG pipeline, agent capabilities, model management, observability features (including [Opik](https://www.comet.com/docs/opik/integrations/dify), [Langfuse](https://docs.langfuse.com), and [Arize Phoenix](https://docs.arize.com/phoenix)) and more, letting you quickly go from prototype to production. Here's a list of the core features:
 
-  > What is `.env`? </br> </br>
-  > The `.env` file is a crucial component in Docker and Docker Compose environments, serving as a centralized configuration file where you can define environment variables that are accessible to the containers at runtime. This file simplifies the management of environment settings across different stages of development, testing, and production, providing consistency and ease of configuration to deployments.
+## Quick start
 
-- **Unified Vector Database Services**: All vector database services are now managed from a single Docker Compose file `docker-compose.yaml`. You can switch between different vector databases by setting the `VECTOR_STORE` environment variable in your `.env` file.
+> Before installing Dify, make sure your machine meets the following minimum system requirements:
+>
+> - CPU >= 2 Core
+> - RAM >= 4 GiB
 
-- **Mandatory .env File**: A `.env` file is now required to run `docker compose up`. This file is crucial for configuring your deployment and for any custom settings to persist through upgrades.
+<br/>
 
-### How to Deploy Dify with `docker-compose.yaml`
-
-1. **Prerequisites**: Ensure Docker and Docker Compose are installed on your system.
-1. **Environment Setup**:
-   - Navigate to the `docker` directory.
-   - Copy the `.env.example` file to a new file named `.env` by running `cp .env.example .env`.
-   - Customize the `.env` file as needed. Refer to the `.env.example` file for detailed configuration options.
-   - **Optional (Recommended for upgrades)**:
-     You may use the environment synchronization tool to help keep your `.env` file aligned with the latest `.env.example` updates, while preserving your custom settings.
-     This is especially useful when upgrading Dify or managing a large, customized `.env` file.
-     See the [Environment Variables Synchronization](#environment-variables-synchronization) section below.
-1. **Running the Services**:
-   - Execute `docker compose up` from the `docker` directory to start the services.
-   - To specify a vector database, set the `VECTOR_STORE` variable in your `.env` file to your desired vector database service, such as `milvus`, `weaviate`, or `opensearch`.
-1. **SSL Certificate Setup**:
-   - Refer `docker/certbot/README.md` to set up SSL certificates using Certbot.
-1. **OpenTelemetry Collector Setup**:
-   - Change `ENABLE_OTEL` to `true` in `.env`.
-   - Configure `OTLP_BASE_ENDPOINT` properly.
-
-### How to Deploy Middleware for Developing Dify
-
-1. **Middleware Setup**:
-   - Use the `docker-compose.middleware.yaml` for setting up essential middleware services like databases and caches.
-   - Navigate to the `docker` directory.
-   - Ensure the `middleware.env` file is created by running `cp middleware.env.example middleware.env` (refer to the `middleware.env.example` file).
-1. **Running Middleware Services**:
-   - Navigate to the `docker` directory.
-   - Execute `docker compose --env-file middleware.env -f docker-compose.middleware.yaml -p dify up -d` to start PostgreSQL/MySQL (per `DB_TYPE`) plus the bundled Weaviate instance.
-
-> Compose automatically loads `COMPOSE_PROFILES=${DB_TYPE:-postgresql},weaviate` from `middleware.env`, so no extra `--profile` flags are needed. Adjust variables in `middleware.env` if you want a different combination of services.
-
-### Migration for Existing Users
-
-For users migrating from the `docker-legacy` setup:
-
-1. **Review Changes**: Familiarize yourself with the new `.env` configuration and Docker Compose setup.
-1. **Transfer Customizations**:
-   - If you have customized configurations such as `docker-compose.yaml`, `ssrf_proxy/squid.conf`, or `nginx/conf.d/default.conf`, you will need to reflect these changes in the `.env` file you create.
-1. **Data Migration**:
-   - Ensure that data from services like databases and caches is backed up and migrated appropriately to the new structure if necessary.
-
-### Overview of `.env`
-
-#### Key Modules and Customization
-
-- **Vector Database Services**: Depending on the type of vector database used (`VECTOR_STORE`), users can set specific endpoints, ports, and authentication details.
-- **Storage Services**: Depending on the storage type (`STORAGE_TYPE`), users can configure specific settings for S3, Azure Blob, Google Storage, etc.
-- **API and Web Services**: Users can define URLs and other settings that affect how the API and web frontend operate.
-
-#### Other notable variables
-
-The `.env.example` file provided in the Docker setup is extensive and covers a wide range of configuration options. It is structured into several sections, each pertaining to different aspects of the application and its services. Here are some of the key sections and variables:
-
-1. **Common Variables**:
-
-   - `CONSOLE_API_URL`, `SERVICE_API_URL`: URLs for different API services.
-   - `APP_WEB_URL`: Frontend application URL.
-   - `FILES_URL`: Base URL for file downloads and previews.
-
-1. **Server Configuration**:
-
-   - `LOG_LEVEL`, `DEBUG`, `FLASK_DEBUG`: Logging and debug settings.
-   - `SECRET_KEY`: A key for encrypting session cookies and other sensitive data.
-
-1. **Database Configuration**:
-
-   - `DB_USERNAME`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`: PostgreSQL database credentials and connection details.
-
-1. **Redis Configuration**:
-
-   - `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`: Redis server connection settings.
-
-1. **Celery Configuration**:
-
-   - `CELERY_BROKER_URL`: Configuration for Celery message broker.
-
-1. **Storage Configuration**:
-
-   - `STORAGE_TYPE`, `S3_BUCKET_NAME`, `AZURE_BLOB_ACCOUNT_NAME`: Settings for file storage options like local, S3, Azure Blob, etc.
-
-1. **Vector Database Configuration**:
-
-   - `VECTOR_STORE`: Type of vector database (e.g., `weaviate`, `milvus`).
-   - Specific settings for each vector store like `WEAVIATE_ENDPOINT`, `MILVUS_URI`.
-
-1. **CORS Configuration**:
-
-   - `WEB_API_CORS_ALLOW_ORIGINS`, `CONSOLE_CORS_ALLOW_ORIGINS`: Settings for cross-origin resource sharing.
-
-1. **OpenTelemetry Configuration**:
-
-   - `ENABLE_OTEL`: Enable OpenTelemetry collector in api.
-   - `OTLP_BASE_ENDPOINT`: Endpoint for your OTLP exporter.
-
-1. **Other Service-Specific Environment Variables**:
-
-   - Each service like `nginx`, `redis`, `db`, and vector databases have specific environment variables that are directly referenced in the `docker-compose.yaml`.
-
-### Environment Variables Synchronization
-
-When upgrading Dify or pulling the latest changes, new environment variables may be introduced in `.env.example`.
-
-To help keep your existing `.env` file up to date **without losing your custom values**, an optional environment variables synchronization tool is provided.
-
-> This tool performs a **one-way synchronization** from `.env.example` to `.env`.
-> Existing values in `.env` are never overwritten automatically.
-
-#### `dify-env-sync.sh` (Optional)
-
-This script compares your current `.env` file with the latest `.env.example` template and helps safely apply new or updated environment variables.
-
-**What it does**
-
-- Creates a backup of the current `.env` file before making any changes
-- Synchronizes newly added environment variables from `.env.example`
-- Preserves all existing custom values in `.env`
-- Displays differences and variables removed from `.env.example` for review
-
-**Backup behavior**
-
-Before synchronization, the current `.env` file is saved to the `env-backup/` directory with a timestamped filename
-(e.g. `env-backup/.env.backup_20231218_143022`).
-
-**When to use**
-
-- After upgrading Dify to a newer version
-- When `.env.example` has been updated with new environment variables
-- When managing a large or heavily customized `.env` file
-
-**Usage**
+The easiest way to start the Dify server is through [Docker Compose](docker/docker-compose.yaml). Before running Dify with the following commands, make sure that [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) are installed on your machine:
 
 ```bash
-# Grant execution permission (first time only)
-chmod +x dify-env-sync.sh
-
-# Run the synchronization
-./dify-env-sync.sh
+cd dify
+cd docker
+cp .env.example .env
+docker compose up -d
 ```
 
-### Additional Information
+After running, you can access the Dify dashboard in your browser at [http://localhost/install](http://localhost/install) and start the initialization process.
 
-- **Continuous Improvement Phase**: We are actively seeking feedback from the community to refine and enhance the deployment process. As more users adopt this new method, we will continue to make improvements based on your experiences and suggestions.
-- **Support**: For detailed configuration options and environment variable settings, refer to the `.env.example` file and the Docker Compose configuration files in the `docker` directory.
+#### Seeking help
 
-This README aims to guide you through the deployment process using the new Docker Compose setup. For any issues or further assistance, please refer to the official documentation or contact support.
-#   d i f y - o p e n - s o u r c e  
- #   d i f y - o p e n - s o u r c e  
- #   d i f y - v i s m a r t t e c h  
- 
+Please refer to our [FAQ](https://docs.dify.ai/getting-started/install-self-hosted/faqs) if you encounter problems setting up Dify. Reach out to [the community and us](#community--contact) if you are still having issues.
+
+> If you'd like to contribute to Dify or do additional development, refer to our [guide to deploying from source code](https://docs.dify.ai/getting-started/install-self-hosted/local-source-code)
+
+## Key features
+
+**1. Workflow**:
+Build and test powerful AI workflows on a visual canvas, leveraging all the following features and beyond.
+
+**2. Comprehensive model support**:
+Seamless integration with hundreds of proprietary / open-source LLMs from dozens of inference providers and self-hosted solutions, covering GPT, Mistral, Llama3, and any OpenAI API-compatible models. A full list of supported model providers can be found [here](https://docs.dify.ai/getting-started/readme/model-providers).
+
+![providers-v5](https://github.com/langgenius/dify/assets/13230914/5a17bdbe-097a-4100-8363-40255b70f6e3)
+
+**3. Prompt IDE**:
+Intuitive interface for crafting prompts, comparing model performance, and adding additional features such as text-to-speech to a chat-based app.
+
+**4. RAG Pipeline**:
+Extensive RAG capabilities that cover everything from document ingestion to retrieval, with out-of-box support for text extraction from PDFs, PPTs, and other common document formats.
+
+**5. Agent capabilities**:
+You can define agents based on LLM Function Calling or ReAct, and add pre-built or custom tools for the agent. Dify provides 50+ built-in tools for AI agents, such as Google Search, DALL·E, Stable Diffusion and WolframAlpha.
+
+**6. LLMOps**:
+Monitor and analyze application logs and performance over time. You could continuously improve prompts, datasets, and models based on production data and annotations.
+
+**7. Backend-as-a-Service**:
+All of Dify's offerings come with corresponding APIs, so you could effortlessly integrate Dify into your own business logic.
+
+## Using Dify
+
+- **Cloud <br/>**
+  We host a [Dify Cloud](https://dify.ai) service for anyone to try with zero setup. It provides all the capabilities of the self-deployed version, and includes 200 free GPT-4 calls in the sandbox plan.
+
+- **Self-hosting Dify Community Edition<br/>**
+  Quickly get Dify running in your environment with this [starter guide](#quick-start).
+  Use our [documentation](https://docs.dify.ai) for further references and more in-depth instructions.
+
+- **Dify for enterprise / organizations<br/>**
+  We provide additional enterprise-centric features. [Send us an email](mailto:business@dify.ai?subject=%5BGitHub%5DBusiness%20License%20Inquiry) to discuss your enterprise needs. <br/>
+
+  > For startups and small businesses using AWS, check out [Dify Premium on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-t22mebxzwjhu6) and deploy it to your own AWS VPC with one click. It's an affordable AMI offering with the option to create apps with custom logo and branding.
+
+## Staying ahead
+
+Star Dify on GitHub and be instantly notified of new releases.
+
+![star-us](https://github.com/langgenius/dify/assets/13230914/b823edc1-6388-4e25-ad45-2f6b187adbb4)
+
+## Advanced Setup
+
+### Custom configurations
+
+If you need to customize the configuration, please refer to the comments in our [.env.example](docker/.env.example) file and update the corresponding values in your `.env` file. Additionally, you might need to make adjustments to the `docker-compose.yaml` file itself, such as changing image versions, port mappings, or volume mounts, based on your specific deployment environment and requirements. After making any changes, please re-run `docker compose up -d`. You can find the full list of available environment variables [here](https://docs.dify.ai/getting-started/install-self-hosted/environments).
+
+#### Customizing Suggested Questions
+
+You can now customize the "Suggested Questions After Answer" feature to better fit your use case. For example, to generate longer, more technical questions:
+
+```bash
+# In your .env file
+SUGGESTED_QUESTIONS_PROMPT='Please help me predict the five most likely technical follow-up questions a developer would ask. Focus on implementation details, best practices, and architecture considerations. Keep each question between 40-60 characters. Output must be JSON array: ["question1","question2","question3","question4","question5"]'
+SUGGESTED_QUESTIONS_MAX_TOKENS=512
+SUGGESTED_QUESTIONS_TEMPERATURE=0.3
+```
+
+See the [Suggested Questions Configuration Guide](docs/suggested-questions-configuration.md) for detailed examples and usage instructions.
+
+### Metrics Monitoring with Grafana
+
+Import the dashboard to Grafana, using Dify's PostgreSQL database as data source, to monitor metrics in granularity of apps, tenants, messages, and more.
+
+- [Grafana Dashboard by @bowenliang123](https://github.com/bowenliang123/dify-grafana-dashboard)
+
+### Deployment with Kubernetes
+
+If you'd like to configure a highly-available setup, there are community-contributed [Helm Charts](https://helm.sh/) and YAML files which allow Dify to be deployed on Kubernetes.
+
+- [Helm Chart by @LeoQuote](https://github.com/douban/charts/tree/master/charts/dify)
+- [Helm Chart by @BorisPolonsky](https://github.com/BorisPolonsky/dify-helm)
+- [Helm Chart by @magicsong](https://github.com/magicsong/ai-charts)
+- [YAML file by @Winson-030](https://github.com/Winson-030/dify-kubernetes)
+- [YAML file by @wyy-holding](https://github.com/wyy-holding/dify-k8s)
+- [🚀 NEW! YAML files (Supports Dify v1.6.0) by @Zhoneym](https://github.com/Zhoneym/DifyAI-Kubernetes)
+
+#### Using Terraform for Deployment
+
+Deploy Dify to Cloud Platform with a single click using [terraform](https://www.terraform.io/)
+
+##### Azure Global
+
+- [Azure Terraform by @nikawang](https://github.com/nikawang/dify-azure-terraform)
+
+##### Google Cloud
+
+- [Google Cloud Terraform by @sotazum](https://github.com/DeNA/dify-google-cloud-terraform)
+
+#### Using AWS CDK for Deployment
+
+Deploy Dify to AWS with [CDK](https://aws.amazon.com/cdk/)
+
+##### AWS
+
+- [AWS CDK by @KevinZhao (EKS based)](https://github.com/aws-samples/solution-for-deploying-dify-on-aws)
+- [AWS CDK by @tmokmss (ECS based)](https://github.com/aws-samples/dify-self-hosted-on-aws)
+
+#### Using Alibaba Cloud Computing Nest
+
+Quickly deploy Dify to Alibaba cloud with [Alibaba Cloud Computing Nest](https://computenest.console.aliyun.com/service/instance/create/default?type=user&ServiceName=Dify%E7%A4%BE%E5%8C%BA%E7%89%88)
+
+#### Using Alibaba Cloud Data Management
+
+One-Click deploy Dify to Alibaba Cloud with [Alibaba Cloud Data Management](https://www.alibabacloud.com/help/en/dms/dify-in-invitational-preview/)
+
+#### Deploy to AKS with Azure Devops Pipeline
+
+One-Click deploy Dify to AKS with [Azure Devops Pipeline Helm Chart by @LeoZhang](https://github.com/Ruiruiz30/Dify-helm-chart-AKS)
+
+## Contributing
+
+For those who'd like to contribute code, see our [Contribution Guide](https://github.com/langgenius/dify/blob/main/CONTRIBUTING.md).
+At the same time, please consider supporting Dify by sharing it on social media and at events and conferences.
+
+> We are looking for contributors to help translate Dify into languages other than Mandarin or English. If you are interested in helping, please see the [i18n README](https://github.com/langgenius/dify/blob/main/web/i18n-config/README.md) for more information, and leave us a comment in the `global-users` channel of our [Discord Community Server](https://discord.gg/8Tpq4AcN9c).
+
+## Community & contact
+
+- [GitHub Discussion](https://github.com/langgenius/dify/discussions). Best for: sharing feedback and asking questions.
+- [GitHub Issues](https://github.com/langgenius/dify/issues). Best for: bugs you encounter using Dify.AI, and feature proposals. See our [Contribution Guide](https://github.com/langgenius/dify/blob/main/CONTRIBUTING.md).
+- [Discord](https://discord.gg/FngNHpbcY7). Best for: sharing your applications and hanging out with the community.
+- [X(Twitter)](https://twitter.com/dify_ai). Best for: sharing your applications and hanging out with the community.
+
+**Contributors**
+
+<a href="https://github.com/langgenius/dify/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=langgenius/dify" />
+</a>
+
+## Star history
+
+[![Star History Chart](https://api.star-history.com/svg?repos=langgenius/dify&type=Date)](https://star-history.com/#langgenius/dify&Date)
+
+## Security disclosure
+
+To protect your privacy, please avoid posting security issues on GitHub. Instead, report issues to security@dify.ai, and our team will respond with detailed answer.
+
+## License
+
+This repository is licensed under the [Dify Open Source License](LICENSE), based on Apache 2.0 with additional conditions.

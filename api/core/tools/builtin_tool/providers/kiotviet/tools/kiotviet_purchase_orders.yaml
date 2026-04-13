@@ -1,0 +1,98 @@
+identity:
+  name: kiotviet_purchase_orders
+  author: Dify Community
+  label:
+    en_US: KiotViet Purchase Orders
+    vi_VN: KiotViet Đơn đặt hàng
+description:
+  human:
+    en_US: Manage purchase orders on KiotViet - list, create, update, cancel, search.
+    vi_VN: Quản lý đơn đặt hàng trên KiotViet.
+  llm: Manage KiotViet purchase orders. Actions - list, get, create, update, cancel, get_by_date_range, get_by_supplier.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, get, create, update, cancel, get_by_date_range, get_by_supplier"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Purchase Orders
+      - value: get
+        label:
+          en_US: Get by ID
+      - value: create
+        label:
+          en_US: Create
+      - value: update
+        label:
+          en_US: Update
+      - value: cancel
+        label:
+          en_US: Cancel
+      - value: get_by_date_range
+        label:
+          en_US: Get by Date Range
+      - value: get_by_supplier
+        label:
+          en_US: Get by Supplier
+  - name: purchase_order_id
+    type: number
+    required: false
+    label:
+      en_US: Purchase Order ID
+    form: llm
+  - name: branch_id
+    type: number
+    required: false
+    label:
+      en_US: Branch ID
+    llm_description: Branch ID (required for create)
+    form: llm
+  - name: supplier_id
+    type: number
+    required: false
+    label:
+      en_US: Supplier ID
+    form: llm
+  - name: supplier_code
+    type: string
+    required: false
+    label:
+      en_US: Supplier Code
+    llm_description: Supplier code for get_by_supplier
+    form: llm
+  - name: purchase_order_details
+    type: string
+    required: false
+    label:
+      en_US: Order Details (JSON)
+    llm_description: 'JSON array of purchase order items'
+    form: llm
+  - name: description
+    type: string
+    required: false
+    label:
+      en_US: Description
+    form: llm
+  - name: from_date
+    type: string
+    required: false
+    label:
+      en_US: From Date
+    form: llm
+  - name: to_date
+    type: string
+    required: false
+    label:
+      en_US: To Date
+    form: llm
+  - name: page_size
+    type: number
+    required: false
+    label:
+      en_US: Page Size
+    form: llm

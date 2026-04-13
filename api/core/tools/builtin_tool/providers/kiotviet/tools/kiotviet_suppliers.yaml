@@ -1,0 +1,54 @@
+identity:
+  name: kiotviet_suppliers
+  author: Dify Community
+  label:
+    en_US: KiotViet Suppliers
+    vi_VN: KiotViet Nhà cung cấp
+description:
+  human:
+    en_US: Manage suppliers on KiotViet - list, get by ID or code.
+    vi_VN: Quản lý nhà cung cấp trên KiotViet.
+  llm: Manage KiotViet suppliers. Actions - list, get, get_by_code.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, get, get_by_code"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Suppliers
+      - value: get
+        label:
+          en_US: Get Supplier by ID
+      - value: get_by_code
+        label:
+          en_US: Get Supplier by Code
+  - name: supplier_id
+    type: number
+    required: false
+    label:
+      en_US: Supplier ID
+    form: llm
+  - name: code
+    type: string
+    required: false
+    label:
+      en_US: Supplier Code
+    form: llm
+  - name: page_size
+    type: number
+    required: false
+    label:
+      en_US: Page Size
+    form: llm
+  - name: name
+    type: string
+    required: false
+    label:
+      en_US: Name Filter
+    llm_description: Filter suppliers by name
+    form: llm

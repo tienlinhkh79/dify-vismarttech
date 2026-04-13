@@ -1,0 +1,12 @@
+identity:
+  name: kiotviet_settings
+  author: Dify Community
+  label:
+    en_US: KiotViet Settings
+    vi_VN: KiotViet Cài đặt
+description:
+  human:
+    en_US: Get KiotViet store settings - inventory rules, customer management settings.
+    vi_VN: Xem cài đặt cửa hàng KiotViet - quy tắc tồn kho, cài đặt quản lý khách hàng.
+  llm: Get KiotViet store settings including inventory rules and customer management.
+parameters: []

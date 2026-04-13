@@ -1,0 +1,72 @@
+identity:
+  name: kiotviet_cashflow
+  author: Dify Community
+  label:
+    en_US: KiotViet Cash Flow
+    vi_VN: KiotViet Dòng tiền
+description:
+  human:
+    en_US: Manage cash flow on KiotViet - list transactions, process payments.
+    vi_VN: Quản lý dòng tiền trên KiotViet - xem giao dịch, xử lý thanh toán.
+  llm: Manage KiotViet cash flow. Actions - list (list cash flow records), process_payment (process a payment for an invoice).
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, process_payment"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Cash Flow
+      - value: process_payment
+        label:
+          en_US: Process Payment
+  - name: invoice_id
+    type: number
+    required: false
+    label:
+      en_US: Invoice ID
+    llm_description: Invoice ID for process_payment
+    form: llm
+  - name: amount
+    type: number
+    required: false
+    label:
+      en_US: Amount
+    llm_description: Payment amount
+    form: llm
+  - name: method
+    type: string
+    required: false
+    label:
+      en_US: Payment Method
+    llm_description: "Payment method: Cash, Card, Transfer"
+    form: llm
+  - name: branch_ids
+    type: string
+    required: false
+    label:
+      en_US: Branch IDs (JSON)
+    llm_description: 'JSON array of branch IDs to filter, e.g. [1,2]'
+    form: llm
+  - name: from_date
+    type: string
+    required: false
+    label:
+      en_US: Start Date
+    form: llm
+  - name: to_date
+    type: string
+    required: false
+    label:
+      en_US: End Date
+    form: llm
+  - name: page_size
+    type: number
+    required: false
+    label:
+      en_US: Page Size
+    form: llm
