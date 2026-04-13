@@ -163,4 +163,5 @@ chmod +x dify-env-sync.sh
 
 This README aims to guide you through the deployment process using the new Docker Compose setup. For any issues or further assistance, please refer to the official documentation or contact support.
 #   d i f y - o p e n - s o u r c e  
+ #   d i f y - o p e n - s o u r c e  
  
