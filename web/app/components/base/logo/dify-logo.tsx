@@ -1,5 +1,4 @@
 'use client'
-import type { FC } from 'react'
 import useTheme from '@/hooks/use-theme'
 import { cn } from '@/utils/classnames'
 import { basePath } from '@/utils/var'
@@ -14,9 +13,9 @@ export const logoPathMap: Record<LogoStyle, string> = {
 export type LogoSize = 'large' | 'medium' | 'small'
 
 export const logoSizeMap: Record<LogoSize, string> = {
-  large: 'w-16 h-7',
-  medium: 'w-12 h-[22px]',
-  small: 'w-9 h-4',
+  large: 'h-10 w-10',
+  medium: 'h-8 w-8',
+  small: 'h-6 w-6',
 }
 
 type DifyLogoProps = {
@@ -25,11 +24,11 @@ type DifyLogoProps = {
   className?: string
 }
 
-const DifyLogo: FC<DifyLogoProps> = ({
+const DifyLogo = ({
   style = 'default',
   size = 'medium',
   className,
-}) => {
+}: DifyLogoProps) => {
   const { theme } = useTheme()
   const themedStyle = (theme === 'dark' && style === 'default') ? 'monochromeWhite' : style
 

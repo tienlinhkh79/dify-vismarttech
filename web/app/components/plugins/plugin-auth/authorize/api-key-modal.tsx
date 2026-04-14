@@ -138,7 +138,6 @@ const ApiKeyModal = ({
       onExtraButtonClick={onRemove}
       disabled={disabled || isLoading || doingAction}
       clickOutsideNotClose={true}
-      wrapperClassName="z-1002!"
     >
       {pluginPayload.detail && (
         <ReadmeEntrance pluginDetail={pluginPayload.detail} showType={ReadmeShowType.modal} />

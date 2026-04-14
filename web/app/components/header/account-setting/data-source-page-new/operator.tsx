@@ -122,7 +122,7 @@ const Operator = ({
       items={items}
       secondItems={secondItems}
       onSelect={handleSelect}
-      popupClassName="z-1002"
+      popupClassName="z-[1050]"
       triggerProps={{
         size: 'l',
       }}

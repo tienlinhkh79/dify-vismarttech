@@ -1,0 +1,20 @@
+# Bind-mounted runtime data (plugin_daemon venv symlinks break Windows build context tar).
+# Match only under repo-root compose folder, not `web/docker/`.
+docker/volumes/**
+docker-legacy/volumes/**
+
+# VCS and caches (smaller context, faster builds)
+.git
+**/.git
+**/node_modules
+**/.pnpm-store
+**/.next
+**/dist
+**/coverage
+**/__pycache__
+*.pyc
+api/storage
+web/.env
+web/.env.*
+api/.env
+api/.env.*

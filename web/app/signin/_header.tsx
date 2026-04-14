@@ -2,7 +2,6 @@
 import type { Locale } from '@/i18n-config'
 import Divider from '@/app/components/base/divider'
 import LocaleSigninSelect from '@/app/components/base/select/locale-signin'
-import { useGlobalPublicStore } from '@/context/global-public-context'
 import { useLocale } from '@/context/i18n'
 import { setLocaleOnClient } from '@/i18n-config'
 import { languages } from '@/i18n-config/language'
@@ -20,19 +19,10 @@ const ThemeSelector = dynamic(() => import('@/app/components/base/theme-selector
 
 const Header = () => {
   const locale = useLocale()
-  const systemFeatures = useGlobalPublicStore(s => s.systemFeatures)
 
   return (
     <div className="flex w-full items-center justify-between p-6">
-      {systemFeatures.branding.enabled && systemFeatures.branding.login_page_logo
-        ? (
-            <img
-              src={systemFeatures.branding.login_page_logo}
-              className="block h-7 w-auto object-contain"
-              alt="logo"
-            />
-          )
-        : <DifyLogo size="large" />}
+      <DifyLogo size="large" />
       <div className="flex items-center gap-1">
         <LocaleSigninSelect
           value={locale}

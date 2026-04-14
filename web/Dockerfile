@@ -77,7 +77,9 @@ COPY --from=builder --chown=dify:dify /app/web/public ./web/public
 COPY --from=builder --chown=dify:dify /app/web/.next/standalone ./
 COPY --from=builder --chown=dify:dify /app/web/.next/static ./web/.next/static
 
-COPY --chown=dify:dify --chmod=755 web/docker/entrypoint.sh ./entrypoint.sh
+# --chmod on COPY requires BuildKit; legacy builder (DOCKER_BUILDKIT=0 on Windows) needs RUN.
+COPY --chown=dify:dify web/docker/entrypoint.sh ./entrypoint.sh
+RUN chmod 755 ./entrypoint.sh
 
 ARG COMMIT_SHA
 ENV COMMIT_SHA=${COMMIT_SHA}

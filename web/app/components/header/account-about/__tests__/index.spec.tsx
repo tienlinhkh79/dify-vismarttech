@@ -49,19 +49,14 @@ describe('AccountAbout', () => {
       expect(screen.getAllByText(/0.6.0/).length).toBeGreaterThan(0)
     })
 
-    it('should render branding logo if enabled', () => {
-      // Arrange
+    it('should render repo product logo even when workspace_logo is set in branding', () => {
       vi.mocked(useGlobalPublicStore).mockImplementation(selector => selector({
         systemFeatures: { branding: { enabled: true, workspace_logo: 'custom-logo.png' } },
       } as unknown as GlobalPublicStore))
 
-      // Act
       render(<AccountAbout langGeniusVersionInfo={mockVersionInfo} onCancel={mockOnCancel} />)
 
-      // Assert
-      const img = screen.getByAltText('logo')
-      expect(img).toBeInTheDocument()
-      expect(img).toHaveAttribute('src', 'custom-logo.png')
+      expect(screen.getByAltText('Dify logo')).toBeInTheDocument()
     })
   })
 

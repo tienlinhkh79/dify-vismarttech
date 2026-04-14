@@ -158,7 +158,7 @@ describe('EmbeddedChatbot index', () => {
   })
 
   describe('Powered by branding', () => {
-    it('should show workspace logo on mobile when branding is enabled', () => {
+    it('should show repo product logo on mobile when workspace_logo is set in branding', () => {
       vi.mocked(useGlobalPublicStore).mockImplementation(selector => selector({
         systemFeatures: {
           ...defaultSystemFeatures,
@@ -174,7 +174,7 @@ describe('EmbeddedChatbot index', () => {
       render(<EmbeddedChatbot />)
 
       expect(screen.getByText('share.chat.poweredBy')).toBeInTheDocument()
-      expect(screen.getByAltText('logo')).toHaveAttribute('src', 'https://example.com/workspace-logo.png')
+      expect(screen.getByAltText('Dify logo')).toBeInTheDocument()
     })
 
     it('should show custom logo when workspace branding logo is unavailable', () => {

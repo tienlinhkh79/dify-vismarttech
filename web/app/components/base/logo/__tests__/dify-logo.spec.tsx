@@ -38,13 +38,13 @@ describe('DifyLogo', () => {
     it('applies custom size correctly', () => {
       const { rerender } = render(<DifyLogo size="large" />)
       let img = screen.getByRole('img', { name: /dify logo/i })
-      expect(img).toHaveClass('w-16')
-      expect(img).toHaveClass('h-7')
+      expect(img).toHaveClass('h-10')
+      expect(img).toHaveClass('w-10')
 
       rerender(<DifyLogo size="small" />)
       img = screen.getByRole('img', { name: /dify logo/i })
-      expect(img).toHaveClass('w-9')
-      expect(img).toHaveClass('h-4')
+      expect(img).toHaveClass('h-6')
+      expect(img).toHaveClass('w-6')
     })
 
     it('applies custom style correctly', () => {

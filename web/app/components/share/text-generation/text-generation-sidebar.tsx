@@ -64,7 +64,7 @@ const TextGenerationSidebar: FC<TextGenerationSidebarProps> = ({
   runControl,
   savedMessages,
   siteInfo,
-  systemFeatures,
+  systemFeatures: _systemFeatures,
   textToSpeechConfig,
   visionConfig,
 }) => {
@@ -163,11 +163,9 @@ const TextGenerationSidebar: FC<TextGenerationSidebarProps> = ({
           )}
         >
           <div className="text-text-tertiary system-2xs-medium-uppercase">{t('chat.poweredBy', { ns: 'share' })}</div>
-          {systemFeatures.branding.enabled && systemFeatures.branding.workspace_logo
-            ? <img src={systemFeatures.branding.workspace_logo} alt="logo" className="block h-5 w-auto" />
-            : customConfig?.replace_webapp_logo
-              ? <img src={customConfig.replace_webapp_logo} alt="logo" className="block h-5 w-auto" />
-              : <DifyLogo size="small" />}
+          {customConfig?.replace_webapp_logo
+            ? <img src={customConfig.replace_webapp_logo} alt="logo" className="block h-5 w-auto" />
+            : <DifyLogo size="small" />}
         </div>
       )}
     </div>

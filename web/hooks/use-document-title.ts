@@ -13,11 +13,11 @@ export default function useDocumentTitle(title: string) {
   if (isPending === false) {
     if (systemFeatures.branding.enabled) {
       titleStr = `${prefix}${systemFeatures.branding.application_title}`
-      favicon = systemFeatures.branding.favicon
+      favicon = systemFeatures.branding.favicon?.trim() || `${basePath}/logo/logo.png`
     }
     else {
       titleStr = `${prefix}Dify`
-      favicon = `${basePath}/favicon.ico`
+      favicon = `${basePath}/logo/logo.png`
     }
   }
   useTitle(titleStr)

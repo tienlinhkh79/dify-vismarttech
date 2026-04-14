@@ -13,8 +13,11 @@ import { AgentationLoader } from './components/devtools/agentation-loader'
 import { ReactScanLoader } from './components/devtools/react-scan/loader'
 import { I18nServerProvider } from './components/provider/i18n-server'
 import RoutePrefixHandle from './routePrefixHandle'
+import { basePath } from '@/utils/var'
 import './styles/globals.css'
 import './styles/markdown.css'
+
+const appIconHref = `${basePath}/logo/logo.png`
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -41,9 +44,9 @@ const LocaleLayout = async ({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Dify" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/icon-192x192.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" href={appIconHref} />
+        <link rel="icon" type="image/png" sizes="32x32" href={appIconHref} />
+        <link rel="icon" type="image/png" sizes="16x16" href={appIconHref} />
         <meta name="msapplication-TileColor" content="#1C64F2" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
 

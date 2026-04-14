@@ -146,7 +146,7 @@ describe('EmbeddedChatbot Header', () => {
       expect(img).toHaveAttribute('src', 'https://example.com/logo.png')
     })
 
-    it('should render workspace logo when branding is enabled and logo exists', () => {
+    it('should render repo product logo even when workspace_logo is set in branding', () => {
       vi.mocked(useGlobalPublicStore).mockImplementation((selector: (s: GlobalPublicStoreMock) => unknown) => selector({
         systemFeatures: {
           ...defaultSystemFeatures,
@@ -160,8 +160,7 @@ describe('EmbeddedChatbot Header', () => {
 
       render(<Header title="Test Chatbot" />)
 
-      const img = screen.getByAltText('logo')
-      expect(img).toHaveAttribute('src', 'https://example.com/workspace.png')
+      expect(screen.getByAltText('Dify logo')).toBeInTheDocument()
     })
 
     it('should render Dify logo by default when branding enabled is true but no logo provided', () => {

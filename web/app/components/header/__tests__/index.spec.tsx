@@ -173,7 +173,7 @@ describe('Header', () => {
     expect(screen.queryByTestId('env-nav')).not.toBeInTheDocument()
   })
 
-  it('should render branded title and logo when branding is enabled', () => {
+  it('should render branded title and repo product logo when branding is enabled', () => {
     mockBrandingEnabled = true
     mockBrandingTitle = 'Acme Workspace'
     mockBrandingLogo = '/logo.png'
@@ -181,8 +181,7 @@ describe('Header', () => {
     render(<Header />)
 
     expect(screen.getByText('Acme Workspace')).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: /logo/i })).toBeInTheDocument()
-    expect(screen.queryByRole('img', { name: /dify logo/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /dify logo/i })).toBeInTheDocument()
   })
 
   it('should show default Dify logo when branding is enabled but no workspace_logo', () => {

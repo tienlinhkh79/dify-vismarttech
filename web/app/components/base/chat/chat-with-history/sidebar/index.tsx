@@ -17,7 +17,6 @@ import RenameModal from '@/app/components/base/chat/chat-with-history/sidebar/re
 import Confirm from '@/app/components/base/confirm'
 import DifyLogo from '@/app/components/base/logo/dify-logo'
 import MenuDropdown from '@/app/components/share/text-generation/menu-dropdown'
-import { useGlobalPublicStore } from '@/context/global-public-context'
 import { cn } from '@/utils/classnames'
 import { useChatWithHistoryContext } from '../context'
 
@@ -47,7 +46,6 @@ const Sidebar = ({ isPanel, panelVisible }: Props) => {
     isResponding,
   } = useChatWithHistoryContext()
   const isSidebarCollapsed = sidebarCollapseState
-  const systemFeatures = useGlobalPublicStore(s => s.systemFeatures)
   const [showConfirm, setShowConfirm] = useState<ConversationItem | null>(null)
   const [showRename, setShowRename] = useState<ConversationItem | null>(null)
 
@@ -158,11 +156,9 @@ const Sidebar = ({ isPanel, panelVisible }: Props) => {
             >
               <div className="system-2xs-medium-uppercase text-text-tertiary">{t('chat.poweredBy', { ns: 'share' })}</div>
               {
-                systemFeatures.branding.enabled && systemFeatures.branding.workspace_logo
-                  ? <img src={systemFeatures.branding.workspace_logo} alt="logo" className="block h-5 w-auto" />
-                  : appData?.custom_config?.replace_webapp_logo
-                    ? <img src={`${appData?.custom_config?.replace_webapp_logo}`} alt="logo" className="block h-5 w-auto" />
-                    : <DifyLogo size="small" />
+                appData?.custom_config?.replace_webapp_logo
+                  ? <img src={`${appData?.custom_config?.replace_webapp_logo}`} alt="logo" className="block h-5 w-auto" />
+                  : <DifyLogo size="small" />
               }
             </div>
           )}

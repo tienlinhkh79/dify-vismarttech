@@ -73,15 +73,22 @@ const InputVarList: FC<Props> = ({
   const handleNotMixedTypeChange = useCallback((variable: string) => {
     return (varValue: ValueSelector | string, varKindType: VarKindType) => {
       const newValue = produce(value, (draft: ToolVarInputs) => {
+        // graphon ToolInput: type "variable" requires value to be list[str] (variable path).
+        const normalizedValue
+          = varKindType === VarKindType.variable
+            ? (Array.isArray(varValue) && varValue.every((x): x is string => typeof x === 'string')
+                ? varValue
+                : [])
+            : varValue
         const target = draft[variable]
         if (target) {
           target.type = varKindType
-          target.value = varValue
+          target.value = normalizedValue
         }
         else {
           draft[variable] = {
             type: varKindType,
-            value: varValue,
+            value: normalizedValue,
           }
         }
       })
@@ -109,10 +116,13 @@ const InputVarList: FC<Props> = ({
 
   const handleFileChange = useCallback((variable: string) => {
     return (varValue: ValueSelector | string) => {
+      const normalized = Array.isArray(varValue) && varValue.every((x): x is string => typeof x === 'string')
+        ? varValue
+        : []
       const newValue = produce(value, (draft: ToolVarInputs) => {
         draft[variable] = {
           type: VarKindType.variable,
-          value: varValue,
+          value: normalized,
         }
       })
       onChange(newValue)

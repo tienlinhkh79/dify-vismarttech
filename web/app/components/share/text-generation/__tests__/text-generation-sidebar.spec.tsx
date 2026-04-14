@@ -155,7 +155,7 @@ describe('TextGenerationSidebar', () => {
     expect(onTabChange).toHaveBeenCalledWith('create')
   })
 
-  it('should prefer workspace branding and hide powered-by block when branding is removed', () => {
+  it('should use repo product logo when workspace branding is set and hide powered-by when branding is removed', () => {
     const { rerender } = renderSidebar({
       systemFeatures: {
         ...defaultSystemFeatures,
@@ -167,8 +167,7 @@ describe('TextGenerationSidebar', () => {
       },
     })
 
-    const brandingLogo = screen.getByRole('img', { name: 'logo' })
-    expect(brandingLogo).toHaveAttribute('src', 'https://example.com/workspace-logo.png')
+    expect(screen.getByAltText('Dify logo')).toBeInTheDocument()
 
     rerender(
       <TextGenerationSidebar
