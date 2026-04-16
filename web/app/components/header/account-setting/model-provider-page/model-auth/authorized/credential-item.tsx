@@ -88,7 +88,7 @@ const CredentialItem = ({
       }
       {
         showAction && !credential.from_enterprise && (
-          <div className="ml-2 hidden shrink-0 items-center group-hover:flex">
+          <div className="ml-2 flex shrink-0 items-center">
             {
               !disableEdit && !credential.not_allowed_to_use && (
                 <Tooltip>
