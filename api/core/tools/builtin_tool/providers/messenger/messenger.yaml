@@ -1,0 +1,60 @@
+identity:
+  author: Dify Community
+  name: messenger
+  label:
+    en_US: Messenger
+    vi_VN: Messenger
+  description:
+    en_US: Facebook Messenger integration for sending and managing messages.
+    vi_VN: Tich hop Facebook Messenger de gui va quan ly tin nhan.
+  icon: icon.svg
+  tags:
+    - social
+    - productivity
+credentials_for_provider:
+  app_id:
+    type: text-input
+    required: true
+    label:
+      en_US: Facebook App ID
+      vi_VN: Facebook App ID
+    placeholder:
+      en_US: Enter your Facebook App ID
+      vi_VN: Nhap Facebook App ID
+  app_secret:
+    type: secret-input
+    required: true
+    label:
+      en_US: Facebook App Secret
+      vi_VN: Facebook App Secret
+    placeholder:
+      en_US: Enter your Facebook App Secret
+      vi_VN: Nhap Facebook App Secret
+  page_id:
+    type: text-input
+    required: true
+    label:
+      en_US: Facebook Page
+      vi_VN: Facebook Page
+    placeholder:
+      en_US: Select a Facebook Page after connecting
+      vi_VN: Chon Facebook Page sau khi ket noi
+  page_access_token:
+    type: secret-input
+    required: true
+    label:
+      en_US: Page Access Token
+      vi_VN: Page Access Token
+    placeholder:
+      en_US: Enter your Facebook Page access token
+      vi_VN: Nhap Page access token cua Facebook
+  graph_api_version:
+    type: text-input
+    required: false
+    label:
+      en_US: Graph API Version
+      vi_VN: Phien ban Graph API
+    placeholder:
+      en_US: v23.0
+      vi_VN: v23.0
+    default: v23.0

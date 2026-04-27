@@ -1,4 +1,5 @@
 import json
+import random
 import time
 from typing import Any, NotRequired, TypedDict, cast
 
@@ -33,9 +34,17 @@ class SearchResponse(TypedDict):
 
 
 class FirecrawlApp:
-    def __init__(self, api_key=None, base_url=None):
+    def __init__(
+        self,
+        api_key=None,
+        base_url=None,
+        request_timeout_ms: int | None = None,
+        max_retries: int | None = None,
+    ):
         self.api_key = api_key
         self.base_url = base_url or "https://api.firecrawl.dev"
+        self.request_timeout_ms = request_timeout_ms or 30000
+        self.max_retries = max_retries or 3
         if self.api_key is None and self.base_url == "https://api.firecrawl.dev":
             raise ValueError("No API key provided")
 
@@ -173,23 +182,57 @@ class FirecrawlApp:
         # ensure exactly one slash between base and path, regardless of user-provided base_url
         return f"{self.base_url.rstrip('/')}/{path.lstrip('/')}"
 
-    def _post_request(self, url, data, headers, retries=3, backoff_factor=0.5) -> httpx.Response:
-        for attempt in range(retries):
-            response = httpx.post(url, headers=headers, json=data)
-            if response.status_code == 502:
-                time.sleep(backoff_factor * (2**attempt))
-            else:
-                return response
-        return response
+    def _sleep_before_retry(self, attempt: int, backoff_factor: float) -> None:
+        delay = backoff_factor * (2**attempt)
+        jitter = random.uniform(0.0, backoff_factor)
+        time.sleep(delay + jitter)
 
-    def _get_request(self, url, headers, retries=3, backoff_factor=0.5) -> httpx.Response:
-        for attempt in range(retries):
-            response = httpx.get(url, headers=headers)
-            if response.status_code == 502:
-                time.sleep(backoff_factor * (2**attempt))
-            else:
+    def _is_retryable_status(self, status_code: int) -> bool:
+        return status_code in {408, 409, 425, 429, 500, 502, 503, 504}
+
+    def _post_request(self, url, data, headers, retries=None, backoff_factor=0.5) -> httpx.Response:
+        effective_retries = retries if retries is not None else self.max_retries
+        last_response: httpx.Response | None = None
+        for attempt in range(effective_retries):
+            try:
+                response = httpx.post(url, headers=headers, json=data, timeout=self.request_timeout_ms / 1000)
+            except (httpx.TimeoutException, httpx.RequestError):
+                if attempt == effective_retries - 1:
+                    raise
+                self._sleep_before_retry(attempt, backoff_factor)
+                continue
+
+            last_response = response
+            if not self._is_retryable_status(response.status_code):
                 return response
-        return response
+            if attempt != effective_retries - 1:
+                self._sleep_before_retry(attempt, backoff_factor)
+
+        if last_response is None:
+            raise RuntimeError("unreachable: request attempts exhausted without response")
+        return last_response
+
+    def _get_request(self, url, headers, retries=None, backoff_factor=0.5) -> httpx.Response:
+        effective_retries = retries if retries is not None else self.max_retries
+        last_response: httpx.Response | None = None
+        for attempt in range(effective_retries):
+            try:
+                response = httpx.get(url, headers=headers, timeout=self.request_timeout_ms / 1000)
+            except (httpx.TimeoutException, httpx.RequestError):
+                if attempt == effective_retries - 1:
+                    raise
+                self._sleep_before_retry(attempt, backoff_factor)
+                continue
+
+            last_response = response
+            if not self._is_retryable_status(response.status_code):
+                return response
+            if attempt != effective_retries - 1:
+                self._sleep_before_retry(attempt, backoff_factor)
+
+        if last_response is None:
+            raise RuntimeError("unreachable: request attempts exhausted without response")
+        return last_response
 
     def _handle_error(self, response, action):
         try:

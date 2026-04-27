@@ -12,6 +12,8 @@ describe('AccountSetting Constants', () => {
 
   it('should have correct ACCOUNT_SETTING_TAB values', () => {
     expect(ACCOUNT_SETTING_TAB.PROVIDER).toBe('provider')
+    expect(ACCOUNT_SETTING_TAB.CHANNELS).toBe('channels')
+    expect(ACCOUNT_SETTING_TAB.KIOTVIET).toBe('kiotviet')
     expect(ACCOUNT_SETTING_TAB.MEMBERS).toBe('members')
     expect(ACCOUNT_SETTING_TAB.BILLING).toBe('billing')
     expect(ACCOUNT_SETTING_TAB.DATA_SOURCE).toBe('data-source')
@@ -26,6 +28,8 @@ describe('AccountSetting Constants', () => {
 
   it('isValidAccountSettingTab should return true for valid tabs', () => {
     expect(isValidAccountSettingTab('provider')).toBe(true)
+    expect(isValidAccountSettingTab('channels')).toBe(true)
+    expect(isValidAccountSettingTab('kiotviet')).toBe(true)
     expect(isValidAccountSettingTab('members')).toBe(true)
     expect(isValidAccountSettingTab('billing')).toBe(true)
     expect(isValidAccountSettingTab('data-source')).toBe(true)

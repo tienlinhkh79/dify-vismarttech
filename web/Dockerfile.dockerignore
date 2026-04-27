@@ -14,6 +14,11 @@
 !sdks/nodejs-client/
 !sdks/nodejs-client/package.json
 
+# Runtime bind-mount data should never be in web build context.
+docker/volumes/**
+docker-legacy/volumes/**
+**/.venv/lib64
+
 .git
 node_modules
 .pnpm-store

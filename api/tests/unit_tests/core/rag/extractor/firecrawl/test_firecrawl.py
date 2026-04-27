@@ -5,6 +5,7 @@ from collections.abc import Mapping
 from typing import Any
 from unittest.mock import MagicMock
 
+import httpx
 import pytest
 from pytest_mock import MockerFixture
 
@@ -323,6 +324,30 @@ class TestFirecrawlApp:
         assert app._get_request("u", {}, retries=2).status_code == 502
 
         assert sleep_mock.call_count == 4
+
+    def test_post_request_retries_on_429(self, mocker: MockerFixture):
+        app = FirecrawlApp(api_key="fc-key", base_url="https://custom.firecrawl.dev")
+        sleep_mock = mocker.patch.object(firecrawl_module.time, "sleep")
+        mocker.patch.object(firecrawl_module.random, "uniform", return_value=0.0)
+        mocker.patch("httpx.post", side_effect=[_response(429), _response(200)])
+
+        result = app._post_request("u", {}, {}, retries=2, backoff_factor=0.1)
+
+        assert result.status_code == 200
+        assert sleep_mock.call_count == 1
+
+    def test_get_request_retries_on_timeout_error(self, mocker: MockerFixture):
+        app = FirecrawlApp(api_key="fc-key", base_url="https://custom.firecrawl.dev")
+        sleep_mock = mocker.patch.object(firecrawl_module.time, "sleep")
+        mocker.patch.object(firecrawl_module.random, "uniform", return_value=0.0)
+        timeout_exc = httpx.TimeoutException("timed out")
+        mock_get = mocker.patch("httpx.get", side_effect=[timeout_exc, _response(200)])
+
+        result = app._get_request("u", {}, retries=2, backoff_factor=0.1)
+
+        assert result.status_code == 200
+        assert sleep_mock.call_count == 1
+        assert mock_get.call_count == 2
 
     def test_handle_error_with_json_and_plain_text(self):
         app = FirecrawlApp(api_key="fc-key", base_url="https://custom.firecrawl.dev")

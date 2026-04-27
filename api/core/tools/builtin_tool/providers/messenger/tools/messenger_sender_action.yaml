@@ -1,0 +1,32 @@
+identity:
+  name: messenger_sender_action
+  author: Dify Community
+  label:
+    en_US: Sender Action
+    vi_VN: Hanh dong nguoi gui
+description:
+  human:
+    en_US: Send typing or seen indicators to a Facebook Messenger user by PSID.
+    vi_VN: Gui trang thai typing hoac da xem den nguoi dung Messenger bang PSID.
+  llm: Send a Facebook Messenger sender action (typing_on, typing_off, mark_seen) by recipient PSID.
+parameters:
+  - name: recipient_id
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Recipient PSID
+      vi_VN: Recipient PSID
+    human_description:
+      en_US: Facebook Page-Scoped User ID (PSID) of the recipient.
+      vi_VN: Facebook Page-Scoped User ID (PSID) cua nguoi nhan.
+  - name: sender_action
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Sender Action
+      vi_VN: Hanh dong
+    human_description:
+      en_US: One of typing_on, typing_off, mark_seen.
+      vi_VN: Mot trong cac gia tri typing_on, typing_off, mark_seen.

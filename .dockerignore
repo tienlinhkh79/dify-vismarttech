@@ -1,7 +1,11 @@
 # Bind-mounted runtime data (plugin_daemon venv symlinks break Windows build context tar).
 # Match only under repo-root compose folder, not `web/docker/`.
 docker/volumes/**
+**/docker/volumes/**
 docker-legacy/volumes/**
+**/docker-legacy/volumes/**
+**/.venv/lib64
+**/.venv/lib64/**
 
 # VCS and caches (smaller context, faster builds)
 .git

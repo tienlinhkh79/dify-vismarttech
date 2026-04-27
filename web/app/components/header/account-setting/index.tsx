@@ -17,7 +17,9 @@ import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
 import { cn } from '@/utils/classnames'
 import Button from '../../base/button'
 import ApiBasedExtensionPage from './api-based-extension-page'
+import ChannelsPage from './channels-page'
 import DataSourcePage from './data-source-page-new'
+import KiotVietPage from './kiotviet-page'
 import LanguagePage from './language-page'
 import MembersPage from './members-page'
 import ModelProviderPage from './model-provider-page'
@@ -62,6 +64,18 @@ export default function AccountSetting({
         name: t('settings.provider', { ns: 'common' }),
         icon: <span className={cn('i-ri-brain-2-line', iconClassName)} />,
         activeIcon: <span className={cn('i-ri-brain-2-fill', iconClassName)} />,
+      },
+      {
+        key: ACCOUNT_SETTING_TAB.KIOTVIET,
+        name: t('settings.kiotviet', { ns: 'common' }),
+        icon: <span className={cn('i-ri-store-2-line', iconClassName)} />,
+        activeIcon: <span className={cn('i-ri-store-2-fill', iconClassName)} />,
+      },
+      {
+        key: ACCOUNT_SETTING_TAB.CHANNELS,
+        name: t('settings.channels', { ns: 'common' }),
+        icon: <span className={cn('i-ri-broadcast-line', iconClassName)} />,
+        activeIcon: <span className={cn('i-ri-broadcast-fill', iconClassName)} />,
       },
       {
         key: ACCOUNT_SETTING_TAB.MEMBERS,
@@ -227,6 +241,8 @@ export default function AccountSetting({
             </div>
             <div className="px-4 pt-2 sm:px-8">
               {activeMenu === ACCOUNT_SETTING_TAB.PROVIDER && <ModelProviderPage searchText={searchValue} />}
+              {activeMenu === ACCOUNT_SETTING_TAB.KIOTVIET && <KiotVietPage />}
+              {activeMenu === ACCOUNT_SETTING_TAB.CHANNELS && <ChannelsPage />}
               {activeMenu === ACCOUNT_SETTING_TAB.MEMBERS && <MembersPage />}
               {activeMenu === ACCOUNT_SETTING_TAB.BILLING && <BillingPage />}
               {activeMenu === ACCOUNT_SETTING_TAB.DATA_SOURCE && <DataSourcePage />}

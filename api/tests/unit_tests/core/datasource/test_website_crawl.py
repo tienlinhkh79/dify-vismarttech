@@ -107,6 +107,8 @@ class TestCrawlOptions:
         assert options.prompt is None
         assert options.max_depth is None
         assert options.use_sitemap is True
+        assert options.request_timeout_ms is None
+        assert options.max_retries is None
 
     def test_get_include_paths_with_values(self, crawl_options: CrawlOptions):
         """Test parsing include paths from comma-separated string."""
@@ -1466,6 +1468,8 @@ class TestDataStructureValidation:
                 "prompt": "Extract main content",
                 "max_depth": 3,
                 "use_sitemap": True,
+                "request_timeout_ms": 45000,
+                "max_retries": 5,
             },
         )
 
@@ -1483,6 +1487,8 @@ class TestDataStructureValidation:
         assert crawl_request.options.prompt == "Extract main content"
         assert crawl_request.options.max_depth == 3
         assert crawl_request.options.use_sitemap is True
+        assert crawl_request.options.request_timeout_ms == 45000
+        assert crawl_request.options.max_retries == 5
 
     def test_crawl_options_path_parsing(self):
         """

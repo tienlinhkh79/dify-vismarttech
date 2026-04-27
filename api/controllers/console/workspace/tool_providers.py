@@ -1,9 +1,13 @@
 import io
+import json
 import logging
 import time
+from html import escape
 from typing import Any, Literal
 from urllib.parse import urlparse
+from uuid import uuid4
 
+import httpx
 from flask import make_response, redirect, request, send_file
 from flask_restx import Resource
 from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
@@ -29,6 +33,7 @@ from core.plugin.impl.oauth import OAuthHandler
 from core.tools.entities.tool_entities import ApiProviderSchemaType, WorkflowToolParameterConfiguration
 from dify_graph.model_runtime.utils.encoders import jsonable_encoder
 from extensions.ext_database import db
+from extensions.ext_redis import redis_client
 from libs.helper import alphanumeric, uuid_value
 from libs.login import current_account_with_tenant, login_required
 from models.provider_ids import ToolProviderID
@@ -233,6 +238,19 @@ class MCPCallbackQuery(BaseModel):
     state: str
 
 
+class MessengerOAuthAuthorizePayload(BaseModel):
+    app_id: str = Field(min_length=1)
+    app_secret: str = Field(min_length=1)
+    graph_api_version: str = Field(default="v23.0")
+
+
+class MessengerOAuthCallbackQuery(BaseModel):
+    state: str
+    code: str | None = None
+    error: str | None = None
+    error_description: str | None = None
+
+
 register_schema_models(
     console_ns,
     BuiltinToolCredentialDeletePayload,
@@ -252,7 +270,24 @@ register_schema_models(
     MCPProviderUpdatePayload,
     MCPProviderDeletePayload,
     MCPAuthPayload,
+    MessengerOAuthAuthorizePayload,
 )
+
+
+def _messenger_oauth_state_key(state: str) -> str:
+    return f"messenger:oauth:state:{state}"
+
+
+def _messenger_oauth_popup_response(success: bool, payload: dict[str, Any]) -> str:
+    message = {"type": "oauth_callback", "success": success, **payload}
+    message_json = json.dumps(message).replace("</", "<\\/")
+    target_origin = escape(dify_config.CONSOLE_WEB_URL, quote=True)
+    return (
+        "<!doctype html><html><body><script>"
+        f"window.opener?.postMessage({message_json}, '{target_origin}');"
+        "window.close();"
+        "</script></body></html>"
+    )
 
 
 @console_ns.route("/workspaces/current/tool-providers")
@@ -603,6 +638,121 @@ class ToolBuiltinProviderCredentialsSchemaLegacyApi(Resource):
                 provider, CredentialType.API_KEY, tenant_id
             )
         )
+
+
+@console_ns.route("/workspaces/current/tool-provider/builtin/messenger/oauth/authorization-url")
+class ToolBuiltinMessengerOAuthAuthorizationApi(Resource):
+    @console_ns.expect(console_ns.models[MessengerOAuthAuthorizePayload.__name__])
+    @setup_required
+    @login_required
+    @is_admin_or_owner_required
+    @account_initialization_required
+    def post(self):
+        payload = MessengerOAuthAuthorizePayload.model_validate(console_ns.payload or {})
+        user, tenant_id = current_account_with_tenant()
+
+        state = uuid4().hex
+        graph_api_version = payload.graph_api_version.strip() or "v23.0"
+        redirect_uri = (
+            f"{dify_config.CONSOLE_API_URL}/console/api/workspaces/current/tool-provider/builtin/messenger/oauth/callback"
+        )
+        redis_client.setex(
+            _messenger_oauth_state_key(state),
+            600,
+            json.dumps(
+                {
+                    "tenant_id": tenant_id,
+                    "user_id": user.id,
+                    "app_id": payload.app_id.strip(),
+                    "app_secret": payload.app_secret.strip(),
+                    "graph_api_version": graph_api_version,
+                    "redirect_uri": redirect_uri,
+                }
+            ),
+        )
+
+        scope = "pages_show_list,pages_manage_metadata,pages_messaging"
+        authorization_url = (
+            f"https://www.facebook.com/{graph_api_version}/dialog/oauth"
+            f"?client_id={payload.app_id.strip()}"
+            f"&redirect_uri={redirect_uri}"
+            f"&scope={scope}"
+            f"&state={state}"
+        )
+        return {"authorization_url": authorization_url}
+
+
+@console_ns.route("/workspaces/current/tool-provider/builtin/messenger/oauth/callback")
+class ToolBuiltinMessengerOAuthCallbackApi(Resource):
+    @setup_required
+    def get(self):
+        query = MessengerOAuthCallbackQuery.model_validate(request.args.to_dict())
+        state_key = _messenger_oauth_state_key(query.state)
+        raw_context = redis_client.get(state_key)
+        if raw_context:
+            redis_client.delete(state_key)
+        if not raw_context:
+            html = _messenger_oauth_popup_response(False, {"error": "oauth_state_expired"})
+            return make_response(html, 200, {"Content-Type": "text/html"})
+
+        context = json.loads(raw_context)
+        graph_api_version = context.get("graph_api_version") or "v23.0"
+        redirect_uri = context.get("redirect_uri")
+
+        if query.error:
+            html = _messenger_oauth_popup_response(
+                False,
+                {
+                    "error": query.error,
+                    "errorDescription": query.error_description or "Facebook authorization failed",
+                },
+            )
+            return make_response(html, 200, {"Content-Type": "text/html"})
+
+        if not query.code:
+            html = _messenger_oauth_popup_response(False, {"error": "missing_authorization_code"})
+            return make_response(html, 200, {"Content-Type": "text/html"})
+
+        try:
+            token_response = httpx.get(
+                f"https://graph.facebook.com/{graph_api_version}/oauth/access_token",
+                params={
+                    "client_id": context["app_id"],
+                    "client_secret": context["app_secret"],
+                    "redirect_uri": redirect_uri,
+                    "code": query.code,
+                },
+                timeout=30,
+            )
+            token_response.raise_for_status()
+            user_access_token = token_response.json().get("access_token")
+            if not user_access_token:
+                raise ValueError("Facebook did not return user access_token")
+
+            pages_response = httpx.get(
+                f"https://graph.facebook.com/{graph_api_version}/me/accounts",
+                params={
+                    "access_token": user_access_token,
+                    "fields": "id,name,access_token",
+                },
+                timeout=30,
+            )
+            pages_response.raise_for_status()
+            pages = pages_response.json().get("data", [])
+        except Exception as e:
+            html = _messenger_oauth_popup_response(False, {"error": "oauth_exchange_failed", "errorDescription": str(e)})
+            return make_response(html, 200, {"Content-Type": "text/html"})
+
+        html = _messenger_oauth_popup_response(
+            True,
+            {
+                "messenger_oauth": {
+                    "pages": pages,
+                    "graph_api_version": graph_api_version,
+                }
+            },
+        )
+        return make_response(html, 200, {"Content-Type": "text/html"})
 
 
 @console_ns.route("/workspaces/current/tool-provider/api/schema")

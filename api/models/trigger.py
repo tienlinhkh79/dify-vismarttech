@@ -2,6 +2,7 @@ import json
 import time
 from collections.abc import Mapping
 from datetime import datetime
+from enum import StrEnum
 from functools import cached_property
 from typing import Any, TypedDict, cast
 from uuid import uuid4
@@ -14,6 +15,7 @@ from core.plugin.entities.plugin_daemon import CredentialType
 from core.trigger.entities.api_entities import TriggerProviderSubscriptionApiEntity
 from core.trigger.entities.entities import Subscription
 from core.trigger.utils.endpoint import generate_plugin_trigger_endpoint_url, generate_webhook_trigger_endpoint
+from core.helper import encrypter
 from libs.datetime_utils import naive_utc_now
 from libs.uuid_utils import uuidv7
 
@@ -25,6 +27,12 @@ from .types import EnumText, LongText, StringUUID
 
 TriggerJsonObject = dict[str, object]
 TriggerCredentials = dict[str, str]
+
+
+class OmniChannelType(StrEnum):
+    FACEBOOK_MESSENGER = "facebook_messenger"
+    INSTAGRAM_DM = "instagram_dm"
+    TIKTOK_MESSAGING = "tiktok_messaging"
 
 
 class WorkflowTriggerLogDict(TypedDict):
@@ -150,6 +158,88 @@ class TriggerSubscription(TypeBase):
             credentials=self.credentials,
             workflows_in_use=-1,
         )
+
+
+class OmniChannelConfig(TypeBase):
+    """Tenant scoped omnichannel credentials for external messaging channels."""
+
+    __tablename__ = "omnichannel_configs"
+    __table_args__ = (
+        sa.PrimaryKeyConstraint("id", name="omnichannel_config_pkey"),
+        Index("idx_omnichannel_tenant_type", "tenant_id", "channel_type"),
+        Index("idx_omnichannel_channel_id", "channel_id", unique=True),
+    )
+
+    id: Mapped[str] = mapped_column(
+        StringUUID, insert_default=lambda: str(uuid4()), default_factory=lambda: str(uuid4()), init=False
+    )
+    tenant_id: Mapped[str] = mapped_column(StringUUID, nullable=False)
+    app_id: Mapped[str] = mapped_column(StringUUID, nullable=False)
+    user_id: Mapped[str] = mapped_column(StringUUID, nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    channel_type: Mapped[OmniChannelType] = mapped_column(EnumText(OmniChannelType, length=60), nullable=False)
+    channel_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    page_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    encrypted_verify_token: Mapped[str] = mapped_column(LongText, nullable=False)
+    encrypted_app_secret: Mapped[str] = mapped_column(LongText, nullable=False)
+    encrypted_page_access_token: Mapped[str] = mapped_column(LongText, nullable=False)
+    enabled: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, server_default=sa.text("true"), default=True)
+    graph_api_version: Mapped[str] = mapped_column(String(32), nullable=False, server_default="v23.0", default="v23.0")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp(), init=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.current_timestamp(),
+        server_onupdate=func.current_timestamp(),
+        init=False,
+    )
+
+    def decrypt_verify_token(self) -> str:
+        return encrypter.decrypt_token(self.tenant_id, self.encrypted_verify_token)
+
+    def decrypt_app_secret(self) -> str:
+        return encrypter.decrypt_token(self.tenant_id, self.encrypted_app_secret)
+
+    def decrypt_page_access_token(self) -> str:
+        return encrypter.decrypt_token(self.tenant_id, self.encrypted_page_access_token)
+
+
+class KiotVietConnection(TypeBase):
+    """Tenant scoped KiotViet credential connections."""
+
+    __tablename__ = "kiotviet_connections"
+    __table_args__ = (
+        sa.PrimaryKeyConstraint("id", name="kiotviet_connection_pkey"),
+        Index("idx_kiotviet_tenant", "tenant_id"),
+        Index("idx_kiotviet_tenant_connection_id", "tenant_id", "connection_id", unique=True),
+    )
+
+    id: Mapped[str] = mapped_column(
+        StringUUID, insert_default=lambda: str(uuid4()), default_factory=lambda: str(uuid4()), init=False
+    )
+    tenant_id: Mapped[str] = mapped_column(StringUUID, nullable=False)
+    user_id: Mapped[str] = mapped_column(StringUUID, nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    connection_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    client_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    encrypted_client_secret: Mapped[str] = mapped_column(LongText, nullable=False)
+    retailer_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    enabled: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, server_default=sa.text("true"), default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp(), init=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.current_timestamp(),
+        server_onupdate=func.current_timestamp(),
+        init=False,
+    )
+
+    def decrypt_client_secret(self) -> str:
+        return encrypter.decrypt_token(self.tenant_id, self.encrypted_client_secret)
 
 
 # system level trigger oauth client params

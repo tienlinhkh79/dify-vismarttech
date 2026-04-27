@@ -15,6 +15,7 @@ from core.plugin.entities.plugin_daemon import CredentialType, PluginTriggerProv
 from core.plugin.entities.request import TriggerInvokeEventResponse
 from core.plugin.impl.exc import PluginDaemonError, PluginNotFoundError
 from core.plugin.impl.trigger import PluginTriggerClient
+from core.trigger.custom_providers import MESSENGER_TRIGGER_PROVIDER_ID, MessengerTriggerProviderController
 from core.trigger.entities.entities import (
     EventEntity,
     Subscription,
@@ -83,6 +84,9 @@ class TriggerManager:
         :return: Trigger provider controller or None
         """
         # check if context is set
+        if str(provider_id) == str(MESSENGER_TRIGGER_PROVIDER_ID):
+            return MessengerTriggerProviderController(tenant_id=tenant_id)
+
         try:
             contexts.plugin_trigger_providers.get()
         except LookupError:
@@ -132,7 +136,9 @@ class TriggerManager:
         :param tenant_id: Tenant ID
         :return: List of all trigger provider controllers
         """
-        return cls.list_plugin_trigger_providers(tenant_id)
+        providers: list[PluginTriggerProviderController] = cls.list_plugin_trigger_providers(tenant_id)
+        providers.append(MessengerTriggerProviderController(tenant_id=tenant_id))
+        return providers
 
     @classmethod
     def list_triggers_by_provider(cls, tenant_id: str, provider_id: TriggerProviderID) -> list[EventEntity]:

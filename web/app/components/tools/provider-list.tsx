@@ -72,8 +72,8 @@ const ProviderList = () => {
 
   const [currentProviderId, setCurrentProviderId] = useState<string | undefined>()
   const currentProvider = useMemo<Collection | undefined>(() => {
-    return filteredCollectionList.find(collection => collection.id === currentProviderId)
-  }, [currentProviderId, filteredCollectionList])
+    return collectionList.find(collection => collection.id === currentProviderId)
+  }, [currentProviderId, collectionList])
   const { data: checkedInstalledData } = useCheckInstalled({
     pluginIds: currentProvider?.plugin_id ? [currentProvider.plugin_id] : [],
     enabled: !!currentProvider?.plugin_id,
@@ -150,6 +150,12 @@ const ProviderList = () => {
                 showClearIcon
                 wrapperClassName="w-[200px]"
                 value={keywords}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                name="tools-search"
+                type="search"
                 onChange={e => handleKeywordsChange(e.target.value)}
                 onClear={() => handleKeywordsChange('')}
               />

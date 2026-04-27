@@ -93,6 +93,9 @@ from .tools import (
 )
 from .trigger import (
     AppTrigger,
+    KiotVietConnection,
+    OmniChannelConfig,
+    OmniChannelType,
     TriggerOAuthSystemClient,
     TriggerOAuthTenantClient,
     TriggerSubscription,
@@ -165,6 +168,7 @@ __all__ = [
     "IconType",
     "InstalledApp",
     "InvitationCode",
+    "KiotVietConnection",
     "LoadBalancingModelConfig",
     "Message",
     "MessageAgentThought",
@@ -172,6 +176,8 @@ __all__ = [
     "MessageChain",
     "MessageFeedback",
     "MessageFile",
+    "OmniChannelConfig",
+    "OmniChannelType",
     "OperationLog",
     "PinnedConversation",
     "Provider",

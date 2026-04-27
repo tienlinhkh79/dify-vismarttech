@@ -9,7 +9,102 @@ import type {
   WorkflowToolProviderResponse,
 } from '@/app/components/tools/types'
 import { buildProviderQuery } from './_tools_util'
-import { get, post } from './base'
+import { get, patch, post } from './base'
+
+export type MessengerChannel = {
+  id?: string
+  channel_id: string
+  platform?: string
+  channel_type?: string
+  status?: 'active' | 'inactive'
+  app_id: string
+  name: string
+  page_id: string
+  verify_token?: string
+  app_secret?: string
+  page_access_token?: string
+  verify_token_masked?: string
+  app_secret_masked?: string
+  page_access_token_masked?: string
+  graph_api_version: string
+  enabled: boolean
+  webhook_path?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export type ChannelProvider = {
+  provider: 'messenger' | 'instagram' | 'tiktok'
+  channel_type: string
+  display_name: string
+  status: 'active' | 'coming_soon'
+  setup_kind: string
+}
+
+export type Channel = {
+  id?: string
+  channel_id: string
+  channel_type: string
+  platform: string
+  status?: 'active' | 'inactive'
+  app_id: string
+  name: string
+  external_resource_id: string
+  verify_token?: string
+  client_secret?: string
+  access_token?: string
+  verify_token_masked?: string
+  client_secret_masked?: string
+  access_token_masked?: string
+  api_version: string
+  enabled: boolean
+  webhook_path?: string
+  created_at?: string
+  updated_at?: string
+}
+
+type MessengerChannelListResponse = {
+  data: MessengerChannel[]
+}
+
+type MessengerChannelItemResponse = {
+  data: MessengerChannel
+}
+
+type ChannelProviderResponse = {
+  data: ChannelProvider[]
+}
+
+type ChannelListResponse = {
+  data: Channel[]
+}
+
+type ChannelItemResponse = {
+  data: Channel
+}
+
+export type KiotVietConnection = {
+  id?: string
+  connection_id: string
+  platform?: string
+  status?: 'active' | 'inactive'
+  name: string
+  client_id: string
+  client_secret?: string
+  client_secret_masked?: string
+  retailer_name: string
+  enabled: boolean
+  created_at?: string
+  updated_at?: string
+}
+
+type KiotVietConnectionListResponse = {
+  data: KiotVietConnection[]
+}
+
+type KiotVietConnectionItemResponse = {
+  data: KiotVietConnection
+}
 
 export const fetchCollectionList = () => {
   return get<Collection[]>('/workspaces/current/tool-providers')
@@ -51,6 +146,76 @@ export const updateBuiltInToolCredential = (collectionName: string, credential: 
 export const removeBuiltInToolCredential = (collectionName: string) => {
   return post(`/workspaces/current/tool-provider/builtin/${collectionName}/delete`, {
     body: {},
+  })
+}
+
+export const getMessengerOAuthAuthorizationUrl = (payload: {
+  app_id: string
+  app_secret: string
+  graph_api_version?: string
+}) => {
+  return post<{ authorization_url: string }>('/workspaces/current/tool-provider/builtin/messenger/oauth/authorization-url', {
+    body: payload,
+  })
+}
+
+export const listMessengerChannels = () => {
+  return get<MessengerChannelListResponse>('/workspaces/current/channels/messenger')
+}
+
+export const listChannelProviders = () => {
+  return get<ChannelProviderResponse>('/workspaces/current/channels/providers')
+}
+
+export const listChannels = () => {
+  return get<ChannelListResponse>('/workspaces/current/channels')
+}
+
+export const createChannel = (payload: Channel) => {
+  return post<ChannelItemResponse>('/workspaces/current/channels', {
+    body: payload,
+  })
+}
+
+export const updateChannel = (channelId: string, payload: Partial<Channel>) => {
+  return patch<ChannelItemResponse>(`/workspaces/current/channels/${channelId}`, {
+    body: payload,
+  })
+}
+
+export const createMessengerChannel = (payload: MessengerChannel) => {
+  return post<MessengerChannelItemResponse>('/workspaces/current/channels/messenger', {
+    body: payload,
+  })
+}
+
+export const updateMessengerChannel = (
+  channelId: string,
+  payload: Partial<MessengerChannel>,
+) => {
+  return patch<MessengerChannelItemResponse>(`/workspaces/current/channels/messenger/${channelId}`, {
+    body: payload,
+  })
+}
+
+// Backward-compatible aliases used by existing callers.
+export const listMessengerOmnichannelChannels = listMessengerChannels
+export const createMessengerOmnichannelChannel = createMessengerChannel
+export const updateMessengerOmnichannelChannel = updateMessengerChannel
+
+export const listKiotVietConnections = () => {
+  return get<KiotVietConnectionListResponse>('/workspaces/current/channels/kiotviet')
+}
+
+export const createKiotVietConnection = (payload: KiotVietConnection) => {
+  return post<KiotVietConnectionItemResponse>('/workspaces/current/channels/kiotviet', {
+    body: payload,
+  })
+}
+
+export const updateKiotVietConnection = (connectionId: string, payload: Partial<KiotVietConnection>) => {
+  return patch<KiotVietConnectionItemResponse>(`/workspaces/current/channels/kiotviet/${connectionId}`, {
+    body: payload,
   })
 }
 

@@ -200,6 +200,10 @@ class TriggerConfig(BaseSettings):
         description="Maximum allowed size for webhook request bodies in bytes",
         default=10485760,
     )
+    MESSENGER_TRIGGER_ENABLED: bool = Field(
+        description="Enable incoming webhook handling for Facebook Messenger trigger endpoints",
+        default=False,
+    )
 
 
 class AsyncWorkflowConfig(BaseSettings):

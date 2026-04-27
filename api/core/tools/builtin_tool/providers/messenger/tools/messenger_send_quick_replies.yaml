@@ -1,0 +1,42 @@
+identity:
+  name: messenger_send_quick_replies
+  author: Dify Community
+  label:
+    en_US: Send Quick Replies
+    vi_VN: Gui quick replies
+description:
+  human:
+    en_US: Send a Messenger text with quick reply buttons by recipient PSID.
+    vi_VN: Gui tin nhan Messenger kem quick reply buttons bang PSID.
+  llm: Send a Facebook Messenger quick replies message to a user by recipient PSID.
+parameters:
+  - name: recipient_id
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Recipient PSID
+      vi_VN: Recipient PSID
+    human_description:
+      en_US: Facebook Page-Scoped User ID (PSID) of the recipient.
+      vi_VN: Facebook Page-Scoped User ID (PSID) cua nguoi nhan.
+  - name: message_text
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Message Text
+      vi_VN: Noi dung tin nhan
+    human_description:
+      en_US: Text shown above quick reply buttons.
+      vi_VN: Noi dung hien thi ben tren quick reply buttons.
+  - name: quick_replies_json
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Quick Replies JSON
+      vi_VN: JSON quick replies
+    human_description:
+      en_US: JSON array items with title, payload and optional image_url.
+      vi_VN: Mang JSON gom title, payload va image_url tuy chon.

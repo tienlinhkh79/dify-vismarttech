@@ -1,0 +1,32 @@
+identity:
+  name: messenger_send_template
+  author: Dify Community
+  label:
+    en_US: Send Template
+    vi_VN: Gui template
+description:
+  human:
+    en_US: Send a Messenger template payload (generic/button/media template) by recipient PSID.
+    vi_VN: Gui payload template Messenger (generic/button/media) bang PSID.
+  llm: Send a Facebook Messenger template payload by recipient PSID.
+parameters:
+  - name: recipient_id
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Recipient PSID
+      vi_VN: Recipient PSID
+    human_description:
+      en_US: Facebook Page-Scoped User ID (PSID) of the recipient.
+      vi_VN: Facebook Page-Scoped User ID (PSID) cua nguoi nhan.
+  - name: template_payload_json
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Template Payload JSON
+      vi_VN: JSON template payload
+    human_description:
+      en_US: JSON object for Messenger template attachment payload.
+      vi_VN: Doi tuong JSON cho payload template attachment cua Messenger.

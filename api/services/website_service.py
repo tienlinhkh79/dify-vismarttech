@@ -39,6 +39,8 @@ class CrawlOptions:
     prompt: str | None = None
     max_depth: int | None = None
     use_sitemap: bool = True
+    request_timeout_ms: int | None = None
+    max_retries: int | None = None
 
     def get_include_paths(self) -> list[str]:
         """Get list of include paths from comma-separated string."""
@@ -87,6 +89,8 @@ class WebsiteCrawlApiRequest:
             prompt=self.options.get("prompt"),
             max_depth=self.options.get("max_depth"),
             use_sitemap=self.options.get("use_sitemap", True),
+            request_timeout_ms=self.options.get("request_timeout_ms"),
+            max_retries=self.options.get("max_retries"),
         )
         return CrawlRequest(url=self.url, provider=self.provider, options=options)
 
@@ -187,7 +191,12 @@ class WebsiteService:
 
     @classmethod
     def _crawl_with_firecrawl(cls, request: CrawlRequest, api_key: str, config: dict) -> dict[str, Any]:
-        firecrawl_app = FirecrawlApp(api_key=api_key, base_url=config.get("base_url"))
+        firecrawl_app = FirecrawlApp(
+            api_key=api_key,
+            base_url=config.get("base_url"),
+            request_timeout_ms=request.options.request_timeout_ms,
+            max_retries=request.options.max_retries,
+        )
 
         params: dict[str, Any]
         if not request.options.crawl_sub_pages:

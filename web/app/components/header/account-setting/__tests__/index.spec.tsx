@@ -70,6 +70,14 @@ vi.mock('@/service/use-common', () => ({
   useProviderContext: vi.fn(),
 }))
 
+vi.mock('@/app/components/header/account-setting/channels-page', () => ({
+  default: () => <div>channels-page</div>,
+}))
+
+vi.mock('@/app/components/header/account-setting/kiotviet-page', () => ({
+  default: () => <div>kiotviet-page</div>,
+}))
+
 const baseAppContextValue: AppContextValue = {
   userProfile: {
     id: '1',
@@ -166,6 +174,8 @@ describe('AccountSetting', () => {
       // Assert
       expect(screen.getByText('common.userProfile.settings')).toBeInTheDocument()
       expect(screen.getByText('common.settings.provider')).toBeInTheDocument()
+      expect(screen.getByText('common.settings.channels')).toBeInTheDocument()
+      expect(screen.getByText('common.settings.kiotviet')).toBeInTheDocument()
       expect(screen.getAllByText('common.settings.members').length).toBeGreaterThan(0)
       expect(screen.getByText('common.settings.billing')).toBeInTheDocument()
       expect(screen.getByText('common.settings.dataSource')).toBeInTheDocument()
@@ -274,6 +284,14 @@ describe('AccountSetting', () => {
       // Members
       fireEvent.click(screen.getAllByText('common.settings.members')[0])
       expect(screen.getAllByText('common.settings.members').length).toBeGreaterThan(1)
+
+      // Channels
+      fireEvent.click(screen.getByText('common.settings.channels'))
+      expect(screen.getByText('channels-page')).toBeInTheDocument()
+
+      // KiotViet
+      fireEvent.click(screen.getByText('common.settings.kiotviet'))
+      expect(screen.getByText('kiotviet-page')).toBeInTheDocument()
     })
   })
 

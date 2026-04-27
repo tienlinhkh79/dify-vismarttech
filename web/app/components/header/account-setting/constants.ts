@@ -2,6 +2,8 @@ export const ACCOUNT_SETTING_MODAL_ACTION = 'showSettings'
 
 export const ACCOUNT_SETTING_TAB = {
   PROVIDER: 'provider',
+  CHANNELS: 'channels',
+  KIOTVIET: 'kiotviet',
   MEMBERS: 'members',
   BILLING: 'billing',
   DATA_SOURCE: 'data-source',
