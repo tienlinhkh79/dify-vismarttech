@@ -75,6 +75,7 @@ MessengerReplyPayload = (
 
 class MessengerRuntimeService:
     _DEDUP_TTL_SECONDS = 300
+    _MERGE_WINDOW_MS = 4000
 
     @staticmethod
     def _extract_markdown_image_urls(text: str) -> tuple[str, list[str]]:
@@ -121,6 +122,45 @@ class MessengerRuntimeService:
                 }
             )
         return files
+
+    @classmethod
+    def _merge_close_events(cls, events: list[OmniChannelIncomingEvent]) -> list[OmniChannelIncomingEvent]:
+        if len(events) <= 1:
+            return events
+
+        merged: list[OmniChannelIncomingEvent] = []
+        for event in events:
+            raw_event = event.get("raw_event") or {}
+            current_ts = int(raw_event.get("timestamp") or 0)
+            if not merged:
+                merged.append(event)
+                continue
+
+            prev = merged[-1]
+            prev_raw = prev.get("raw_event") or {}
+            prev_ts = int(prev_raw.get("timestamp") or 0)
+            same_sender = prev.get("external_user_id") == event.get("external_user_id")
+            close_enough = current_ts > 0 and prev_ts > 0 and (current_ts - prev_ts) <= cls._MERGE_WINDOW_MS
+
+            if not same_sender or not close_enough:
+                merged.append(event)
+                continue
+
+            prev_text = str(prev.get("text") or "").strip()
+            curr_text = str(event.get("text") or "").strip()
+            merged_text = "\n".join([part for part in [prev_text, curr_text] if part])
+            prev["text"] = merged_text
+
+            prev_attachments = list(prev.get("attachments") or [])
+            curr_attachments = list(event.get("attachments") or [])
+            if curr_attachments:
+                prev["attachments"] = prev_attachments + curr_attachments
+
+            if event.get("message_id"):
+                prev["message_id"] = event["message_id"]
+            prev["raw_event"] = event.get("raw_event", prev["raw_event"])
+
+        return merged
 
     @staticmethod
     def _simulate_human_typing_delay(reply_text: str) -> None:
@@ -438,6 +478,7 @@ class MessengerRuntimeService:
         """Generate and send replies for all normalized inbound Messenger events."""
         if not events:
             return 0
+        events = cls._merge_close_events(events)
 
         app = cls._get_reply_app(channel_config["app_id"])
         sent_count = 0
