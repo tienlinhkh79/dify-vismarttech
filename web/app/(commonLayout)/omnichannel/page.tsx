@@ -12,6 +12,7 @@ import {
   listChannels,
   listOmnichannelConversations,
   listOmnichannelMessages,
+  refreshOmnichannelConversationParticipant,
   startOmnichannelHistorySync,
   testOmnichannelWebhook,
   type Channel,
@@ -19,6 +20,15 @@ import {
   type OmnichannelMessage,
   type OmnichannelSyncJob,
 } from '@/service/tools'
+import { API_PREFIX } from '@/config'
+import { getBaseURL } from '@/service/client'
+
+function omnichannelSseUrl(channelId: string): string {
+  const segment = `workspaces/current/channels/${encodeURIComponent(channelId)}/stream`
+  const base = getBaseURL(API_PREFIX)
+  const root = base.href.replace(/\/?$/, '')
+  return `${root}/${segment}`
+}
 
 type ChannelStats = {
   total_messages: number
@@ -48,7 +58,59 @@ const getChannelGradient = (channelType?: string) => {
 
 const isImageUrl = (url: string) => /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url)
 
-/** Newest-first pages from API; we render chronological ascending (oldest → newest). */
+/** PSID / Facebook numeric IDs used as fallback label must not become avatar "initials" (e.g. "32"). */
+function omnichannelInitialsSeed(displayNameOrExternalId: string | undefined | null): string {
+  const s = (displayNameOrExternalId || '').trim()
+  if (!s)
+    return ''
+  if (/^\d+$/.test(s))
+    return ''
+  return s
+}
+
+function OmnichannelAvatar({
+  imageUrl,
+  initials,
+  size = 32,
+}: {
+  imageUrl?: string | null
+  initials: string
+  size?: number
+}) {
+  const [imageFailed, setImageFailed] = useState(false)
+  useEffect(() => {
+    setImageFailed(false)
+  }, [imageUrl])
+  const label = (initials || '?').slice(0, 2).toUpperCase()
+  const trimmedUrl = (imageUrl || '').trim()
+  const showImage = Boolean(trimmedUrl) && !imageFailed
+  return (
+    <div
+      className='shrink-0 overflow-hidden rounded-full border border-divider-subtle bg-background-default shadow-sm'
+      style={{ width: size, height: size }}
+    >
+      {showImage
+        ? (
+            <img
+              src={trimmedUrl}
+              alt=''
+              className='size-full object-cover'
+              onError={() => setImageFailed(true)}
+            />
+          )
+        : (
+            <div className='flex size-full items-center justify-center text-[10px] font-semibold text-text-tertiary'>
+              {label}
+            </div>
+          )}
+    </div>
+  )
+}
+
+/** Newest-first pages from API; we render chronological ascending (oldest → newest).
+ *  Fallback poll when SSE is unavailable; primary updates use Redis → SSE.
+ */
+const OMNICHANNEL_FALLBACK_POLL_MS = 45_000
 const OMNICHANNEL_MESSAGES_PAGE_SIZE = 50
 const SCROLL_LOAD_OLDER_THRESHOLD_PX = 120
 const JUMP_TO_LATEST_DISTANCE_PX = 220
@@ -99,6 +161,8 @@ const messageMatchesSearch = (message: OmnichannelMessage, q: string) => {
     String(message.id),
     message.direction,
     message.source,
+    String(message.sender_display_name || ''),
+    String(message.channel_actor_name || ''),
     ...(message.attachments || []).map((a) => {
       if (a && typeof a === 'object' && 'url' in a)
         return String((a as { url?: string }).url || '')
@@ -147,6 +211,67 @@ const OmnichannelPage = () => {
   const [isLoadingOlderMessages, setIsLoadingOlderMessages] = useState(false)
   const [showJumpToLatest, setShowJumpToLatest] = useState(false)
   const [messageSearchQuery, setMessageSearchQuery] = useState('')
+  const messengerParticipantRefreshAttemptedRef = useRef('')
+  const selectedChannelIdRef = useRef('')
+  const selectedConversationIdRef = useRef('')
+  const isMessagesLoadingRef = useRef(false)
+  const isLoadingOlderMessagesRef = useRef(false)
+  const omnichannelRealtimeDebounceRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    selectedChannelIdRef.current = selectedChannelId
+  }, [selectedChannelId])
+
+  useEffect(() => {
+    selectedConversationIdRef.current = selectedConversationId
+  }, [selectedConversationId])
+
+  useEffect(() => {
+    isMessagesLoadingRef.current = isMessagesLoading
+  }, [isMessagesLoading])
+
+  useEffect(() => {
+    isLoadingOlderMessagesRef.current = isLoadingOlderMessages
+  }, [isLoadingOlderMessages])
+
+  useEffect(() => {
+    messengerParticipantRefreshAttemptedRef.current = ''
+  }, [selectedConversationId])
+
+  useEffect(() => {
+    if (!selectedChannelId || !selectedConversationId)
+      return
+    const channel = channels.find(c => c.channel_id === selectedChannelId)
+    if (!channel || channel.channel_type !== 'facebook_messenger')
+      return
+    const conv = conversations.find(c => c.id === selectedConversationId)
+    if (!conv)
+      return
+    const hasName = !!(conv.participant_display_name || '').trim()
+    const hasPic = !!(conv.participant_profile_pic_url || '').trim()
+    if (hasName && hasPic)
+      return
+    if (messengerParticipantRefreshAttemptedRef.current === selectedConversationId)
+      return
+    messengerParticipantRefreshAttemptedRef.current = selectedConversationId
+
+    let cancelled = false
+    void (async () => {
+      try {
+        const res = await refreshOmnichannelConversationParticipant(selectedChannelId, selectedConversationId)
+        const updated = res.data
+        if (cancelled || !updated?.id)
+          return
+        setConversations(prev => prev.map(c => (c.id === updated.id ? { ...c, ...updated } : c)))
+      }
+      catch {
+        /* Meta may return empty profile; UI keeps initials */
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [selectedChannelId, selectedConversationId, channels, conversations])
 
   useEffect(() => {
     (async () => {
@@ -279,6 +404,77 @@ const OmnichannelPage = () => {
     setShowJumpToLatest(false)
   }, [])
 
+  const refreshChannelData = useCallback(async (opts?: { includeMessages?: boolean }) => {
+    const channelId = selectedChannelIdRef.current
+    if (!channelId)
+      return
+    if (typeof document !== 'undefined' && document.hidden)
+      return
+
+    let resolvedConversationId = selectedConversationIdRef.current
+    try {
+      const [conversationRes, statsRes, healthRes] = await Promise.all([
+        listOmnichannelConversations(channelId, { limit: 50 }),
+        getOmnichannelStats(channelId),
+        getOmnichannelHealth(channelId),
+      ])
+      const nextConversations = conversationRes.data || []
+      const prevSel = selectedConversationIdRef.current
+      resolvedConversationId = (prevSel && nextConversations.some(item => item.id === prevSel))
+        ? prevSel
+        : (nextConversations[0]?.id || '')
+      setConversations(nextConversations)
+      setSelectedConversationId(resolvedConversationId)
+      selectedConversationIdRef.current = resolvedConversationId
+      setStats(statsRes.data)
+      setHealth(healthRes.data)
+    }
+    catch {
+      // avoid flashing the main error banner on transient failures
+    }
+
+    if (!opts?.includeMessages)
+      return
+    const convId = resolvedConversationId
+    if (!convId)
+      return
+    if (loadOlderInFlightRef.current)
+      return
+    if (isMessagesLoadingRef.current || isLoadingOlderMessagesRef.current)
+      return
+
+    const el = messagesScrollRef.current
+    const nearBottom = el
+      ? el.scrollHeight - el.scrollTop - el.clientHeight < 88
+      : true
+    try {
+      const res = await listOmnichannelMessages(channelId, convId, {
+        limit: OMNICHANNEL_MESSAGES_PAGE_SIZE,
+      })
+      const asc = sortMessagesChronological(res.data || [])
+      let grew = false
+      setMessages((prev) => {
+        const next = mergePollNewer(asc, prev)
+        grew = next.length > prev.length
+        return next
+      })
+      if (nearBottom && grew)
+        setTimeout(() => scrollMessagesToBottom(false), 0)
+    }
+    catch {
+      // ignore transient errors
+    }
+  }, [scrollMessagesToBottom])
+
+  const scheduleOmnichannelRealtimeRefresh = useCallback(() => {
+    if (omnichannelRealtimeDebounceRef.current)
+      window.clearTimeout(omnichannelRealtimeDebounceRef.current)
+    omnichannelRealtimeDebounceRef.current = window.setTimeout(() => {
+      omnichannelRealtimeDebounceRef.current = null
+      void refreshChannelData({ includeMessages: true })
+    }, 400)
+  }, [refreshChannelData])
+
   const onMessagesScroll = useCallback(() => {
     const el = messagesScrollRef.current
     if (!el)
@@ -295,38 +491,77 @@ const OmnichannelPage = () => {
     void loadOlderMessages()
   }, [loadOlderMessages])
 
+  /** Slow fallback when SSE is down; push path is Redis → API SSE. */
   useEffect(() => {
-    if (!selectedChannelId || !selectedConversationId)
+    if (!selectedChannelId)
       return
-    const intervalId = window.setInterval(async () => {
-      if (typeof document !== 'undefined' && document.hidden)
-        return
-      if (loadOlderInFlightRef.current || isMessagesLoading || isLoadingOlderMessages)
-        return
-      const el = messagesScrollRef.current
-      const nearBottom = el
-        ? el.scrollHeight - el.scrollTop - el.clientHeight < 88
-        : true
-      try {
-        const res = await listOmnichannelMessages(selectedChannelId, selectedConversationId, {
-          limit: OMNICHANNEL_MESSAGES_PAGE_SIZE,
-        })
-        const asc = sortMessagesChronological(res.data || [])
-        let grew = false
-        setMessages((prev) => {
-          const next = mergePollNewer(asc, prev)
-          grew = next.length > prev.length
-          return next
-        })
-        if (nearBottom && grew)
-          setTimeout(() => scrollMessagesToBottom(false), 0)
-      }
-      catch {
-        // ignore transient poll errors
-      }
-    }, 30_000)
+    const intervalId = window.setInterval(() => {
+      void refreshChannelData({ includeMessages: true })
+    }, OMNICHANNEL_FALLBACK_POLL_MS)
     return () => window.clearInterval(intervalId)
-  }, [selectedChannelId, selectedConversationId, isMessagesLoading, isLoadingOlderMessages, scrollMessagesToBottom])
+  }, [selectedChannelId, refreshChannelData])
+
+  /** Subscribe to server push for this channel (same session cookies as REST). */
+  useEffect(() => {
+    if (!selectedChannelId)
+      return
+    if (typeof window === 'undefined' || typeof EventSource === 'undefined')
+      return
+
+    let es: EventSource | null = null
+    let reconnectTimer: number | null = null
+    let cancelled = false
+
+    const clearReconnect = () => {
+      if (reconnectTimer != null) {
+        window.clearTimeout(reconnectTimer)
+        reconnectTimer = null
+      }
+    }
+
+    const connect = () => {
+      if (cancelled)
+        return
+      const channelId = selectedChannelIdRef.current
+      if (!channelId)
+        return
+      const url = omnichannelSseUrl(channelId)
+      es = new EventSource(url, { withCredentials: true })
+      es.onmessage = (ev) => {
+        try {
+          const data = JSON.parse(ev.data) as { type?: string }
+          if (data.type === 'connected')
+            return
+          if (data.type !== 'omnichannel')
+            return
+          scheduleOmnichannelRealtimeRefresh()
+        }
+        catch {
+          /* ignore non-JSON */
+        }
+      }
+      es.onerror = () => {
+        es?.close()
+        es = null
+        if (cancelled)
+          return
+        clearReconnect()
+        reconnectTimer = window.setTimeout(connect, 5000)
+      }
+    }
+
+    connect()
+
+    return () => {
+      cancelled = true
+      clearReconnect()
+      if (omnichannelRealtimeDebounceRef.current) {
+        window.clearTimeout(omnichannelRealtimeDebounceRef.current)
+        omnichannelRealtimeDebounceRef.current = null
+      }
+      es?.close()
+    }
+  }, [selectedChannelId, scheduleOmnichannelRealtimeRefresh])
 
   useLayoutEffect(() => {
     if (!initialScrollToBottomRef.current)
@@ -445,6 +680,11 @@ const OmnichannelPage = () => {
     [channels, selectedChannelId],
   )
 
+  const isMetaHistorySyncSupported = useMemo(() => {
+    const ct = selectedChannel?.channel_type
+    return ct === 'facebook_messenger' || ct === 'instagram_dm'
+  }, [selectedChannel?.channel_type])
+
   const selectedConversation = useMemo(
     () => conversations.find(item => item.id === selectedConversationId),
     [conversations, selectedConversationId],
@@ -461,23 +701,6 @@ const OmnichannelPage = () => {
       .slice(-6)
       .reverse()
   }, [messages])
-
-  const refreshChannelData = async (channelId: string) => {
-    const [conversationRes, statsRes, healthRes] = await Promise.all([
-      listOmnichannelConversations(channelId, { limit: 50 }),
-      getOmnichannelStats(channelId),
-      getOmnichannelHealth(channelId),
-    ])
-    const nextConversations = conversationRes.data || []
-    setConversations(nextConversations)
-    setStats(statsRes.data)
-    setHealth(healthRes.data)
-    setSelectedConversationId((prev) => {
-      if (prev && nextConversations.some(item => item.id === prev))
-        return prev
-      return nextConversations[0]?.id || ''
-    })
-  }
 
   const onStartSync = async () => {
     if (!selectedChannelId)
@@ -505,7 +728,7 @@ const OmnichannelPage = () => {
             if (syncPollingRef.current)
               window.clearInterval(syncPollingRef.current)
             syncPollingRef.current = null
-            await refreshChannelData(selectedChannelId)
+            await refreshChannelData({ includeMessages: true })
             setIsSyncing(false)
             if (nextJob.status === 'failed')
               setError(nextJob.last_error || t('settings.omnichannelErrorSyncFailed'))
@@ -620,11 +843,25 @@ const OmnichannelPage = () => {
                   }`}
                   onClick={() => setSelectedConversationId(item.id)}
                 >
-                  <div className='flex items-center justify-between gap-2'>
-                    <div className='truncate font-medium text-text-primary'>{item.external_user_id}</div>
-                    <span className='text-[10px] uppercase text-text-tertiary'>{channelTypeLabel(item.channel_type)}</span>
+                  <div className='flex items-start gap-2'>
+                    <OmnichannelAvatar
+                      size={36}
+                      imageUrl={item.participant_profile_pic_url}
+                      initials={omnichannelInitialsSeed(
+                        (item.participant_display_name && item.participant_display_name.trim()) || item.external_user_id,
+                      )}
+                    />
+                    <div className='min-w-0 flex-1'>
+                      <div className='flex items-center justify-between gap-2'>
+                        <div className='truncate font-medium text-text-primary'>
+                          {(item.participant_display_name && item.participant_display_name.trim()) || item.external_user_id}
+                        </div>
+                        <span className='shrink-0 text-[10px] uppercase text-text-tertiary'>{channelTypeLabel(item.channel_type)}</span>
+                      </div>
+                      <div className='truncate text-[11px] text-text-quaternary'>{item.external_user_id}</div>
+                      <div className='text-xs text-text-tertiary'>{t('settings.omnichannelLastMessage', { time: toLocaleText(item.last_message_at) })}</div>
+                    </div>
                   </div>
-                  <div className='text-xs text-text-tertiary'>{t('settings.omnichannelLastMessage', { time: toLocaleText(item.last_message_at) })}</div>
                 </button>
               ))}
             </div>
@@ -637,7 +874,10 @@ const OmnichannelPage = () => {
               <div className='text-sm font-medium text-text-primary'>{t('settings.omnichannelMessages')}</div>
               <div className='text-xs text-text-tertiary'>
                 {selectedConversation
-                  ? t('settings.omnichannelConversationWith', { id: selectedConversation.external_user_id })
+                  ? t('settings.omnichannelConversationWith', {
+                      id: (selectedConversation.participant_display_name && String(selectedConversation.participant_display_name).trim())
+                        || selectedConversation.external_user_id,
+                    })
                   : t('settings.omnichannelSelectConversationHint')}
               </div>
               {!!selectedConversationId && messagesHasMore && !isMessagesLoading && (
@@ -711,20 +951,43 @@ const OmnichannelPage = () => {
                       )
                     }
                     const message = item.message
+                    const isOutbound = message.direction === 'outbound'
+                    const inboundSender = (
+                      (message.sender_display_name && String(message.sender_display_name).trim())
+                      || (selectedConversation?.participant_display_name && String(selectedConversation.participant_display_name).trim())
+                      || message.external_user_id
+                    )
+                    const inboundAvatar = message.sender_profile_pic_url || selectedConversation?.participant_profile_pic_url
+                    const outboundSender = (
+                      (message.channel_actor_name && String(message.channel_actor_name).trim())
+                      || (selectedChannel?.name && String(selectedChannel.name).trim())
+                      || t('settings.omnichannelReplyActorFallback')
+                    )
+                    const outboundAvatar = message.channel_actor_picture_url
+                    const actorLabel = isOutbound ? outboundSender : inboundSender
+                    const inboundInitialsSeed = omnichannelInitialsSeed(inboundSender)
+                    const outboundInitialsSeed = omnichannelInitialsSeed(outboundSender)
+
                     return (
                       <div
                         key={item.key}
-                        className={`flex ${message.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}
+                        className={`flex items-end gap-2 ${isOutbound ? 'justify-end' : 'justify-start'}`}
                       >
-                        <div className={`max-w-[85%] rounded-2xl border px-3 py-2 text-sm shadow-sm ${
-                          message.direction === 'outbound'
+                        {!isOutbound && (
+                          <OmnichannelAvatar imageUrl={inboundAvatar} initials={inboundInitialsSeed} size={36} />
+                        )}
+                        <div className={`max-w-[min(85%,520px)] rounded-2xl border px-3 py-2 text-sm shadow-sm ${
+                          isOutbound
                             ? 'border-primary-200 bg-primary-50'
                             : 'border-divider-subtle bg-components-panel-bg'
                         }`}
                         >
-                          <div className='mb-1 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[10px] text-text-tertiary'>
-                            <span className='font-medium tracking-wide'>{messageDirectionAndSource(message.direction, message.source)}</span>
-                            <span className='shrink-0 tabular-nums'>{toLocaleText(message.created_at)}</span>
+                          <div className='mb-1 space-y-0.5'>
+                            <div className='text-xs font-medium text-text-secondary'>{actorLabel}</div>
+                            <div className='flex flex-wrap items-center justify-between gap-x-2 text-[10px] text-text-tertiary'>
+                              <span>{messageDirectionAndSource(message.direction, message.source)}</span>
+                              <span className='shrink-0 tabular-nums'>{toLocaleText(message.created_at)}</span>
+                            </div>
                           </div>
                           <div className='whitespace-pre-wrap break-words text-text-primary'>{message.content || t('settings.omnichannelMessageEmpty')}</div>
                           {!!message.attachments?.length && (
@@ -751,6 +1014,9 @@ const OmnichannelPage = () => {
                             </div>
                           )}
                         </div>
+                        {isOutbound && (
+                          <OmnichannelAvatar imageUrl={outboundAvatar} initials={outboundInitialsSeed} size={36} />
+                        )}
                       </div>
                     )
                   })}
@@ -764,14 +1030,19 @@ const OmnichannelPage = () => {
           <div className='rounded-xl border border-components-panel-border bg-components-panel-bg p-4'>
             <div className='system-xs-semibold-uppercase mb-2 text-text-tertiary'>{t('settings.omnichannelSyncHistory')}</div>
             <div className='space-y-2'>
-              <Input type='datetime-local' value={syncSince} onChange={e => setSyncSince(e.target.value)} />
-              <Input type='datetime-local' value={syncUntil} onChange={e => setSyncUntil(e.target.value)} />
+              <Input type='datetime-local' value={syncSince} onChange={e => setSyncSince(e.target.value)} disabled={!isMetaHistorySyncSupported} />
+              <Input type='datetime-local' value={syncUntil} onChange={e => setSyncUntil(e.target.value)} disabled={!isMetaHistorySyncSupported} />
             </div>
+            <p className='mt-2 text-xs leading-snug text-text-quaternary'>
+              {isMetaHistorySyncSupported
+                ? t('settings.omnichannelSyncNoDatesMessengerHint')
+                : t('settings.omnichannelSyncHistoryNotSupportedHint')}
+            </p>
             <Button
               className='mt-3'
               size='small'
               loading={isSyncing}
-              disabled={!selectedChannelId || isSyncing}
+              disabled={!selectedChannelId || isSyncing || !isMetaHistorySyncSupported}
               onClick={onStartSync}
             >
               {t('settings.omnichannelStartSync')}

@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 
 CSRF_WHITE_LIST = [
     re.compile(r"/console/api/apps/[a-f0-9-]+/workflows/draft"),
+    # EventSource cannot send custom headers; stream is GET + read-only after @login_required.
+    re.compile(r"/console/api/workspaces/current/channels/[^/]+/stream$"),
 ]
 
 

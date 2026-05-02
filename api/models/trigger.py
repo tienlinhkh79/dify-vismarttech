@@ -236,7 +236,7 @@ class OmniChannelConfig(TypeBase):
         return encrypter.decrypt_token(self.tenant_id, self.encrypted_oa_refresh_token)
 
 
-class OmniChannelConversation(TypeBase):
+class OmniChannelConversation(TypeBase, kw_only=True):
     __tablename__ = "omnichannel_conversations"
     __table_args__ = (
         sa.PrimaryKeyConstraint("id", name="omnichannel_conversation_pkey"),
@@ -253,6 +253,8 @@ class OmniChannelConversation(TypeBase):
     channel_type: Mapped[OmniChannelType] = mapped_column(EnumText(OmniChannelType, length=60), nullable=False)
     external_user_id: Mapped[str] = mapped_column(String(255), nullable=False)
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    participant_display_name: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    participant_profile_pic_url: Mapped[str | None] = mapped_column(LongText, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=func.current_timestamp(), init=False
     )

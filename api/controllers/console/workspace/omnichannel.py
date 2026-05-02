@@ -1,20 +1,24 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime
 
-from flask import request
+from flask import Response, request
 from flask_restx import Resource
 from graphon.model_runtime.utils.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, field_validator, model_validator
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import BadRequest, NotFound, Unauthorized
 
 from controllers.common.schema import register_schema_models
 from controllers.console import console_ns
 from controllers.console.wraps import account_initialization_required, is_admin_or_owner_required, setup_required
+from extensions.ext_redis import get_pubsub_broadcast_channel
 from libs.login import current_account_with_tenant, login_required
+from models.account import AccountStatus
 from services.omnichannel.channel_management_service import ChannelInput, ChannelManagementService
 from services.omnichannel.kiotviet_connection_service import KiotVietConnectionInput, KiotVietConnectionService
 from services.omnichannel.omnichannel_ops_service import OmnichannelOpsService
+from services.omnichannel.omnichannel_realtime import omnichannel_pubsub_topic
 from services.omnichannel.providers.registry import ChannelProviderRegistry
 from tasks.omnichannel_tasks import run_omnichannel_sync_job
 
@@ -261,6 +265,50 @@ class ChannelApi(Resource):
         return {"result": "success"}, 200
 
 
+@console_ns.route("/workspaces/current/channels/<string:channel_id>/stream")
+class ChannelOmnichannelStreamApi(Resource):
+    """Server-Sent Events stream: Redis pub/sub pushes when omnichannel data changes (webhook, sync, profile)."""
+
+    @setup_required
+    def get(self, channel_id: str):
+        try:
+            account, tenant_id = current_account_with_tenant()
+        except ValueError as exc:
+            raise Unauthorized("Unauthorized.") from exc
+        if account.status == AccountStatus.UNINITIALIZED:
+            raise Unauthorized("Account is not initialized.")
+        if ChannelManagementService.get_channel(tenant_id, channel_id) is None:
+            raise NotFound("Channel not found")
+
+        topic_name = omnichannel_pubsub_topic(tenant_id=tenant_id, channel_id=channel_id)
+
+        def event_stream():
+            broadcast = get_pubsub_broadcast_channel()
+            subscription = broadcast.topic(topic_name).subscribe()
+            with subscription:
+                yield f"data: {json.dumps({'type': 'connected', 'channel_id': channel_id}, separators=(',', ':'))}\n\n"
+                while True:
+                    item = subscription.receive(timeout=12.0)
+                    if item is None:
+                        yield ": ping\n\n"
+                        continue
+                    try:
+                        text = item.decode("utf-8")
+                    except UnicodeDecodeError:
+                        continue
+                    yield f"data: {text}\n\n"
+
+        return Response(
+            event_stream(),
+            mimetype="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            },
+        )
+
+
 @console_ns.route("/workspaces/current/channels/<string:channel_id>/conversations")
 class ChannelConversationCollectionApi(Resource):
     @setup_required
@@ -278,6 +326,29 @@ class ChannelConversationCollectionApi(Resource):
             limit=filter_payload.limit,
         )
         return jsonable_encoder(result)
+
+
+@console_ns.route(
+    "/workspaces/current/channels/<string:channel_id>/conversations/<string:conversation_id>/refresh-participant"
+)
+class ChannelConversationParticipantRefreshApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def post(self, channel_id: str, conversation_id: str):
+        _, tenant_id = current_account_with_tenant()
+        try:
+            data = OmnichannelOpsService.refresh_messenger_conversation_participant(
+                tenant_id=tenant_id,
+                channel_id=channel_id,
+                conversation_id=conversation_id,
+            )
+        except ValueError as exc:
+            msg = str(exc)
+            if "not found" in msg.lower():
+                raise NotFound(msg) from exc
+            raise BadRequest(msg) from exc
+        return jsonable_encoder({"data": data}), 200
 
 
 @console_ns.route("/workspaces/current/channels/<string:channel_id>/conversations/<string:conversation_id>/messages")

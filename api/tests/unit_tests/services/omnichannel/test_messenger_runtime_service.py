@@ -1,10 +1,27 @@
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+from models.trigger import OmniChannelMessageDirection
 from services.omnichannel.messenger_runtime_service import MessengerRuntimeService
 
 
 class TestMessengerRuntimeService:
+    def setup_method(self) -> None:
+        self._patch_user_prof = patch(
+            "services.omnichannel.messenger_runtime_service.fetch_messenger_user_profile",
+            return_value={"name": "", "profile_pic": ""},
+        )
+        self._patch_page_prof = patch(
+            "services.omnichannel.messenger_runtime_service.fetch_page_profile",
+            return_value={"name": "", "picture_url": ""},
+        )
+        self._patch_user_prof.start()
+        self._patch_page_prof.start()
+
+    def teardown_method(self) -> None:
+        self._patch_page_prof.stop()
+        self._patch_user_prof.stop()
+
     @patch.object(MessengerRuntimeService, "_get_reply_app", return_value=SimpleNamespace(id="app-1", tenant_id="tenant-1"))
     @patch.object(MessengerRuntimeService, "_generate_reply", return_value="Hello from Dify")
     @patch.object(MessengerRuntimeService, "_send_text_reply")
@@ -344,4 +361,52 @@ class TestMessengerRuntimeService:
         assert sent is True
         mock_send_text.assert_called_once_with("user-1", "Lương: 1,100 yên/giờ", channel_config)
         mock_send_attachment.assert_called_once_with("user-1", "image", "https://example.com/a.jpg", channel_config)
+
+    @patch.object(MessengerRuntimeService, "_record_message")
+    @patch.object(MessengerRuntimeService, "_get_reply_app", return_value=SimpleNamespace(id="app-1", tenant_id="tenant-1"))
+    @patch.object(MessengerRuntimeService, "_generate_reply", return_value="")
+    def test_process_events_comment_prefers_webhook_from_picture(
+        self, _mock_generate: MagicMock, _mock_get_app: MagicMock, mock_record: MagicMock
+    ):
+        channel_config = {
+            "tenant_id": "tenant-1",
+            "app_id": "app-1",
+            "channel_id": "ch-1",
+            "page_id": "page-1",
+            "verify_token": "verify-token",
+            "app_secret": "secret",
+            "page_access_token": "token",
+            "graph_api_version": "v23.0",
+        }
+        MessengerRuntimeService.process_events(
+            channel_id="ch-1",
+            events=[
+                {
+                    "channel": "facebook_messenger",
+                    "channel_id": "ch-1",
+                    "external_account_id": "page-1",
+                    "external_user_id": "fb-user-9",
+                    "text": "Nice",
+                    "interaction_type": "facebook_comment",
+                    "message_id": "c1",
+                    "reply_target_id": "c1",
+                    "raw_event": {
+                        "from": {
+                            "id": "fb-user-9",
+                            "name": "Nam FB",
+                            "picture": {"data": {"url": "https://cdn.example/u.jpg"}},
+                        },
+                    },
+                }
+            ],
+            channel_config=channel_config,
+        )
+        inbound = [
+            c
+            for c in mock_record.call_args_list
+            if c.kwargs.get("direction") == OmniChannelMessageDirection.INBOUND
+        ]
+        assert len(inbound) == 1
+        assert inbound[0].kwargs["participant_display_name"] == "Nam FB"
+        assert inbound[0].kwargs["participant_profile_pic_url"] == "https://cdn.example/u.jpg"
 

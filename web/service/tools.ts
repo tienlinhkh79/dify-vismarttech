@@ -89,9 +89,13 @@ type ChannelItemResponse = {
 export type OmnichannelConversation = {
   id: string
   external_user_id: string
+  participant_display_name?: string | null
+  participant_profile_pic_url?: string | null
   last_message_at?: string
   channel_id: string
   channel_type: string
+  created_at?: string
+  updated_at?: string
 }
 
 export type OmnichannelMessage = {
@@ -104,6 +108,10 @@ export type OmnichannelMessage = {
   content: string
   attachments: Array<Record<string, unknown>>
   metadata: Record<string, unknown>
+  sender_display_name?: string | null
+  sender_profile_pic_url?: string | null
+  channel_actor_name?: string | null
+  channel_actor_picture_url?: string | null
   created_at?: string
 }
 
@@ -259,6 +267,13 @@ export const getZaloChannelOAuthStatus = (channelId: string) => {
       oauth_callback_url: string
     }
   }>(`/workspaces/current/channels/zalo/${channelId}/oauth/status`)
+}
+
+export const refreshOmnichannelConversationParticipant = (channelId: string, conversationId: string) => {
+  return post<OmnichannelItemResponse<OmnichannelConversation>>(
+    `/workspaces/current/channels/${channelId}/conversations/${conversationId}/refresh-participant`,
+    {},
+  )
 }
 
 export const listOmnichannelConversations = (channelId: string, params?: {

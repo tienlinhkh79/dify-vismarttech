@@ -51,6 +51,8 @@ const ChannelsPage = () => {
   const [zaloOAuthChannelId, setZaloOAuthChannelId] = useState<string | null>(null)
   const [zaloOAuthOpen, setZaloOAuthOpen] = useState(false)
   const [isVerifyTokenVisible, setIsVerifyTokenVisible] = useState(false)
+  const [isClientSecretVisible, setIsClientSecretVisible] = useState(false)
+  const [isAccessTokenVisible, setIsAccessTokenVisible] = useState(false)
   const [oauthPages, setOauthPages] = useState<Array<{ id: string, name: string, access_token: string }>>([])
   const [messengerAuthAppId, setMessengerAuthAppId] = useState('')
   const [messengerAuthAppSecret, setMessengerAuthAppSecret] = useState('')
@@ -175,17 +177,22 @@ const ChannelsPage = () => {
     setMessengerAuthAppSecret('')
     setMaskedSecrets({})
     setIsVerifyTokenVisible(false)
+    setIsClientSecretVisible(false)
+    setIsAccessTokenVisible(false)
     setSetupStep(1)
     setIsDrawerOpen(true)
   }
 
   const openEdit = (channel: Channel) => {
+    const maskedVerifyToken = channel.verify_token_masked || ''
+    const maskedClientSecret = channel.client_secret_masked || ''
+    const maskedAccessToken = channel.access_token_masked || ''
     setEditingChannelId(channel.channel_id)
     setFormValue({
       ...channel,
-      verify_token: '',
-      client_secret: '',
-      access_token: '',
+      verify_token: maskedVerifyToken,
+      client_secret: maskedClientSecret,
+      access_token: maskedAccessToken,
       oauth_application_id: channel.oauth_application_id || '',
     })
     setOauthPages(channel.external_resource_id ? [{
@@ -201,11 +208,13 @@ const ChannelsPage = () => {
     }
     setMessengerAuthAppSecret('')
     setMaskedSecrets({
-      verify_token: channel.verify_token_masked,
-      client_secret: channel.client_secret_masked,
-      access_token: channel.access_token_masked,
+      verify_token: maskedVerifyToken,
+      client_secret: maskedClientSecret,
+      access_token: maskedAccessToken,
     })
     setIsVerifyTokenVisible(false)
+    setIsClientSecretVisible(false)
+    setIsAccessTokenVisible(false)
     setSetupStep(3)
     setIsDrawerOpen(true)
   }
@@ -219,6 +228,22 @@ const ChannelsPage = () => {
   )
   const providerSetupConfig = getProviderSetupConfig(formValue.channel_type)
   const providerDocsUrl = providerSetupConfig.docsUrl
+  const editClientSecretHint = useMemo(() => {
+    const base = isZaloProvider
+      ? t('settings.channelsZaloAppSecretHint', { ns: 'common' })
+      : t('settings.channelsGenericClientSecretHint', { ns: 'common' })
+    if (isEditing && maskedSecrets.client_secret)
+      return `${base} (${t('settings.channelsStoredCredentialHint', { ns: 'common' })}: ${maskedSecrets.client_secret})`
+    return base
+  }, [isZaloProvider, isEditing, maskedSecrets.client_secret, t])
+  const editAccessTokenHint = useMemo(() => {
+    const base = isZaloProvider
+      ? t('settings.channelsZaloTokenHint', { ns: 'common' })
+      : t('settings.channelsGenericAccessTokenHint', { ns: 'common' })
+    if (isEditing && maskedSecrets.access_token)
+      return `${base} (${t('settings.channelsStoredCredentialHint', { ns: 'common' })}: ${maskedSecrets.access_token})`
+    return base
+  }, [isZaloProvider, isEditing, maskedSecrets.access_token, t])
   const providerChannelCountMap = channels.reduce<Record<string, number>>((acc: Record<string, number>, channel: Channel) => {
     acc[channel.channel_type] = (acc[channel.channel_type] || 0) + 1
     return acc
@@ -272,11 +297,21 @@ const ChannelsPage = () => {
       toast.error(t('settings.channelsMessengerConnectRequired', { ns: 'common' }))
       return
     }
-    if (providerSetupConfig.requiresClientSecret && !formValue.client_secret?.trim()) {
+    const hasStoredClientSecret = !!(maskedSecrets.client_secret && String(maskedSecrets.client_secret).trim())
+    const hasStoredAccessToken = !!(maskedSecrets.access_token && String(maskedSecrets.access_token).trim())
+    if (
+      providerSetupConfig.requiresClientSecret
+      && !formValue.client_secret?.trim()
+      && !(isEditing && hasStoredClientSecret)
+    ) {
       toast.error(t('settings.channelsProviderSecretRequiredError', { ns: 'common' }))
       return
     }
-    if (providerSetupConfig.requiresAccessToken && !formValue.access_token?.trim()) {
+    if (
+      providerSetupConfig.requiresAccessToken
+      && !formValue.access_token?.trim()
+      && !(isEditing && hasStoredAccessToken)
+    ) {
       toast.error(t('settings.channelsProviderTokenRequiredError', { ns: 'common' }))
       return
     }
@@ -289,12 +324,19 @@ const ChannelsPage = () => {
       api_version: formValue.api_version.trim() || 'v23.0',
       enabled: formValue.enabled,
     }
-    if (formValue.verify_token?.trim())
-      payload.verify_token = formValue.verify_token.trim()
-    if (formValue.client_secret?.trim())
-      payload.client_secret = formValue.client_secret.trim()
-    if (formValue.access_token?.trim())
-      payload.access_token = formValue.access_token.trim()
+    const verifyTokenInput = formValue.verify_token?.trim() || ''
+    const clientSecretInput = formValue.client_secret?.trim() || ''
+    const accessTokenInput = formValue.access_token?.trim() || ''
+    const storedVerifyToken = maskedSecrets.verify_token?.trim() || ''
+    const storedClientSecret = maskedSecrets.client_secret?.trim() || ''
+    const storedAccessToken = maskedSecrets.access_token?.trim() || ''
+
+    if (verifyTokenInput && (!isEditing || verifyTokenInput !== storedVerifyToken))
+      payload.verify_token = verifyTokenInput
+    if (clientSecretInput && (!isEditing || clientSecretInput !== storedClientSecret))
+      payload.client_secret = clientSecretInput
+    if (accessTokenInput && (!isEditing || accessTokenInput !== storedAccessToken))
+      payload.access_token = accessTokenInput
     if (isZaloProvider && (formValue.oauth_application_id || '').trim())
       payload.oauth_application_id = String(formValue.oauth_application_id).trim()
     if (formValue.platform)
@@ -519,12 +561,22 @@ const ChannelsPage = () => {
                       ? t('settings.channelsZaloAppSecretHint', { ns: 'common' })
                       : t('settings.channelsGenericClientSecretHint', { ns: 'common' })}
                   >
-                    <Input
-                      type="password"
-                      value={formValue.client_secret || ''}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormValue((prev: Channel) => ({ ...prev, client_secret: e.target.value }))}
-                      placeholder={t('settings.channelsFieldClientSecret', { ns: 'common' })}
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type={isClientSecretVisible ? 'text' : 'password'}
+                        value={formValue.client_secret || ''}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => setFormValue((prev: Channel) => ({ ...prev, client_secret: e.target.value }))}
+                        placeholder={t('settings.channelsFieldClientSecret', { ns: 'common' })}
+                      />
+                      <Button
+                        size="small"
+                        variant="secondary"
+                        onClick={() => setIsClientSecretVisible(prev => !prev)}
+                      >
+                        {isClientSecretVisible ? <RiEyeOffLine className="size-4" /> : <RiEyeLine className="size-4" />}
+                        <span className="ml-1">{isClientSecretVisible ? t('settings.channelsHideToken', { ns: 'common' }) : t('settings.channelsShowToken', { ns: 'common' })}</span>
+                      </Button>
+                    </div>
                   </FieldGroup>
                   {providerSetupConfig.requiresAccessToken && (
                     <FieldGroup
@@ -533,12 +585,22 @@ const ChannelsPage = () => {
                         ? t('settings.channelsZaloTokenHint', { ns: 'common' })
                         : t('settings.channelsGenericAccessTokenHint', { ns: 'common' })}
                     >
-                      <Input
-                        type="password"
-                        value={formValue.access_token || ''}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setFormValue((prev: Channel) => ({ ...prev, access_token: e.target.value }))}
-                        placeholder={t('settings.channelsFieldAccessToken', { ns: 'common' })}
-                      />
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type={isAccessTokenVisible ? 'text' : 'password'}
+                          value={formValue.access_token || ''}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => setFormValue((prev: Channel) => ({ ...prev, access_token: e.target.value }))}
+                          placeholder={t('settings.channelsFieldAccessToken', { ns: 'common' })}
+                        />
+                        <Button
+                          size="small"
+                          variant="secondary"
+                          onClick={() => setIsAccessTokenVisible(prev => !prev)}
+                        >
+                          {isAccessTokenVisible ? <RiEyeOffLine className="size-4" /> : <RiEyeLine className="size-4" />}
+                          <span className="ml-1">{isAccessTokenVisible ? t('settings.channelsHideToken', { ns: 'common' }) : t('settings.channelsShowToken', { ns: 'common' })}</span>
+                        </Button>
+                      </div>
                     </FieldGroup>
                   )}
                   {providerSetupConfig.showApiVersion && (
@@ -745,30 +807,48 @@ const ChannelsPage = () => {
                   )}
                   <FieldGroup
                     label={t('settings.channelsFieldClientSecret', { ns: 'common' })}
-                    hint={isZaloProvider
-                      ? t('settings.channelsZaloAppSecretHint', { ns: 'common' })
-                      : t('settings.channelsGenericClientSecretHint', { ns: 'common' })}
+                    hint={editClientSecretHint}
                   >
-                    <Input
-                      type="password"
-                      value={formValue.client_secret || ''}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormValue((prev: Channel) => ({ ...prev, client_secret: e.target.value }))}
-                      placeholder={maskedSecrets.client_secret || t('settings.channelsFieldClientSecretOptional', { ns: 'common' })}
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type={isClientSecretVisible ? 'text' : 'password'}
+                        value={formValue.client_secret || ''}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => setFormValue((prev: Channel) => ({ ...prev, client_secret: e.target.value }))}
+                        placeholder={maskedSecrets.client_secret || t('settings.channelsFieldClientSecretOptional', { ns: 'common' })}
+                      />
+                      <Button
+                        size="small"
+                        variant="secondary"
+                        onClick={() => setIsClientSecretVisible(prev => !prev)}
+                      >
+                        {isClientSecretVisible ? <RiEyeOffLine className="size-4" /> : <RiEyeLine className="size-4" />}
+                        <span className="ml-1">{isClientSecretVisible ? t('settings.channelsHideToken', { ns: 'common' }) : t('settings.channelsShowToken', { ns: 'common' })}</span>
+                      </Button>
+                    </div>
                   </FieldGroup>
-                  <FieldGroup
-                    label={t('settings.channelsFieldAccessToken', { ns: 'common' })}
-                    hint={isZaloProvider
-                      ? t('settings.channelsZaloTokenHint', { ns: 'common' })
-                      : t('settings.channelsGenericAccessTokenHint', { ns: 'common' })}
-                  >
-                    <Input
-                      type="password"
-                      value={formValue.access_token || ''}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormValue((prev: Channel) => ({ ...prev, access_token: e.target.value }))}
-                      placeholder={maskedSecrets.access_token || t('settings.channelsFieldAccessTokenOptional', { ns: 'common' })}
-                    />
-                  </FieldGroup>
+                  {!isZaloProvider && (
+                    <FieldGroup
+                      label={t('settings.channelsFieldAccessToken', { ns: 'common' })}
+                      hint={editAccessTokenHint}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type={isAccessTokenVisible ? 'text' : 'password'}
+                          value={formValue.access_token || ''}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => setFormValue((prev: Channel) => ({ ...prev, access_token: e.target.value }))}
+                          placeholder={maskedSecrets.access_token || t('settings.channelsFieldAccessTokenOptional', { ns: 'common' })}
+                        />
+                        <Button
+                          size="small"
+                          variant="secondary"
+                          onClick={() => setIsAccessTokenVisible(prev => !prev)}
+                        >
+                          {isAccessTokenVisible ? <RiEyeOffLine className="size-4" /> : <RiEyeLine className="size-4" />}
+                          <span className="ml-1">{isAccessTokenVisible ? t('settings.channelsHideToken', { ns: 'common' }) : t('settings.channelsShowToken', { ns: 'common' })}</span>
+                        </Button>
+                      </div>
+                    </FieldGroup>
+                  )}
                   {providerSetupConfig.showApiVersion && (
                     <FieldGroup
                       label={t('settings.channelsFieldApiVersion', { ns: 'common' })}
@@ -791,7 +871,7 @@ const ChannelsPage = () => {
                 />
                 {t('settings.channelsEnabledLabel', { ns: 'common' })}
               </label>
-              {isEditing && isZaloProvider && editingChannel && (editingChannel.oauth_status === 'pending_auth' || editingChannel.oauth_status === 'expired') && (
+              {isEditing && isZaloProvider && editingChannel && (
                 <Button
                   variant="secondary"
                   className="w-full"
@@ -800,7 +880,9 @@ const ChannelsPage = () => {
                     setZaloOAuthOpen(true)
                   }}
                 >
-                  {t('settings.channelsZaloReconnectButton', { ns: 'common' })}
+                  {(editingChannel.oauth_status === 'pending_auth' || editingChannel.oauth_status === 'expired')
+                    ? t('settings.channelsZaloReconnectButton', { ns: 'common' })
+                    : t('settings.channelsZaloConnectButton', { ns: 'common' })}
                 </Button>
               )}
               <div className="flex justify-end gap-2 pt-2">

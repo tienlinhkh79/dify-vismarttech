@@ -119,6 +119,24 @@ def create_flask_app_with_configs() -> DifyApp:
     _ = before_request
     _ = add_trace_headers
 
+    # Legacy omnichannel URLs use /api/triggers/...; trigger blueprint is /triggers/...
+    # Nginx may rewrite this, but tunnels that hit the API port directly need WSGI-level fix.
+    _flask_wsgi = dify_app.wsgi_app
+
+    def _wsgi_legacy_api_triggers_path(environ, start_response):
+        path = environ.get("PATH_INFO") or ""
+        new_path: str | None = None
+        if path.startswith("/api/triggers/"):
+            new_path = "/triggers/" + path.removeprefix("/api/triggers/")
+        elif path in ("/api/triggers", "/api/triggers/"):
+            new_path = "/triggers"
+        if new_path is not None:
+            environ = environ.copy()
+            environ["PATH_INFO"] = new_path
+        return _flask_wsgi(environ, start_response)
+
+    dify_app.wsgi_app = _wsgi_legacy_api_triggers_path  # type: ignore[method-assign]
+
     return dify_app
 
 

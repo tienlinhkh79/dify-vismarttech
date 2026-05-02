@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from celery import shared_task
 
+from services.omnichannel.channel_config_service import ChannelConfigService
 from services.omnichannel.messenger_runtime_service import MessengerRuntimeService
 from services.omnichannel.omnichannel_ops_service import OmnichannelOpsService
 from services.omnichannel.zalo_oauth_service import ZaloOAuthService
@@ -30,10 +31,13 @@ def process_meta_webhook_events(
 def process_zalo_webhook_events(
     channel_id: str, events: list[dict], channel_config: dict
 ) -> dict[str, int]:
+    # Reload with OAuth refresh on the worker; webhook HTTP path skips refresh to avoid tunnel timeouts.
+    fresh = ChannelConfigService.get_zalo_channel_config(channel_id, skip_oauth_refresh=False)
+    cfg = fresh if fresh else channel_config
     sent_replies = ZaloRuntimeService.process_events(
         channel_id=channel_id,
         events=events,
-        channel_config=channel_config,
+        channel_config=cfg,
     )
     return {"accepted_events": len(events), "sent_replies": sent_replies}
 

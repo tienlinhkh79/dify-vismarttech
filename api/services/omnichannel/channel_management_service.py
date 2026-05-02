@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any, NotRequired, TypedDict
 
 from sqlalchemy import select
@@ -72,6 +73,15 @@ class ChannelManagementService:
         return enum_type
 
     @classmethod
+    def _secret_fingerprint(cls, get_plain: Callable[[], str]) -> str:
+        """Non-reversible hint so the console can show that a secret is stored (last chars only)."""
+        try:
+            plain = (get_plain() or "").strip()
+        except Exception:
+            return ""
+        return encrypter.obfuscated_token(plain) if plain else ""
+
+    @classmethod
     def _to_masked_dict(cls, config: OmniChannelConfig) -> dict[str, Any]:
         from services.omnichannel.zalo_oauth_service import ZaloOAuthService
 
@@ -89,9 +99,9 @@ class ChannelManagementService:
             "enabled": config.enabled,
             "status": "active" if config.enabled else "inactive",
             "webhook_path": callback_path,
-            "verify_token_masked": encrypter.full_mask_token(),
-            "client_secret_masked": encrypter.full_mask_token(),
-            "access_token_masked": encrypter.full_mask_token(),
+            "verify_token_masked": cls._secret_fingerprint(config.decrypt_verify_token),
+            "client_secret_masked": cls._secret_fingerprint(config.decrypt_app_secret),
+            "access_token_masked": cls._secret_fingerprint(config.decrypt_page_access_token),
             "created_at": config.created_at,
             "updated_at": config.updated_at,
         }

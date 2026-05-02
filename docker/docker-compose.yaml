@@ -501,6 +501,7 @@ x-shared-env: &shared-api-worker-env
   HTTP_REQUEST_MAX_READ_TIMEOUT: ${HTTP_REQUEST_MAX_READ_TIMEOUT:-600}
   HTTP_REQUEST_MAX_WRITE_TIMEOUT: ${HTTP_REQUEST_MAX_WRITE_TIMEOUT:-600}
   WEBHOOK_REQUEST_BODY_MAX_SIZE: ${WEBHOOK_REQUEST_BODY_MAX_SIZE:-10485760}
+  MESSENGER_TRIGGER_ENABLED: ${MESSENGER_TRIGGER_ENABLED:-true}
   RESPECT_XFORWARD_HEADERS_ENABLED: ${RESPECT_XFORWARD_HEADERS_ENABLED:-false}
   SSRF_PROXY_HTTP_URL: ${SSRF_PROXY_HTTP_URL:-http://ssrf_proxy:3128}
   SSRF_PROXY_HTTPS_URL: ${SSRF_PROXY_HTTPS_URL:-http://ssrf_proxy:3128}
@@ -749,6 +750,8 @@ services:
       PLUGIN_MAX_PACKAGE_SIZE: ${PLUGIN_MAX_PACKAGE_SIZE:-52428800}
       PLUGIN_DAEMON_TIMEOUT: ${PLUGIN_DAEMON_TIMEOUT:-600.0}
       INNER_API_KEY_FOR_PLUGIN: ${PLUGIN_DIFY_INNER_API_KEY:-QaHbTe77CtuXmsfyhR7+vRjI/+XbV1AaFy691iy+kGDv2Jvy0/eAh8Y1}
+      ALLOW_REGISTER: "true"
+      ALLOW_CREATE_WORKSPACE: "true"
     depends_on:
       init_permissions:
         condition: service_completed_successfully
@@ -769,6 +772,25 @@ services:
     volumes:
       # Mount the storage directory to the container, for storing user files.
       - ./volumes/app/storage:/app/api/storage
+      - ../api/core/tools/builtin_tool/_position.yaml:/app/api/core/tools/builtin_tool/_position.yaml
+      - ../api/core/tools/builtin_tool/provider.py:/app/api/core/tools/builtin_tool/provider.py
+      - ../api/core/tools/builtin_tool/providers/kiotviet:/app/api/core/tools/builtin_tool/providers/kiotviet
+      - ../api/core/tools/builtin_tool/providers/messenger:/app/api/core/tools/builtin_tool/providers/messenger
+      - ../api/app_factory.py:/app/api/app_factory.py
+      - ../api/controllers/console/__init__.py:/app/api/controllers/console/__init__.py
+      - ../api/controllers/console/workspace/tool_providers.py:/app/api/controllers/console/workspace/tool_providers.py
+      - ../api/controllers/console/workspace/omnichannel.py:/app/api/controllers/console/workspace/omnichannel.py
+      - ../api/controllers/console/workspace/zalo_oauth.py:/app/api/controllers/console/workspace/zalo_oauth.py
+      - ../api/controllers/trigger/messenger.py:/app/api/controllers/trigger/messenger.py
+      - ../api/controllers/trigger/zalo.py:/app/api/controllers/trigger/zalo.py
+      - ../api/controllers/trigger/__init__.py:/app/api/controllers/trigger/__init__.py
+      - ../api/models/trigger.py:/app/api/models/trigger.py
+      - ../api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py
+      - ../api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py:/app/api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py
+      - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
+      - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
+      - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
+      - ../api/services/omnichannel:/app/api/services/omnichannel
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
       interval: 30s
@@ -798,6 +820,8 @@ services:
       SENTRY_PROFILES_SAMPLE_RATE: ${API_SENTRY_PROFILES_SAMPLE_RATE:-1.0}
       PLUGIN_MAX_PACKAGE_SIZE: ${PLUGIN_MAX_PACKAGE_SIZE:-52428800}
       INNER_API_KEY_FOR_PLUGIN: ${PLUGIN_DIFY_INNER_API_KEY:-QaHbTe77CtuXmsfyhR7+vRjI/+XbV1AaFy691iy+kGDv2Jvy0/eAh8Y1}
+      ALLOW_REGISTER: "true"
+      ALLOW_CREATE_WORKSPACE: "true"
     depends_on:
       init_permissions:
         condition: service_completed_successfully
@@ -818,6 +842,19 @@ services:
     volumes:
       # Mount the storage directory to the container, for storing user files.
       - ./volumes/app/storage:/app/api/storage
+      - ../api/core/tools/builtin_tool/_position.yaml:/app/api/core/tools/builtin_tool/_position.yaml
+      - ../api/core/tools/builtin_tool/provider.py:/app/api/core/tools/builtin_tool/provider.py
+      - ../api/core/tools/builtin_tool/providers/kiotviet:/app/api/core/tools/builtin_tool/providers/kiotviet
+      - ../api/core/tools/builtin_tool/providers/messenger:/app/api/core/tools/builtin_tool/providers/messenger
+      - ../api/controllers/console/workspace/tool_providers.py:/app/api/controllers/console/workspace/tool_providers.py
+      - ../api/controllers/trigger/zalo.py:/app/api/controllers/trigger/zalo.py
+      - ../api/models/trigger.py:/app/api/models/trigger.py
+      - ../api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py
+      - ../api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py:/app/api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py
+      - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
+      - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
+      - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
+      - ../api/services/omnichannel:/app/api/services/omnichannel
     healthcheck:
       test: ["CMD", "true"]
       interval: 30s
@@ -842,6 +879,8 @@ services:
       <<: *shared-api-worker-env
       # Startup mode, 'worker_beat' starts the Celery beat for scheduling periodic tasks.
       MODE: beat
+      ALLOW_REGISTER: "true"
+      ALLOW_CREATE_WORKSPACE: "true"
     depends_on:
       init_permissions:
         condition: service_completed_successfully
@@ -859,6 +898,20 @@ services:
         required: false
       redis:
         condition: service_started
+    volumes:
+      - ../api/core/tools/builtin_tool/_position.yaml:/app/api/core/tools/builtin_tool/_position.yaml
+      - ../api/core/tools/builtin_tool/provider.py:/app/api/core/tools/builtin_tool/provider.py
+      - ../api/core/tools/builtin_tool/providers/kiotviet:/app/api/core/tools/builtin_tool/providers/kiotviet
+      - ../api/core/tools/builtin_tool/providers/messenger:/app/api/core/tools/builtin_tool/providers/messenger
+      - ../api/controllers/console/workspace/tool_providers.py:/app/api/controllers/console/workspace/tool_providers.py
+      - ../api/controllers/trigger/zalo.py:/app/api/controllers/trigger/zalo.py
+      - ../api/models/trigger.py:/app/api/models/trigger.py
+      - ../api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py
+      - ../api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py:/app/api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py
+      - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
+      - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
+      - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
+      - ../api/services/omnichannel:/app/api/services/omnichannel
     healthcheck:
       test: ["CMD", "true"]
       interval: 30s
@@ -1169,8 +1222,10 @@ services:
       NGINX_ENABLE_CERTBOT_CHALLENGE: ${NGINX_ENABLE_CERTBOT_CHALLENGE:-false}
       CERTBOT_DOMAIN: ${CERTBOT_DOMAIN:-}
     depends_on:
-      - api
-      - web
+      api:
+        condition: service_healthy
+      web:
+        condition: service_started
     ports:
       - "${EXPOSE_NGINX_PORT:-80}:${NGINX_PORT:-80}"
       - "${EXPOSE_NGINX_SSL_PORT:-443}:${NGINX_SSL_PORT:-443}"

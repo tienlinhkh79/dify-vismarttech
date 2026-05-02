@@ -13,7 +13,6 @@ from typing import Any, TypedDict
 from urllib.parse import urlencode
 from uuid import uuid4
 
-import segno
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
@@ -58,6 +57,13 @@ class ZaloOAuthService:
 
     @classmethod
     def _qr_data_uri(cls, auth_url: str) -> str:
+        try:
+            import segno
+        except ImportError:
+            logger.warning(
+                "segno is not installed; skipping QR image generation and returning auth_url only for Zalo OAuth."
+            )
+            return ""
         buf = io.BytesIO()
         segno.make(auth_url).save(buf, kind="png", scale=6)
         raw = base64.b64encode(buf.getvalue()).decode("ascii")

@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from datetime import UTC, datetime
 import logging
-from typing import Any, TypedDict
+from typing import Any, NotRequired, TypedDict
 
 from sqlalchemy import Select, and_, func, select
 from sqlalchemy.orm import Session
@@ -20,6 +20,9 @@ from models.trigger import (
     OmniChannelSyncJobStatus,
     OmniChannelType,
 )
+from services.omnichannel.channel_config_service import ChannelConfigService
+from services.omnichannel.messenger_graph_profile import extract_graph_picture_url, fetch_messenger_user_profile
+from services.omnichannel.omnichannel_realtime import publish_omnichannel_change
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +38,10 @@ class MessageWritePayload(TypedDict):
     attachments: list[dict[str, Any]]
     metadata: dict[str, Any]
     created_at: datetime | None
+    participant_display_name: NotRequired[str | None]
+    participant_profile_pic_url: NotRequired[str | None]
+    channel_actor_name: NotRequired[str | None]
+    channel_actor_picture_url: NotRequired[str | None]
 
 
 class OmnichannelOpsService:
@@ -119,6 +126,8 @@ class OmnichannelOpsService:
                 {
                     "id": item.id,
                     "external_user_id": item.external_user_id,
+                    "participant_display_name": item.participant_display_name,
+                    "participant_profile_pic_url": item.participant_profile_pic_url,
                     "last_message_at": item.last_message_at,
                     "channel_id": item.channel_id,
                     "channel_type": item.channel_type.value,
@@ -130,6 +139,92 @@ class OmnichannelOpsService:
             "has_more": has_more,
             "next_cursor": next_cursor,
         }
+
+    @classmethod
+    def refresh_messenger_conversation_participant(
+        cls,
+        *,
+        tenant_id: str,
+        channel_id: str,
+        conversation_id: str,
+    ) -> dict[str, Any]:
+        """Re-fetch Messenger User Profile (PSID) from Graph and persist on the conversation row."""
+        messenger_cfg = ChannelConfigService.get_messenger_channel_config(channel_id)
+        if not messenger_cfg or messenger_cfg["tenant_id"] != tenant_id:
+            raise ValueError("Channel not found")
+
+        with Session(db.engine, expire_on_commit=False) as session:
+            config = session.scalar(
+                select(OmniChannelConfig).where(
+                    OmniChannelConfig.tenant_id == tenant_id,
+                    OmniChannelConfig.channel_id == channel_id,
+                )
+            )
+            if not config:
+                raise ValueError("Channel not found")
+            if config.channel_type != OmniChannelType.FACEBOOK_MESSENGER:
+                raise ValueError(
+                    "Participant refresh is only supported for facebook_messenger channels"
+                )
+            conv = session.scalar(
+                select(OmniChannelConversation).where(
+                    OmniChannelConversation.tenant_id == tenant_id,
+                    OmniChannelConversation.channel_id == channel_id,
+                    OmniChannelConversation.id == conversation_id,
+                )
+            )
+            if not conv:
+                raise ValueError("Conversation not found")
+            psid = conv.external_user_id
+
+        prof = fetch_messenger_user_profile(
+            psid=psid,
+            access_token=messenger_cfg["page_access_token"],
+            graph_version=messenger_cfg["graph_api_version"],
+        )
+        pname = str(prof.get("name") or "").strip()
+        purl = str(prof.get("profile_pic") or "").strip()
+        if not pname and not purl:
+            logger.info(
+                "Messenger participant refresh: Graph returned no name or picture conversation_id=%s psid=%s",
+                conversation_id,
+                psid,
+            )
+
+        with Session(db.engine, expire_on_commit=False) as session:
+            conv = session.scalar(
+                select(OmniChannelConversation).where(
+                    OmniChannelConversation.tenant_id == tenant_id,
+                    OmniChannelConversation.channel_id == channel_id,
+                    OmniChannelConversation.id == conversation_id,
+                )
+            )
+            if not conv:
+                raise ValueError("Conversation not found")
+            if pname:
+                conv.participant_display_name = pname
+            if purl:
+                conv.participant_profile_pic_url = purl
+            session.commit()
+            session.refresh(conv)
+            out = {
+                "id": conv.id,
+                "external_user_id": conv.external_user_id,
+                "participant_display_name": conv.participant_display_name,
+                "participant_profile_pic_url": conv.participant_profile_pic_url,
+                "last_message_at": conv.last_message_at,
+                "channel_id": conv.channel_id,
+                "channel_type": conv.channel_type.value,
+                "created_at": conv.created_at,
+                "updated_at": conv.updated_at,
+            }
+        publish_omnichannel_change(
+            tenant_id=tenant_id,
+            channel_id=channel_id,
+            conversation_id=str(out["id"]),
+            kind="conversations",
+        )
+        return out
 
     @classmethod
     def list_messages(
@@ -176,6 +271,10 @@ class OmnichannelOpsService:
                     "content": item.content,
                     "attachments": item.attachments,
                     "metadata": item.message_metadata,
+                    "sender_display_name": (item.message_metadata or {}).get("sender_display_name"),
+                    "sender_profile_pic_url": (item.message_metadata or {}).get("sender_profile_pic_url"),
+                    "channel_actor_name": (item.message_metadata or {}).get("channel_actor_name"),
+                    "channel_actor_picture_url": (item.message_metadata or {}).get("channel_actor_picture_url"),
                     "created_at": item.created_at,
                 }
                 for item in data
@@ -232,6 +331,21 @@ class OmnichannelOpsService:
     @classmethod
     def record_message(cls, payload: MessageWritePayload) -> dict[str, Any]:
         created_at = cls._normalize_dt(payload.get("created_at")) or datetime.utcnow()
+        metadata = dict(payload.get("metadata") or {})
+        pname = str(payload.get("participant_display_name") or "").strip()
+        purl = str(payload.get("participant_profile_pic_url") or "").strip()
+        caname = str(payload.get("channel_actor_name") or "").strip()
+        caurl = str(payload.get("channel_actor_picture_url") or "").strip()
+        if pname:
+            metadata["sender_display_name"] = pname
+        if purl:
+            metadata["sender_profile_pic_url"] = purl
+        if caname:
+            metadata["channel_actor_name"] = caname
+        if caurl:
+            metadata["channel_actor_picture_url"] = caurl
+
+        direction = payload["direction"]
         with Session(db.engine, expire_on_commit=False) as session:
             channel_type = cls._get_channel_type(session, payload["tenant_id"], payload["channel_id"])
             conversation = cls._get_or_create_conversation(
@@ -242,6 +356,11 @@ class OmnichannelOpsService:
                 external_user_id=payload["external_user_id"],
                 last_message_at=created_at,
             )
+            if direction == OmniChannelMessageDirection.INBOUND:
+                if pname:
+                    conversation.participant_display_name = pname
+                if purl:
+                    conversation.participant_profile_pic_url = purl
             message = OmniChannelMessage(
                 tenant_id=payload["tenant_id"],
                 channel_id=payload["channel_id"],
@@ -253,13 +372,22 @@ class OmnichannelOpsService:
                 source=payload["source"],
                 content=payload["content"],
                 attachments=payload["attachments"],
-                message_metadata=payload["metadata"],
+                message_metadata=metadata,
             )
             message.created_at = created_at
             session.add(message)
             session.commit()
             session.refresh(message)
-        return {"id": message.id, "conversation_id": message.conversation_id}
+            conv_row_id = str(message.conversation_id)
+            msg_row_id = str(message.id)
+        publish_omnichannel_change(
+            tenant_id=payload["tenant_id"],
+            channel_id=payload["channel_id"],
+            conversation_id=conv_row_id,
+            message_id=msg_row_id,
+            kind="messages",
+        )
+        return {"id": msg_row_id, "conversation_id": conv_row_id}
 
     @classmethod
     def create_sync_job(
@@ -357,6 +485,19 @@ class OmnichannelOpsService:
                 if config.channel_type not in (OmniChannelType.FACEBOOK_MESSENGER, OmniChannelType.INSTAGRAM_DM):
                     raise ValueError(f"Sync history is not implemented for channel type: {config.channel_type.value}")
 
+                # Full-window sync (no since/until): refresh PSID display name + profile photo from User Profile API
+                # so the conversation list and UI fallbacks match Meta before pulling conversation history.
+                if (
+                    config.channel_type == OmniChannelType.FACEBOOK_MESSENGER
+                    and row.since_at is None
+                    and row.until_at is None
+                ):
+                    cls._refresh_all_messenger_participant_profiles(
+                        session=session,
+                        tenant_id=tenant_id,
+                        channel_id=channel_id,
+                    )
+
                 synced_messages, discovered_messages = cls._sync_meta_history(
                     session=session,
                     config=config,
@@ -414,6 +555,8 @@ class OmnichannelOpsService:
         content: str,
         created_at: datetime,
         metadata: dict[str, Any],
+        conversation_hint_name: str | None = None,
+        conversation_hint_pic: str | None = None,
     ) -> bool:
         existed = session.scalar(
             select(OmniChannelMessage.id).where(
@@ -444,6 +587,12 @@ class OmnichannelOpsService:
         if conversation:
             if not conversation.last_message_at or conversation.last_message_at < created_at:
                 conversation.last_message_at = created_at
+            hint_n = (conversation_hint_name or "").strip()
+            hint_p = (conversation_hint_pic or "").strip()
+            if hint_n and not (conversation.participant_display_name or "").strip():
+                conversation.participant_display_name = hint_n
+            if hint_p and not (conversation.participant_profile_pic_url or "").strip():
+                conversation.participant_profile_pic_url = hint_p
         else:
             conversation = OmniChannelConversation(
                 tenant_id=tenant_id,
@@ -451,6 +600,8 @@ class OmnichannelOpsService:
                 channel_type=channel_type,
                 external_user_id=external_user_id,
                 last_message_at=created_at,
+                participant_display_name=(conversation_hint_name or "").strip() or None,
+                participant_profile_pic_url=(conversation_hint_pic or "").strip() or None,
             )
             session.add(conversation)
             session.flush()
@@ -474,6 +625,50 @@ class OmnichannelOpsService:
         return True
 
     @classmethod
+    def _refresh_all_messenger_participant_profiles(
+        cls,
+        *,
+        session: Session,
+        tenant_id: str,
+        channel_id: str,
+    ) -> None:
+        """Re-resolve every PSID row from Graph (name + profile picture) for this Messenger channel."""
+        messenger_cfg = ChannelConfigService.get_messenger_channel_config(channel_id)
+        if not messenger_cfg or messenger_cfg["tenant_id"] != tenant_id:
+            logger.warning(
+                "Skip messenger participant bulk refresh: missing or mismatched config tenant_id=%s channel_id=%s",
+                tenant_id,
+                channel_id,
+            )
+            return
+        convs = list(
+            session.scalars(
+                select(OmniChannelConversation).where(
+                    OmniChannelConversation.tenant_id == tenant_id,
+                    OmniChannelConversation.channel_id == channel_id,
+                )
+            ).all()
+        )
+        for conv in convs:
+            prof = fetch_messenger_user_profile(
+                psid=conv.external_user_id,
+                access_token=messenger_cfg["page_access_token"],
+                graph_version=messenger_cfg["graph_api_version"],
+            )
+            pname = str(prof.get("name") or "").strip()
+            purl = str(prof.get("profile_pic") or "").strip()
+            if pname:
+                conv.participant_display_name = pname
+            if purl:
+                conv.participant_profile_pic_url = purl
+        session.commit()
+        publish_omnichannel_change(
+            tenant_id=tenant_id,
+            channel_id=channel_id,
+            kind="conversations",
+        )
+
+    @classmethod
     def _sync_meta_history(
         cls,
         *,
@@ -492,7 +687,7 @@ class OmnichannelOpsService:
         conversations_url = f"{base_url}/{page_id}/conversations"
         conversations_params: dict[str, Any] = {
             "platform": platform,
-            "fields": "id,updated_time,participants.limit(10){id,name}",
+            "fields": "id,updated_time,participants.limit(10){id,name,picture}",
             "limit": 25,
             "access_token": page_access_token,
         }
@@ -514,10 +709,20 @@ class OmnichannelOpsService:
 
                 participants = (conversation.get("participants") or {}).get("data") or []
                 participant_ids = [str(item.get("id") or "").strip() for item in participants if item.get("id")]
+                customer_display_name = ""
+                customer_pic_url = ""
+                for p in participants:
+                    if not isinstance(p, dict):
+                        continue
+                    pid = str(p.get("id") or "").strip()
+                    if pid and pid != page_id:
+                        customer_display_name = str(p.get("name") or "").strip()
+                        customer_pic_url = extract_graph_picture_url(p.get("picture"))
+                        break
 
                 messages_url = f"{base_url}/{conversation_id}/messages"
                 messages_params: dict[str, Any] = {
-                    "fields": "id,message,from,created_time",
+                    "fields": "id,message,from{id,name,picture},created_time",
                     "limit": cls._GRAPH_PAGE_LIMIT,
                     "access_token": page_access_token,
                 }
@@ -543,7 +748,9 @@ class OmnichannelOpsService:
 
                         discovered_messages += 1
                         from_obj = message.get("from") or {}
-                        from_id = str(from_obj.get("id") or "").strip()
+                        from_id = str(from_obj.get("id") or "").strip() if isinstance(from_obj, dict) else ""
+                        from_name = str(from_obj.get("name") or "").strip() if isinstance(from_obj, dict) else ""
+                        from_pic = extract_graph_picture_url(from_obj.get("picture")) if isinstance(from_obj, dict) else ""
 
                         direction = (
                             OmniChannelMessageDirection.OUTBOUND if from_id and from_id == page_id else OmniChannelMessageDirection.INBOUND
@@ -559,6 +766,18 @@ class OmnichannelOpsService:
                         if not external_user_id:
                             continue
 
+                        msg_meta: dict[str, Any] = {"conversation_id": conversation_id, "graph_sync": True}
+                        if direction == OmniChannelMessageDirection.INBOUND:
+                            if from_name:
+                                msg_meta["sender_display_name"] = from_name
+                            if from_pic:
+                                msg_meta["sender_profile_pic_url"] = from_pic
+                        else:
+                            if from_name:
+                                msg_meta["channel_actor_name"] = from_name
+                            if from_pic:
+                                msg_meta["channel_actor_picture_url"] = from_pic
+
                         inserted = cls._upsert_sync_message(
                             session=session,
                             tenant_id=config.tenant_id,
@@ -568,7 +787,9 @@ class OmnichannelOpsService:
                             direction=direction,
                             content=str(message.get("message") or ""),
                             created_at=created_at,
-                            metadata={"conversation_id": conversation_id},
+                            metadata=msg_meta,
+                            conversation_hint_name=customer_display_name or None,
+                            conversation_hint_pic=customer_pic_url or None,
                         )
                         if inserted:
                             synced_messages += 1
@@ -582,6 +803,11 @@ class OmnichannelOpsService:
             next_conversations_params = None if paging_next_conversations else None
 
         session.commit()
+        publish_omnichannel_change(
+            tenant_id=config.tenant_id,
+            channel_id=config.channel_id,
+            kind="history_sync",
+        )
         return synced_messages, discovered_messages
 
     @classmethod

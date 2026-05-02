@@ -7,7 +7,7 @@ import json
 import logging
 import re
 import time
-from typing import Any, Literal, NotRequired, TypedDict
+from typing import Any, Literal, NotRequired, TypedDict, cast
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -19,7 +19,12 @@ from extensions.ext_redis import redis_client
 from models.model import App, AppMode
 from services.app_generate_service import AppGenerateService
 from services.end_user_service import EndUserService
-from services.omnichannel.omnichannel_ops_service import OmnichannelOpsService
+from services.omnichannel.messenger_graph_profile import (
+    extract_graph_picture_url,
+    fetch_messenger_user_profile,
+    fetch_page_profile,
+)
+from services.omnichannel.omnichannel_ops_service import MessageWritePayload, OmnichannelOpsService
 from services.omnichannel.messenger_service import OmniChannelIncomingEvent
 from models.trigger import OmniChannelMessageDirection, OmniChannelMessageSource
 
@@ -265,22 +270,33 @@ class MessengerRuntimeService:
         direction: OmniChannelMessageDirection,
         content: str,
         source: OmniChannelMessageSource = OmniChannelMessageSource.WEBHOOK,
+        participant_display_name: str | None = None,
+        participant_profile_pic_url: str | None = None,
+        channel_actor_name: str | None = None,
+        channel_actor_picture_url: str | None = None,
     ) -> None:
         try:
-            OmnichannelOpsService.record_message(
-                {
-                    "tenant_id": app.tenant_id,
-                    "channel_id": channel_id,
-                    "external_user_id": event["external_user_id"],
-                    "direction": direction,
-                    "source": source,
-                    "content": content,
-                    "external_message_id": event.get("message_id"),
-                    "attachments": list(event.get("attachments") or []),
-                    "metadata": {"raw_event": event.get("raw_event") or {}},
-                    "created_at": None,
-                }
-            )
+            payload: dict[str, Any] = {
+                "tenant_id": app.tenant_id,
+                "channel_id": channel_id,
+                "external_user_id": event["external_user_id"],
+                "direction": direction,
+                "source": source,
+                "content": content,
+                "external_message_id": event.get("message_id"),
+                "attachments": list(event.get("attachments") or []),
+                "metadata": {"raw_event": event.get("raw_event") or {}},
+                "created_at": None,
+            }
+            if participant_display_name:
+                payload["participant_display_name"] = participant_display_name
+            if participant_profile_pic_url:
+                payload["participant_profile_pic_url"] = participant_profile_pic_url
+            if channel_actor_name:
+                payload["channel_actor_name"] = channel_actor_name
+            if channel_actor_picture_url:
+                payload["channel_actor_picture_url"] = channel_actor_picture_url
+            OmnichannelOpsService.record_message(cast(MessageWritePayload, payload))
         except Exception:
             logger.debug("Failed to persist omnichannel message channel=%s", channel_id, exc_info=True)
 
@@ -547,6 +563,43 @@ class MessengerRuntimeService:
 
         app = cls._get_reply_app(channel_config["app_id"])
         sent_count = 0
+        page_profile = {"name": "", "picture_url": ""}
+        if events:
+            page_id = str(events[0].get("external_account_id") or "").strip()
+            if page_id:
+                page_profile = fetch_page_profile(
+                    page_id=page_id,
+                    access_token=channel_config["page_access_token"],
+                    graph_version=channel_config["graph_api_version"],
+                )
+        user_profile_cache: dict[str, tuple[str, str]] = {}
+
+        def user_profile_for(psid: str) -> tuple[str, str]:
+            if psid in user_profile_cache:
+                return user_profile_cache[psid]
+            prof = fetch_messenger_user_profile(
+                psid=psid,
+                access_token=channel_config["page_access_token"],
+                graph_version=channel_config["graph_api_version"],
+            )
+            user_profile_cache[psid] = (str(prof.get("name") or ""), str(prof.get("profile_pic") or ""))
+            return user_profile_cache[psid]
+
+        def sender_display_for_event(ev: OmniChannelIncomingEvent, psid: str) -> tuple[str, str]:
+            """Prefer Page-feed comment webhook `from` (name/picture); else Graph User Profile for PSID."""
+            wname, wpic = "", ""
+            if str(ev.get("interaction_type") or "") == "facebook_comment":
+                raw = ev.get("raw_event") or {}
+                if isinstance(raw, dict):
+                    from_obj = raw.get("from")
+                    if isinstance(from_obj, dict):
+                        wname = str(from_obj.get("name") or "").strip()
+                        wpic = str(from_obj.get("profile_pic") or "").strip()
+                        if not wpic:
+                            wpic = extract_graph_picture_url(from_obj.get("picture"))
+            gname, gpic = user_profile_for(psid)
+            return (wname or gname), (wpic or gpic)
+
         for event in events:
             recipient_psid = event["external_user_id"]
             interaction_type = str(event.get("interaction_type") or "messenger_message")
@@ -571,6 +624,7 @@ class MessengerRuntimeService:
                         action="typing_on",
                         channel_config=channel_config,
                     )
+                uname, upic = sender_display_for_event(event, recipient_psid)
                 cls._record_message(
                     app=app,
                     channel_id=channel_id,
@@ -578,6 +632,8 @@ class MessengerRuntimeService:
                     direction=OmniChannelMessageDirection.INBOUND,
                     source=OmniChannelMessageSource.WEBHOOK,
                     content=str(event.get("text") or "").strip(),
+                    participant_display_name=uname or None,
+                    participant_profile_pic_url=upic or None,
                 )
                 reply_text = cls._generate_reply(app, channel_id, event)
                 if not reply_text:
@@ -616,6 +672,8 @@ class MessengerRuntimeService:
                         direction=OmniChannelMessageDirection.OUTBOUND,
                         source=OmniChannelMessageSource.SYSTEM,
                         content=reply_text.strip(),
+                        channel_actor_name=str(page_profile.get("name") or "").strip() or None,
+                        channel_actor_picture_url=str(page_profile.get("picture_url") or "").strip() or None,
                     )
                     sent_count += 1
             except Exception:

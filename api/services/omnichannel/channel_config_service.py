@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TypedDict
 
 from sqlalchemy import select
@@ -10,6 +11,8 @@ from sqlalchemy.orm import Session
 from extensions.ext_database import db
 from models.trigger import OmniChannelConfig, OmniChannelType
 from services.omnichannel.zalo_oauth_service import ZaloOAuthService
+
+logger = logging.getLogger(__name__)
 
 
 class MessengerChannelConfig(TypedDict):
@@ -74,30 +77,36 @@ class ChannelConfigService:
         return ChannelConfigService.get_meta_channel_config(channel_id)
 
     @staticmethod
-    def get_zalo_channel_config(channel_id: str) -> ZaloChannelConfig | None:
-        ZaloOAuthService.refresh_tokens_for_channel(channel_id, leeway_seconds=3600)
-        with Session(db.engine, expire_on_commit=False) as session:
-            config = session.scalar(
-                select(OmniChannelConfig).where(
-                    OmniChannelConfig.channel_id == channel_id,
-                    OmniChannelConfig.channel_type == OmniChannelType.ZALO_OA,
-                    OmniChannelConfig.enabled.is_(True),
+    def get_zalo_channel_config(channel_id: str, *, skip_oauth_refresh: bool = False) -> ZaloChannelConfig | None:
+        try:
+            # Webhook URL checks must answer quickly; token refresh calls Zalo and can cause 408 via tunnel.
+            if not skip_oauth_refresh:
+                ZaloOAuthService.refresh_tokens_for_channel(channel_id, leeway_seconds=3600)
+            with Session(db.engine, expire_on_commit=False) as session:
+                config = session.scalar(
+                    select(OmniChannelConfig).where(
+                        OmniChannelConfig.channel_id == channel_id,
+                        OmniChannelConfig.channel_type == OmniChannelType.ZALO_OA,
+                        OmniChannelConfig.enabled.is_(True),
+                    )
                 )
-            )
-        if not config:
-            return None
+            if not config:
+                return None
 
-        access_token = config.decrypt_page_access_token().strip()
-        if not access_token:
-            return None
+            access_token = config.decrypt_page_access_token().strip()
+            if not access_token:
+                return None
 
-        return {
-            "tenant_id": config.tenant_id,
-            "app_id": config.app_id,
-            "channel_id": config.channel_id,
-            "oa_id": config.page_id,
-            "verify_token": config.decrypt_verify_token(),
-            "app_secret": config.decrypt_app_secret(),
-            "oa_access_token": access_token,
-        }
+            return {
+                "tenant_id": config.tenant_id,
+                "app_id": config.app_id,
+                "channel_id": config.channel_id,
+                "oa_id": config.page_id,
+                "verify_token": config.decrypt_verify_token(),
+                "app_secret": config.decrypt_app_secret(),
+                "oa_access_token": access_token,
+            }
+        except Exception:
+            logger.exception("Failed to load Zalo channel config channel_id=%s", channel_id)
+            return None
 
