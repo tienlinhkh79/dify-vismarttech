@@ -25,7 +25,7 @@ class TestVerifyMessengerWebhook:
     @patch.object(module.dify_config, "MESSENGER_TRIGGER_ENABLED", True)
     @patch.object(
         module.ChannelConfigService,
-        "get_messenger_channel_config",
+        "get_meta_channel_config",
         return_value={"verify_token": "token-1"},
     )
     @patch.object(module.MessengerService, "verify_webhook_handshake", return_value="challenge-ok")
@@ -51,7 +51,7 @@ class TestVerifyMessengerWebhook:
 
 
     @patch.object(module.dify_config, "MESSENGER_TRIGGER_ENABLED", True)
-    @patch.object(module.ChannelConfigService, "get_messenger_channel_config", return_value=None)
+    @patch.object(module.ChannelConfigService, "get_meta_channel_config", return_value=None)
     def test_returns_404_when_channel_missing(self, _mock_channel):
         module.request = MockRequest()
         response, status = module.verify_messenger_webhook("channel-1")
@@ -63,12 +63,12 @@ class TestIngestMessengerWebhook:
     @patch.object(module.dify_config, "MESSENGER_TRIGGER_ENABLED", True)
     @patch.object(
         module.ChannelConfigService,
-        "get_messenger_channel_config",
+        "get_meta_channel_config",
         return_value={"app_secret": "secret", "app_id": "app-1", "page_access_token": "token", "graph_api_version": "v23.0"},
     )
     @patch.object(module.MessengerService, "verify_payload_signature", return_value=True)
     @patch.object(module.MessengerService, "parse_message_events", return_value=[{"id": "evt-1"}, {"id": "evt-2"}])
-    @patch.object(module.MessengerRuntimeService, "process_events", return_value=2)
+    @patch.object(module.process_meta_webhook_events, "delay", return_value=None)
     def test_accepts_valid_webhook(self, _mock_process, _mock_parse, _mock_signature, _mock_channel):
         module.request = MockRequest(
             headers={"X-Hub-Signature-256": "sha256=abc"},
@@ -80,12 +80,12 @@ class TestIngestMessengerWebhook:
         assert status == 200
         assert response["ok"] is True
         assert response["accepted_events"] == 2
-        assert response["sent_replies"] == 2
+        assert response["queued_async"] is True
 
     @patch.object(module.dify_config, "MESSENGER_TRIGGER_ENABLED", True)
     @patch.object(
         module.ChannelConfigService,
-        "get_messenger_channel_config",
+        "get_meta_channel_config",
         return_value={"app_secret": "secret", "app_id": "app-1", "page_access_token": "token", "graph_api_version": "v23.0"},
     )
     @patch.object(module.MessengerService, "verify_payload_signature", return_value=False)
@@ -101,7 +101,7 @@ class TestIngestMessengerWebhook:
         assert response["error"] == "Invalid webhook signature"
 
     @patch.object(module.dify_config, "MESSENGER_TRIGGER_ENABLED", True)
-    @patch.object(module.ChannelConfigService, "get_messenger_channel_config", return_value=None)
+    @patch.object(module.ChannelConfigService, "get_meta_channel_config", return_value=None)
     def test_returns_404_when_channel_missing(self, _mock_channel):
         module.request = MockRequest()
         response, status = module.ingest_messenger_webhook("channel-1")

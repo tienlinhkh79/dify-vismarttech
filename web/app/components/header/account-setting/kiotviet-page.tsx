@@ -135,11 +135,11 @@ const KiotVietPage = () => {
   const saveConnection = async () => {
     const nextConnectionId = sanitizeConnectionId(formValue.connection_id || formValue.name)
     if (!nextConnectionId || !formValue.name.trim() || !formValue.client_id.trim() || !formValue.retailer_name.trim()) {
-      toast.error(t('errorMsg.fieldRequired', { ns: 'common', field: 'required fields' }))
+      toast.error(t('settings.kiotvietErrorRequiredFields', { ns: 'common' }))
       return
     }
     if (!editingConnection && !String(formValue.client_secret || '').trim()) {
-      toast.error(t('errorMsg.fieldRequired', { ns: 'common', field: 'client_secret' }))
+      toast.error(t('settings.kiotvietErrorClientSecretRequired', { ns: 'common' }))
       return
     }
 
@@ -199,7 +199,7 @@ const KiotVietPage = () => {
           size="small"
           onClick={openCreate}
         >
-          {t('settings.channelsAdd', { ns: 'common' })}
+          {t('settings.kiotvietAdd', { ns: 'common' })}
         </Button>
       </div>
       {!connections.length && (
@@ -242,28 +242,30 @@ const KiotVietPage = () => {
                 disabled={!!editingConnection}
                 value={formValue.connection_id}
                 onChange={e => setFormValue(prev => ({ ...prev, connection_id: e.target.value }))}
-                placeholder="connection_id"
+                placeholder={t('settings.kiotvietPlaceholderConnectionId', { ns: 'common' })}
               />
               <Input
                 value={formValue.name}
                 onChange={e => setFormValue(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="connection name"
+                placeholder={t('settings.kiotvietPlaceholderConnectionName', { ns: 'common' })}
               />
               <Input
                 value={formValue.client_id}
                 onChange={e => setFormValue(prev => ({ ...prev, client_id: e.target.value }))}
-                placeholder="client id"
+                placeholder={t('settings.kiotvietPlaceholderClientId', { ns: 'common' })}
               />
               <Input
                 type="password"
                 value={formValue.client_secret}
                 onChange={e => setFormValue(prev => ({ ...prev, client_secret: e.target.value }))}
-                placeholder={editingConnection ? 'client secret (optional to keep current)' : 'client secret'}
+                placeholder={editingConnection
+                  ? t('settings.kiotvietPlaceholderClientSecretOptional', { ns: 'common' })
+                  : t('settings.kiotvietPlaceholderClientSecret', { ns: 'common' })}
               />
               <Input
                 value={formValue.retailer_name}
                 onChange={e => setFormValue(prev => ({ ...prev, retailer_name: e.target.value }))}
-                placeholder="retailer name"
+                placeholder={t('settings.kiotvietPlaceholderRetailerName', { ns: 'common' })}
               />
               <label className="flex items-center gap-2 text-sm text-text-secondary">
                 <input

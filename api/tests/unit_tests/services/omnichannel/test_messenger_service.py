@@ -99,3 +99,35 @@ class TestParseMessageEvents:
         assert events[0]["text"] == ""
         assert events[0]["attachments"] == [{"type": "image", "url": "https://example.com/a.jpg"}]
 
+    def test_facebook_comment_events_are_normalized(self):
+        payload = {
+            "entry": [
+                {
+                    "id": "page-1",
+                    "changes": [
+                        {
+                            "field": "feed",
+                            "value": {
+                                "item": "comment",
+                                "comment_id": "comment-100",
+                                "message": "Can you share the price?",
+                                "from": {"id": "user-99"},
+                            },
+                        }
+                    ],
+                }
+            ]
+        }
+
+        events = MessengerService.parse_message_events(channel_id="channel-1", payload=payload)
+
+        assert len(events) == 1
+        assert events[0]["channel"] == "facebook_messenger"
+        assert events[0]["channel_id"] == "channel-1"
+        assert events[0]["external_account_id"] == "page-1"
+        assert events[0]["external_user_id"] == "user-99"
+        assert events[0]["interaction_type"] == "facebook_comment"
+        assert events[0]["message_id"] == "comment-100"
+        assert events[0]["reply_target_id"] == "comment-100"
+        assert events[0]["text"] == "Can you share the price?"
+

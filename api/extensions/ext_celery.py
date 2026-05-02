@@ -204,6 +204,13 @@ def init_app(app: DifyApp) -> Celery:
             "schedule": timedelta(minutes=dify_config.API_TOKEN_LAST_USED_UPDATE_INTERVAL),
         }
 
+    if dify_config.ENABLE_ZALO_OA_TOKEN_REFRESH_TASK:
+        imports.append("tasks.omnichannel_tasks")
+        beat_schedule["refresh_zalo_oa_tokens"] = {
+            "task": "tasks.omnichannel_tasks.refresh_zalo_oa_tokens_task",
+            "schedule": timedelta(minutes=dify_config.ZALO_OA_TOKEN_REFRESH_INTERVAL_MINUTES),
+        }
+
     if dify_config.ENTERPRISE_ENABLED and dify_config.ENTERPRISE_TELEMETRY_ENABLED:
         imports.append("tasks.enterprise_telemetry_task")
     celery_app.conf.update(beat_schedule=beat_schedule, imports=imports)

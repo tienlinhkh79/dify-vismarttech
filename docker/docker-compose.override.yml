@@ -1,5 +1,8 @@
 services:
   api:
+    environment:
+      ALLOW_REGISTER: "true"
+      ALLOW_CREATE_WORKSPACE: "true"
     volumes:
       - ../api/core/tools/builtin_tool/_position.yaml:/app/api/core/tools/builtin_tool/_position.yaml
       - ../api/core/tools/builtin_tool/provider.py:/app/api/core/tools/builtin_tool/provider.py
@@ -9,32 +12,44 @@ services:
       - ../api/controllers/console/workspace/tool_providers.py:/app/api/controllers/console/workspace/tool_providers.py
       - ../api/controllers/console/workspace/omnichannel.py:/app/api/controllers/console/workspace/omnichannel.py
       - ../api/controllers/trigger/messenger.py:/app/api/controllers/trigger/messenger.py
+      - ../api/controllers/trigger/zalo.py:/app/api/controllers/trigger/zalo.py
       - ../api/controllers/trigger/__init__.py:/app/api/controllers/trigger/__init__.py
       - ../api/models/trigger.py:/app/api/models/trigger.py
       - ../api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
+      - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
       - ../api/services/omnichannel:/app/api/services/omnichannel
 
   worker:
+    environment:
+      ALLOW_REGISTER: "true"
+      ALLOW_CREATE_WORKSPACE: "true"
     volumes:
       - ../api/core/tools/builtin_tool/_position.yaml:/app/api/core/tools/builtin_tool/_position.yaml
       - ../api/core/tools/builtin_tool/provider.py:/app/api/core/tools/builtin_tool/provider.py
       - ../api/core/tools/builtin_tool/providers/kiotviet:/app/api/core/tools/builtin_tool/providers/kiotviet
       - ../api/core/tools/builtin_tool/providers/messenger:/app/api/core/tools/builtin_tool/providers/messenger
       - ../api/controllers/console/workspace/tool_providers.py:/app/api/controllers/console/workspace/tool_providers.py
+      - ../api/controllers/trigger/zalo.py:/app/api/controllers/trigger/zalo.py
       - ../api/models/trigger.py:/app/api/models/trigger.py
       - ../api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
+      - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
       - ../api/services/omnichannel:/app/api/services/omnichannel
 
   worker_beat:
+    environment:
+      ALLOW_REGISTER: "true"
+      ALLOW_CREATE_WORKSPACE: "true"
     volumes:
       - ../api/core/tools/builtin_tool/_position.yaml:/app/api/core/tools/builtin_tool/_position.yaml
       - ../api/core/tools/builtin_tool/provider.py:/app/api/core/tools/builtin_tool/provider.py
       - ../api/core/tools/builtin_tool/providers/kiotviet:/app/api/core/tools/builtin_tool/providers/kiotviet
       - ../api/core/tools/builtin_tool/providers/messenger:/app/api/core/tools/builtin_tool/providers/messenger
       - ../api/controllers/console/workspace/tool_providers.py:/app/api/controllers/console/workspace/tool_providers.py
+      - ../api/controllers/trigger/zalo.py:/app/api/controllers/trigger/zalo.py
       - ../api/models/trigger.py:/app/api/models/trigger.py
       - ../api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
+      - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
       - ../api/services/omnichannel:/app/api/services/omnichannel

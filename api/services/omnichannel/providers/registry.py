@@ -20,23 +20,30 @@ class ChannelProviderRegistry:
         {
             "provider": "messenger",
             "channel_type": "facebook_messenger",
-            "display_name": "Messenger (Facebook Page)",
+            "display_name": "Facebook Page",
             "status": "active",
             "setup_kind": "oauth_or_token",
         },
         {
             "provider": "instagram",
             "channel_type": "instagram_dm",
-            "display_name": "Instagram Direct Message",
-            "status": "coming_soon",
+            "display_name": "Instagram Messaging",
+            "status": "active",
             "setup_kind": "oauth_meta",
         },
         {
             "provider": "tiktok",
             "channel_type": "tiktok_messaging",
-            "display_name": "TikTok Messaging",
-            "status": "coming_soon",
-            "setup_kind": "oauth_tiktok",
+            "display_name": "TikTok Business Messaging",
+            "status": "active",
+            "setup_kind": "oauth_or_token",
+        },
+        {
+            "provider": "zalo",
+            "channel_type": "zalo_oa",
+            "display_name": "Zalo Official Account (OA)",
+            "status": "active",
+            "setup_kind": "oauth_zalo",
         },
     ]
 

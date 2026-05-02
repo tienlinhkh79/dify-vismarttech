@@ -33,6 +33,25 @@ class OmniChannelType(StrEnum):
     FACEBOOK_MESSENGER = "facebook_messenger"
     INSTAGRAM_DM = "instagram_dm"
     TIKTOK_MESSAGING = "tiktok_messaging"
+    ZALO_OA = "zalo_oa"
+
+
+class OmniChannelMessageDirection(StrEnum):
+    INBOUND = "inbound"
+    OUTBOUND = "outbound"
+
+
+class OmniChannelMessageSource(StrEnum):
+    WEBHOOK = "webhook"
+    SYNC = "sync"
+    SYSTEM = "system"
+
+
+class OmniChannelSyncJobStatus(StrEnum):
+    PENDING = "pending"
+    RUNNING = "running"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
 
 
 class WorkflowTriggerLogDict(TypedDict):
@@ -168,6 +187,7 @@ class OmniChannelConfig(TypeBase):
         sa.PrimaryKeyConstraint("id", name="omnichannel_config_pkey"),
         Index("idx_omnichannel_tenant_type", "tenant_id", "channel_type"),
         Index("idx_omnichannel_channel_id", "channel_id", unique=True),
+        Index("idx_omnichannel_zalo_token_expires", "oa_token_expires_at"),
     )
 
     id: Mapped[str] = mapped_column(
@@ -180,9 +200,12 @@ class OmniChannelConfig(TypeBase):
     channel_type: Mapped[OmniChannelType] = mapped_column(EnumText(OmniChannelType, length=60), nullable=False)
     channel_id: Mapped[str] = mapped_column(String(255), nullable=False)
     page_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    oauth_application_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     encrypted_verify_token: Mapped[str] = mapped_column(LongText, nullable=False)
     encrypted_app_secret: Mapped[str] = mapped_column(LongText, nullable=False)
-    encrypted_page_access_token: Mapped[str] = mapped_column(LongText, nullable=False)
+    encrypted_page_access_token: Mapped[str | None] = mapped_column(LongText, nullable=True)
+    encrypted_oa_refresh_token: Mapped[str | None] = mapped_column(LongText, nullable=True)
+    oa_token_expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     enabled: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, server_default=sa.text("true"), default=True)
     graph_api_version: Mapped[str] = mapped_column(String(32), nullable=False, server_default="v23.0", default="v23.0")
     created_at: Mapped[datetime] = mapped_column(
@@ -203,7 +226,111 @@ class OmniChannelConfig(TypeBase):
         return encrypter.decrypt_token(self.tenant_id, self.encrypted_app_secret)
 
     def decrypt_page_access_token(self) -> str:
+        if not self.encrypted_page_access_token:
+            return ""
         return encrypter.decrypt_token(self.tenant_id, self.encrypted_page_access_token)
+
+    def decrypt_oa_refresh_token(self) -> str:
+        if not self.encrypted_oa_refresh_token:
+            return ""
+        return encrypter.decrypt_token(self.tenant_id, self.encrypted_oa_refresh_token)
+
+
+class OmniChannelConversation(TypeBase):
+    __tablename__ = "omnichannel_conversations"
+    __table_args__ = (
+        sa.PrimaryKeyConstraint("id", name="omnichannel_conversation_pkey"),
+        Index("idx_omni_conversation_tenant_channel", "tenant_id", "channel_id"),
+        Index("idx_omni_conversation_external_user", "tenant_id", "external_user_id"),
+        UniqueConstraint("tenant_id", "channel_id", "external_user_id", name="uniq_omni_conversation_user_channel"),
+    )
+
+    id: Mapped[str] = mapped_column(
+        String(36), insert_default=lambda: str(uuidv7()), default_factory=lambda: str(uuidv7()), init=False
+    )
+    tenant_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    channel_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    channel_type: Mapped[OmniChannelType] = mapped_column(EnumText(OmniChannelType, length=60), nullable=False)
+    external_user_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    last_message_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp(), init=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.current_timestamp(),
+        server_onupdate=func.current_timestamp(),
+        init=False,
+    )
+
+
+class OmniChannelMessage(TypeBase):
+    __tablename__ = "omnichannel_messages"
+    __table_args__ = (
+        sa.PrimaryKeyConstraint("id", name="omnichannel_message_pkey"),
+        Index("idx_omni_message_tenant_channel_created", "tenant_id", "channel_id", "created_at"),
+        Index("idx_omni_message_conversation_created", "conversation_id", "created_at"),
+        Index("idx_omni_message_external_message", "tenant_id", "channel_id", "external_message_id"),
+    )
+
+    id: Mapped[str] = mapped_column(
+        String(36), insert_default=lambda: str(uuidv7()), default_factory=lambda: str(uuidv7()), init=False
+    )
+    tenant_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    channel_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    channel_type: Mapped[OmniChannelType] = mapped_column(EnumText(OmniChannelType, length=60), nullable=False)
+    conversation_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    external_user_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    external_message_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    direction: Mapped[OmniChannelMessageDirection] = mapped_column(
+        EnumText(OmniChannelMessageDirection, length=30), nullable=False
+    )
+    source: Mapped[OmniChannelMessageSource] = mapped_column(EnumText(OmniChannelMessageSource, length=30), nullable=False)
+    content: Mapped[str] = mapped_column(LongText, nullable=False, default="")
+    attachments: Mapped[list[dict[str, Any]]] = mapped_column(sa.JSON, nullable=False, default=list)
+    message_metadata: Mapped[dict[str, Any]] = mapped_column("metadata", sa.JSON, nullable=False, default=dict)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp(), init=False
+    )
+
+
+class OmniChannelSyncJob(TypeBase):
+    __tablename__ = "omnichannel_sync_jobs"
+    __table_args__ = (
+        sa.PrimaryKeyConstraint("id", name="omnichannel_sync_job_pkey"),
+        Index("idx_omni_sync_job_tenant_channel", "tenant_id", "channel_id"),
+        Index("idx_omni_sync_job_status_created", "status", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(
+        String(36), insert_default=lambda: str(uuidv7()), default_factory=lambda: str(uuidv7()), init=False
+    )
+    tenant_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    channel_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    channel_type: Mapped[OmniChannelType] = mapped_column(EnumText(OmniChannelType, length=60), nullable=False)
+    created_by: Mapped[str] = mapped_column(String(36), nullable=False)
+    since_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, default=None)
+    until_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, default=None)
+    last_error: Mapped[str | None] = mapped_column(LongText, nullable=True, default=None)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, default=None)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, default=None)
+    status: Mapped[OmniChannelSyncJobStatus] = mapped_column(
+        EnumText(OmniChannelSyncJobStatus, length=30), nullable=False, default=OmniChannelSyncJobStatus.PENDING
+    )
+    progress: Mapped[float] = mapped_column(sa.Float, nullable=False, default=0.0)
+    total_messages: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    synced_messages: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp(), init=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.current_timestamp(),
+        server_onupdate=func.current_timestamp(),
+        init=False,
+    )
 
 
 class KiotVietConnection(TypeBase):

@@ -2,6 +2,7 @@
 
 import type { Resource } from 'i18next'
 import type { Locale } from '@/i18n-config'
+import { useMemo } from 'react'
 import { I18nextProvider } from 'react-i18next'
 import { createI18nextInstance } from '@/i18n-config/client'
 
@@ -14,7 +15,10 @@ export function I18nClientProvider({
   resource: Resource
   children: React.ReactNode
 }) {
-  const i18n = createI18nextInstance(locale, resource)
+  const i18n = useMemo(
+    () => createI18nextInstance(locale, resource),
+    [locale, resource],
+  )
 
   return (
     <I18nextProvider i18n={i18n}>

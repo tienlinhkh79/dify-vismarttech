@@ -2,7 +2,8 @@
 import type { ActionItem } from '../types'
 import { useTheme } from 'next-themes'
 import { useEffect } from 'react'
-import { getI18n } from 'react-i18next'
+import { getI18n, useTranslation } from 'react-i18next'
+import type { Locale } from '@/i18n-config'
 import { setLocaleOnClient } from '@/i18n-config'
 import { accountCommand } from './account'
 import { executeCommand } from './command-bus'
@@ -63,13 +64,14 @@ const unregisterSlashCommands = () => {
 
 export const SlashCommandProvider = () => {
   const theme = useTheme()
+  const { i18n } = useTranslation()
   useEffect(() => {
     registerSlashCommands({
       setTheme: theme.setTheme,
-      setLocale: setLocaleOnClient,
+      setLocale: (locale: string) => setLocaleOnClient(locale as Locale, false, i18n),
     })
     return () => unregisterSlashCommands()
-  }, [theme.setTheme])
+  }, [theme.setTheme, i18n])
 
   return null
 }

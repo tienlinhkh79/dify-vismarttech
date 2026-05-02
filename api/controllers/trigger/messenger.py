@@ -10,8 +10,8 @@ from flask import jsonify, request
 from configs import dify_config
 from controllers.trigger import bp
 from services.omnichannel.channel_config_service import ChannelConfigService
-from services.omnichannel.messenger_runtime_service import MessengerRuntimeService
 from services.omnichannel.messenger_service import MessengerService
+from tasks.omnichannel_tasks import process_meta_webhook_events
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ def verify_messenger_webhook(channel_id: str):
     # Backward-compatible guard: older runtime images may not expose this flag yet.
     if not getattr(dify_config, "MESSENGER_TRIGGER_ENABLED", True):
         return jsonify({"error": "Messenger trigger is disabled"}), 404
-    channel_config = ChannelConfigService.get_messenger_channel_config(channel_id)
+    channel_config = ChannelConfigService.get_meta_channel_config(channel_id)
     if not channel_config:
         return jsonify({"error": "Messenger channel not found"}), 404
 
@@ -46,7 +46,7 @@ def ingest_messenger_webhook(channel_id: str):
     if not getattr(dify_config, "MESSENGER_TRIGGER_ENABLED", True):
         return jsonify({"error": "Messenger trigger is disabled"}), 404
 
-    channel_config = ChannelConfigService.get_messenger_channel_config(channel_id)
+    channel_config = ChannelConfigService.get_meta_channel_config(channel_id)
     if not channel_config:
         return jsonify({"error": "Messenger channel not found"}), 404
 
@@ -99,16 +99,12 @@ def ingest_messenger_webhook(channel_id: str):
             messaging_event_types,
         )
 
-    sent_replies = MessengerRuntimeService.process_events(
-        channel_id=channel_id,
-        events=events,
-        channel_config=channel_config,
-    )
+    process_meta_webhook_events.delay(channel_id, events, channel_config)
     logger.info(
-        "Messenger webhook processed channel=%s accepted_events=%s sent_replies=%s",
+        "Messenger webhook accepted channel=%s accepted_events=%s queued_async=%s",
         channel_id,
         len(events),
-        sent_replies,
+        True,
     )
-    return jsonify({"ok": True, "accepted_events": len(events), "sent_replies": sent_replies}), 200
+    return jsonify({"ok": True, "accepted_events": len(events), "queued_async": True}), 200
 

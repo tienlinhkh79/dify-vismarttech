@@ -67,3 +67,31 @@ class TestMessengerChannelApi:
         assert status == 200
         assert result["result"] == "success"
 
+
+class TestOmnichannelOpsApis:
+    @patch.object(module, "request")
+    @patch.object(module, "current_account_with_tenant", return_value=(SimpleNamespace(id="user-1"), "tenant-1"))
+    @patch.object(module.OmnichannelOpsService, "list_conversations", return_value={"data": [{"id": "conv-1"}]})
+    def test_list_conversations(self, _mock_list, _mock_current, mock_request):
+        mock_request.args.to_dict.return_value = {}
+        result = module.ChannelConversationCollectionApi().get("ch-1")
+        assert result["data"][0]["id"] == "conv-1"
+
+    @patch.object(module, "request")
+    @patch.object(module, "current_account_with_tenant", return_value=(SimpleNamespace(id="user-1"), "tenant-1"))
+    @patch.object(module.OmnichannelOpsService, "get_channel_stats", return_value={"total_messages": 10})
+    def test_get_channel_stats(self, _mock_stats, _mock_current, mock_request):
+        mock_request.args.to_dict.return_value = {}
+        result = module.ChannelStatsApi().get("ch-1")
+        assert result["data"]["total_messages"] == 10
+
+    @patch.object(module, "current_account_with_tenant", return_value=(SimpleNamespace(id="user-1"), "tenant-1"))
+    @patch.object(module.OmnichannelOpsService, "create_sync_job", return_value={"id": "job-1"})
+    @patch.object(module.run_omnichannel_sync_job, "delay", return_value=None)
+    @patch.object(module, "console_ns")
+    def test_create_sync_job(self, mock_ns, _mock_delay, _mock_create, _mock_current):
+        mock_ns.payload = {"since": None, "until": None}
+        result, status = module.ChannelSyncHistoryApi().post("ch-1")
+        assert status == 202
+        assert result["data"]["id"] == "job-1"
+

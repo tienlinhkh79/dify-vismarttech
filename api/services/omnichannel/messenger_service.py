@@ -28,6 +28,8 @@ class OmniChannelIncomingEvent(TypedDict):
     text: str
     message_id: NotRequired[str]
     attachments: NotRequired[list[OmniChannelIncomingAttachment]]
+    interaction_type: NotRequired[str]
+    reply_target_id: NotRequired[str]
     raw_event: dict[str, Any]
 
 
@@ -76,8 +78,10 @@ class MessengerService:
     def parse_message_events(channel_id: str, payload: dict[str, Any]) -> list[OmniChannelIncomingEvent]:
         """Normalize Messenger payload to canonical omnichannel events.
 
-        User text messages and image/file attachments are emitted.
-        Delivery/read/postback events are ignored.
+        Supported inbound events:
+        - Messenger messaging text/image/file events
+        - Facebook Page feed comment events (entry[].changes[].value.item == "comment")
+        Delivery/read/postback and non-comment feed updates are ignored.
         """
         events: list[OmniChannelIncomingEvent] = []
         for entry in payload.get("entry", []):
@@ -122,6 +126,42 @@ class MessengerService:
                     event["message_id"] = str(message["mid"])
                 if attachments:
                     event["attachments"] = attachments
+                events.append(event)
+
+            for change in entry.get("changes", []):
+                if not isinstance(change, dict):
+                    continue
+                value = change.get("value") or {}
+                if not isinstance(value, dict):
+                    continue
+                if str(value.get("item") or "") != "comment":
+                    continue
+
+                from_obj = value.get("from") or {}
+                sender_id = str((from_obj.get("id") if isinstance(from_obj, dict) else "") or "").strip()
+                if not sender_id:
+                    continue
+                if sender_id == entry_id:
+                    # Ignore comments authored by the page itself.
+                    continue
+
+                comment_message = str(value.get("message") or "").strip()
+                comment_id = str(value.get("comment_id") or "").strip()
+                if not comment_message and not comment_id:
+                    continue
+
+                event: OmniChannelIncomingEvent = {
+                    "channel": "facebook_messenger",
+                    "channel_id": channel_id,
+                    "external_account_id": entry_id,
+                    "external_user_id": sender_id,
+                    "text": comment_message,
+                    "interaction_type": "facebook_comment",
+                    "raw_event": value,
+                }
+                if comment_id:
+                    event["message_id"] = comment_id
+                    event["reply_target_id"] = comment_id
                 events.append(event)
 
         return events

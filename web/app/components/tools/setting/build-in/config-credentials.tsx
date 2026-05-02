@@ -68,7 +68,7 @@ const ConfigCredential: FC<Props> = ({
   const isMessenger = collectionName === 'messenger' || collectionName.endsWith('/messenger')
 
   const callbackUrl = channelIdInput
-    ? `${globalThis.location.origin}/api/triggers/messenger/webhook/${channelIdInput}`
+    ? `${globalThis.location.origin}/triggers/messenger/webhook/${channelIdInput}`
     : ''
 
   useEffect(() => {

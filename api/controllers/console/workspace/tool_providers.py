@@ -31,7 +31,7 @@ from core.mcp.mcp_client import MCPClient
 from core.plugin.entities.plugin_daemon import CredentialType
 from core.plugin.impl.oauth import OAuthHandler
 from core.tools.entities.tool_entities import ApiProviderSchemaType, WorkflowToolParameterConfiguration
-from dify_graph.model_runtime.utils.encoders import jsonable_encoder
+from graphon.model_runtime.utils.encoders import jsonable_encoder
 from extensions.ext_database import db
 from extensions.ext_redis import redis_client
 from libs.helper import alphanumeric, uuid_value

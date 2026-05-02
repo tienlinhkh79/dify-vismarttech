@@ -34,7 +34,7 @@ export type MessengerChannel = {
 }
 
 export type ChannelProvider = {
-  provider: 'messenger' | 'instagram' | 'tiktok'
+  provider: 'messenger' | 'instagram' | 'tiktok' | 'zalo' | string
   channel_type: string
   display_name: string
   status: 'active' | 'coming_soon'
@@ -53,6 +53,9 @@ export type Channel = {
   verify_token?: string
   client_secret?: string
   access_token?: string
+  oauth_application_id?: string | null
+  oauth_status?: 'pending_auth' | 'connected' | 'expired' | string
+  oauth_callback_url?: string
   verify_token_masked?: string
   client_secret_masked?: string
   access_token_masked?: string
@@ -81,6 +84,55 @@ type ChannelListResponse = {
 
 type ChannelItemResponse = {
   data: Channel
+}
+
+export type OmnichannelConversation = {
+  id: string
+  external_user_id: string
+  last_message_at?: string
+  channel_id: string
+  channel_type: string
+}
+
+export type OmnichannelMessage = {
+  id: string
+  conversation_id: string
+  external_user_id: string
+  external_message_id?: string
+  direction: 'inbound' | 'outbound'
+  source: 'webhook' | 'sync' | 'system'
+  content: string
+  attachments: Array<Record<string, unknown>>
+  metadata: Record<string, unknown>
+  created_at?: string
+}
+
+export type OmnichannelSyncJob = {
+  id: string
+  tenant_id: string
+  channel_id: string
+  channel_type: string
+  status: 'pending' | 'running' | 'succeeded' | 'failed'
+  progress: number
+  total_messages: number
+  synced_messages: number
+  last_error?: string
+  since_at?: string
+  until_at?: string
+  started_at?: string
+  finished_at?: string
+  created_at?: string
+  updated_at?: string
+}
+
+type OmnichannelListResponse<T> = {
+  data: T[]
+  has_more: boolean
+  next_cursor: string | null
+}
+
+type OmnichannelItemResponse<T> = {
+  data: T
 }
 
 export type KiotVietConnection = {
@@ -181,6 +233,97 @@ export const updateChannel = (channelId: string, payload: Partial<Channel>) => {
   return patch<ChannelItemResponse>(`/workspaces/current/channels/${channelId}`, {
     body: payload,
   })
+}
+
+export type ZaloOAuthStartResponse = {
+  auth_url: string
+  qr_data_uri: string
+  state: string
+  expires_in: number
+  oauth_callback_url: string
+}
+
+export const startZaloChannelOAuth = (channelId: string) => {
+  return post<{ data: ZaloOAuthStartResponse }>(
+    `/workspaces/current/channels/zalo/${channelId}/oauth/start`,
+    { body: {} },
+  )
+}
+
+export const getZaloChannelOAuthStatus = (channelId: string) => {
+  return get<{
+    data: {
+      connected: boolean
+      oauth_status: string
+      expires_at?: string | null
+      oauth_callback_url: string
+    }
+  }>(`/workspaces/current/channels/zalo/${channelId}/oauth/status`)
+}
+
+export const listOmnichannelConversations = (channelId: string, params?: {
+  since?: string
+  until?: string
+  cursor?: string
+  limit?: number
+}) => {
+  return get<OmnichannelListResponse<OmnichannelConversation>>(`/workspaces/current/channels/${channelId}/conversations`, {
+    params,
+  })
+}
+
+export const listOmnichannelMessages = (channelId: string, conversationId: string, params?: {
+  since?: string
+  until?: string
+  cursor?: string
+  limit?: number
+}) => {
+  return get<OmnichannelListResponse<OmnichannelMessage>>(
+    `/workspaces/current/channels/${channelId}/conversations/${conversationId}/messages`,
+    { params },
+  )
+}
+
+export const startOmnichannelHistorySync = (channelId: string, payload: {
+  since?: string
+  until?: string
+}) => {
+  return post<OmnichannelItemResponse<OmnichannelSyncJob>>(`/workspaces/current/channels/${channelId}/sync-history`, {
+    body: payload,
+  })
+}
+
+export const getOmnichannelSyncJob = (channelId: string, jobId: string) => {
+  return get<OmnichannelItemResponse<OmnichannelSyncJob>>(`/workspaces/current/channels/${channelId}/sync-jobs/${jobId}`)
+}
+
+export const getOmnichannelStats = (channelId: string, params?: { since?: string; until?: string }) => {
+  return get<OmnichannelItemResponse<{
+    total_messages: number
+    inbound_messages: number
+    outbound_messages: number
+    active_conversations: number
+  }>>(`/workspaces/current/channels/${channelId}/stats`, { params })
+}
+
+export const getOmnichannelHealth = (channelId: string) => {
+  return get<OmnichannelItemResponse<{
+    channel_id: string
+    enabled: boolean
+    channel_type: string
+    last_inbound_at?: string
+    last_outbound_at?: string
+    webhook_path: string
+  }>>(`/workspaces/current/channels/${channelId}/health`)
+}
+
+export const testOmnichannelWebhook = (channelId: string) => {
+  return post<OmnichannelItemResponse<{
+    success: boolean
+    channel_id: string
+    channel_type: string
+    message: string
+  }>>(`/workspaces/current/channels/${channelId}/webhook/test`)
 }
 
 export const createMessengerChannel = (payload: MessengerChannel) => {

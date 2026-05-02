@@ -8,6 +8,7 @@ import Zendesk from '@/app/components/base/zendesk'
 import GotoAnything from '@/app/components/goto-anything'
 import Header from '@/app/components/header'
 import HeaderWrapper from '@/app/components/header/header-wrapper'
+import ZaloOAuthReturnHandler from '@/app/components/header/zalo-oauth-return-handler'
 import ReadmePanel from '@/app/components/plugins/readme-panel'
 import { AppContextProvider } from '@/context/app-context-provider'
 import { EventEmitterContextProvider } from '@/context/event-emitter-provider'
@@ -29,6 +30,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
               <ModalContextProvider>
                 <HeaderWrapper>
                   <Header />
+                  <ZaloOAuthReturnHandler />
                 </HeaderWrapper>
                 <RoleRouteGuard>
                   {children}

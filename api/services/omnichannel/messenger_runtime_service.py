@@ -19,7 +19,9 @@ from extensions.ext_redis import redis_client
 from models.model import App, AppMode
 from services.app_generate_service import AppGenerateService
 from services.end_user_service import EndUserService
+from services.omnichannel.omnichannel_ops_service import OmnichannelOpsService
 from services.omnichannel.messenger_service import OmniChannelIncomingEvent
+from models.trigger import OmniChannelMessageDirection, OmniChannelMessageSource
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +88,14 @@ class MessengerRuntimeService:
         cleaned = re.sub(r"\n{3,}", "\n\n", cleaned).strip()
         return cleaned, image_urls
 
+    @staticmethod
+    def _normalize_llm_text_reply(text: str) -> str:
+        value = text.strip()
+        value = re.sub(r"^\s*text\s*:\s*", "", value, flags=re.IGNORECASE)
+        if value.startswith("```") and value.endswith("```"):
+            value = value[3:-3].strip()
+        return value
+
     """Execute the inbound AI generation and outbound Messenger send flow."""
 
     @staticmethod
@@ -103,7 +113,7 @@ class MessengerRuntimeService:
         if not attachment_lines:
             return text
 
-        attachment_context = "User sent these Messenger attachments:\n" + "\n".join(attachment_lines)
+        attachment_context = "User sent these Meta channel attachments:\n" + "\n".join(attachment_lines)
         if text:
             return f"{text}\n\n{attachment_context}"
         return f"{attachment_context}\n\nPlease analyze the attachment content and reply helpfully."
@@ -247,6 +257,34 @@ class MessengerRuntimeService:
         return None
 
     @staticmethod
+    def _record_message(
+        *,
+        app: App,
+        channel_id: str,
+        event: OmniChannelIncomingEvent,
+        direction: OmniChannelMessageDirection,
+        content: str,
+        source: OmniChannelMessageSource = OmniChannelMessageSource.WEBHOOK,
+    ) -> None:
+        try:
+            OmnichannelOpsService.record_message(
+                {
+                    "tenant_id": app.tenant_id,
+                    "channel_id": channel_id,
+                    "external_user_id": event["external_user_id"],
+                    "direction": direction,
+                    "source": source,
+                    "content": content,
+                    "external_message_id": event.get("message_id"),
+                    "attachments": list(event.get("attachments") or []),
+                    "metadata": {"raw_event": event.get("raw_event") or {}},
+                    "created_at": None,
+                }
+            )
+        except Exception:
+            logger.debug("Failed to persist omnichannel message channel=%s", channel_id, exc_info=True)
+
+    @staticmethod
     def _send_quick_replies_reply(
         recipient_psid: str,
         message_text: str,
@@ -352,6 +390,19 @@ class MessengerRuntimeService:
         response.raise_for_status()
 
     @staticmethod
+    def _send_comment_reply(*, comment_id: str, message_text: str, channel_config: MessengerRuntimeConfig) -> None:
+        endpoint = f"https://graph.facebook.com/{channel_config['graph_api_version']}/{comment_id}/comments"
+        response = ssrf_proxy.post(
+            endpoint,
+            params={
+                "access_token": channel_config["page_access_token"],
+                "message": message_text,
+            },
+            headers={"Content-Type": "application/json"},
+        )
+        response.raise_for_status()
+
+    @staticmethod
     def _parse_reply_payload(reply_text: str) -> MessengerReplyPayload:
         try:
             data = json.loads(reply_text)
@@ -423,9 +474,22 @@ class MessengerRuntimeService:
         elif reply_type == "text":
             text = data.get("text")
             if isinstance(text, str) and text.strip():
-                return {"type": "text", "text": text}
+                return {"type": "text", "text": MessengerRuntimeService._normalize_llm_text_reply(text)}
 
         return {"type": "text", "text": reply_text}
+
+    @classmethod
+    def _to_plain_text_reply(cls, reply_text: str) -> str:
+        payload = cls._parse_reply_payload(reply_text)
+        if payload["type"] == "text":
+            return cls._normalize_llm_text_reply(payload["text"])
+        if payload["type"] == "quick_replies":
+            return cls._normalize_llm_text_reply(payload["text"])
+        if payload["type"] == "template":
+            return json.dumps(payload["template_payload"], ensure_ascii=False)
+        if payload["type"] == "attachment":
+            return payload["url"].strip()
+        return ""
 
     @classmethod
     def _send_reply(cls, recipient_psid: str, reply_text: str, channel_config: MessengerRuntimeConfig) -> bool:
@@ -461,7 +525,8 @@ class MessengerRuntimeService:
             )
             return True
 
-        text_to_send, image_urls = cls._extract_markdown_image_urls(payload["text"])
+        normalized_text = cls._normalize_llm_text_reply(payload["text"])
+        text_to_send, image_urls = cls._extract_markdown_image_urls(normalized_text)
         sent = False
         if text_to_send:
             cls._send_text_reply(recipient_psid, text_to_send, channel_config)
@@ -484,6 +549,8 @@ class MessengerRuntimeService:
         sent_count = 0
         for event in events:
             recipient_psid = event["external_user_id"]
+            interaction_type = str(event.get("interaction_type") or "messenger_message")
+            is_comment_event = interaction_type == "facebook_comment"
             try:
                 if not cls._should_process_event(channel_id, event):
                     logger.info(
@@ -493,22 +560,63 @@ class MessengerRuntimeService:
                         event.get("message_id"),
                     )
                     continue
-                cls._send_sender_action(
-                    recipient_psid=recipient_psid,
-                    action="mark_seen",
-                    channel_config=channel_config,
-                )
-                cls._send_sender_action(
-                    recipient_psid=recipient_psid,
-                    action="typing_on",
-                    channel_config=channel_config,
+                if not is_comment_event:
+                    cls._send_sender_action(
+                        recipient_psid=recipient_psid,
+                        action="mark_seen",
+                        channel_config=channel_config,
+                    )
+                    cls._send_sender_action(
+                        recipient_psid=recipient_psid,
+                        action="typing_on",
+                        channel_config=channel_config,
+                    )
+                cls._record_message(
+                    app=app,
+                    channel_id=channel_id,
+                    event=event,
+                    direction=OmniChannelMessageDirection.INBOUND,
+                    source=OmniChannelMessageSource.WEBHOOK,
+                    content=str(event.get("text") or "").strip(),
                 )
                 reply_text = cls._generate_reply(app, channel_id, event)
                 if not reply_text:
                     continue
-                cls._simulate_human_typing_delay(reply_text)
-                is_message_sent = cls._send_reply(recipient_psid, reply_text, channel_config)
+                if is_comment_event:
+                    comment_id = str(event.get("reply_target_id") or event.get("message_id") or "").strip()
+                    if not comment_id:
+                        logger.info(
+                            "Skip comment reply due to missing comment target channel=%s external_user_id=%s",
+                            channel_id,
+                            recipient_psid,
+                        )
+                        continue
+                    plain_text_reply = cls._to_plain_text_reply(reply_text)
+                    if not plain_text_reply:
+                        logger.info(
+                            "Skip empty comment reply channel=%s external_user_id=%s",
+                            channel_id,
+                            recipient_psid,
+                        )
+                        continue
+                    cls._send_comment_reply(
+                        comment_id=comment_id,
+                        message_text=plain_text_reply,
+                        channel_config=channel_config,
+                    )
+                    is_message_sent = True
+                else:
+                    cls._simulate_human_typing_delay(reply_text)
+                    is_message_sent = cls._send_reply(recipient_psid, reply_text, channel_config)
                 if is_message_sent:
+                    cls._record_message(
+                        app=app,
+                        channel_id=channel_id,
+                        event=event,
+                        direction=OmniChannelMessageDirection.OUTBOUND,
+                        source=OmniChannelMessageSource.SYSTEM,
+                        content=reply_text.strip(),
+                    )
                     sent_count += 1
             except Exception:
                 logger.exception(
@@ -517,13 +625,14 @@ class MessengerRuntimeService:
                     recipient_psid,
                 )
             finally:
-                try:
-                    cls._send_sender_action(
-                        recipient_psid=recipient_psid,
-                        action="typing_off",
-                        channel_config=channel_config,
-                    )
-                except Exception:
-                    logger.debug("Failed sending typing_off for channel=%s external_user_id=%s", channel_id, recipient_psid)
+                if not is_comment_event:
+                    try:
+                        cls._send_sender_action(
+                            recipient_psid=recipient_psid,
+                            action="typing_off",
+                            channel_config=channel_config,
+                        )
+                    except Exception:
+                        logger.debug("Failed sending typing_off for channel=%s external_user_id=%s", channel_id, recipient_psid)
         return sent_count
 

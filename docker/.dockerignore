@@ -1,0 +1,3 @@
+volumes/**
+**/.venv/lib64
+**/.venv/lib64/**

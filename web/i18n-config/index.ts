@@ -1,3 +1,4 @@
+import type { i18n as I18nInstance } from 'i18next'
 import type { Locale } from '@/i18n-config/language'
 
 import Cookies from 'js-cookie'
@@ -12,11 +13,25 @@ export const i18n = {
 
 export { Locale }
 
-export const setLocaleOnClient = async (locale: Locale, reloadPage = true) => {
+/**
+ * Updates locale cookie. When reloadPage is false, pass the active react-i18next
+ * instance from useTranslation() so UI strings update immediately (getI18n() is not
+ * the same instance as I18nextProvider when using createInstance()).
+ */
+export const setLocaleOnClient = async (
+  locale: Locale,
+  reloadPage = true,
+  i18nInstance?: I18nInstance,
+) => {
   Cookies.set(LOCALE_COOKIE_NAME, locale, { expires: 365 })
-  await changeLanguage(locale)
-  if (reloadPage)
+  if (reloadPage) {
     location.reload()
+    return
+  }
+  if (i18nInstance)
+    await i18nInstance.changeLanguage(locale)
+  else
+    await changeLanguage(locale)
 }
 
 export const renderI18nObject = (obj: Record<string, string>, language: string) => {

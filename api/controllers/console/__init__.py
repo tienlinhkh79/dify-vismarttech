@@ -134,6 +134,7 @@ from .workspace import (
     tool_providers,
     trigger_providers,
     workspace,
+    zalo_oauth,
 )
 
 api.add_namespace(console_ns)
@@ -188,6 +189,7 @@ __all__ = [
     "models",
     "notification",
     "omnichannel",
+    "zalo_oauth",
     "oauth",
     "oauth_server",
     "ops_trace",

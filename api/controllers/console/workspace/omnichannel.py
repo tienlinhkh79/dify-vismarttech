@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from datetime import datetime
+
+from flask import request
 from flask_restx import Resource
-from dify_graph.model_runtime.utils.encoders import jsonable_encoder
-from pydantic import BaseModel, Field, model_validator
+from graphon.model_runtime.utils.encoders import jsonable_encoder
+from pydantic import BaseModel, Field, field_validator, model_validator
 from werkzeug.exceptions import NotFound
 
 from controllers.common.schema import register_schema_models
@@ -11,7 +14,9 @@ from controllers.console.wraps import account_initialization_required, is_admin_
 from libs.login import current_account_with_tenant, login_required
 from services.omnichannel.channel_management_service import ChannelInput, ChannelManagementService
 from services.omnichannel.kiotviet_connection_service import KiotVietConnectionInput, KiotVietConnectionService
+from services.omnichannel.omnichannel_ops_service import OmnichannelOpsService
 from services.omnichannel.providers.registry import ChannelProviderRegistry
+from tasks.omnichannel_tasks import run_omnichannel_sync_job
 
 
 class MessengerChannelCreatePayload(BaseModel):
@@ -51,9 +56,20 @@ class ChannelCreatePayload(BaseModel):
     external_resource_id: str = Field(min_length=1, max_length=255)
     verify_token: str = Field(min_length=1)
     client_secret: str = Field(min_length=1)
-    access_token: str = Field(min_length=1)
+    access_token: str = Field(default="", max_length=16384)
+    oauth_application_id: str | None = Field(default=None, max_length=255)
     api_version: str = Field(default="v23.0", min_length=1, max_length=32)
     enabled: bool = True
+
+    @model_validator(mode="after")
+    def validate_access_token_by_channel(self):
+        if self.channel_type == "zalo_oa":
+            if not self.access_token.strip() and not (self.oauth_application_id or "").strip():
+                raise ValueError("Zalo OA requires oauth_application_id when access_token is empty")
+            return self
+        if not self.access_token.strip():
+            raise ValueError("access_token is required for this channel type")
+        return self
 
 
 class ChannelUpdatePayload(BaseModel):
@@ -63,9 +79,17 @@ class ChannelUpdatePayload(BaseModel):
     external_resource_id: str | None = Field(default=None, min_length=1, max_length=255)
     verify_token: str | None = Field(default=None, min_length=1)
     client_secret: str | None = Field(default=None, min_length=1)
-    access_token: str | None = Field(default=None, min_length=1)
+    access_token: str | None = Field(default=None, max_length=16384)
+    oauth_application_id: str | None = Field(default=None, max_length=255)
     api_version: str | None = Field(default=None, min_length=1, max_length=32)
     enabled: bool | None = None
+
+    @field_validator("access_token", mode="before")
+    @classmethod
+    def empty_access_token_to_none(cls, value: object) -> object:
+        if value == "":
+            return None
+        return value
 
     @model_validator(mode="after")
     def validate_not_empty(self):
@@ -97,6 +121,18 @@ class KiotVietConnectionUpdatePayload(BaseModel):
         return self
 
 
+class ChannelSyncHistoryPayload(BaseModel):
+    since: datetime | None = None
+    until: datetime | None = None
+
+
+class ChannelTimeFilterPayload(BaseModel):
+    since: datetime | None = None
+    until: datetime | None = None
+    cursor: str | None = None
+    limit: int | None = Field(default=None, ge=1, le=100)
+
+
 register_schema_models(
     console_ns,
     MessengerChannelCreatePayload,
@@ -105,6 +141,8 @@ register_schema_models(
     ChannelUpdatePayload,
     KiotVietConnectionCreatePayload,
     KiotVietConnectionUpdatePayload,
+    ChannelSyncHistoryPayload,
+    ChannelTimeFilterPayload,
 )
 
 
@@ -221,6 +259,127 @@ class ChannelApi(Resource):
         except ValueError:
             raise NotFound("Channel not found")
         return {"result": "success"}, 200
+
+
+@console_ns.route("/workspaces/current/channels/<string:channel_id>/conversations")
+class ChannelConversationCollectionApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def get(self, channel_id: str):
+        _, tenant_id = current_account_with_tenant()
+        filter_payload = ChannelTimeFilterPayload.model_validate(request.args.to_dict())
+        result = OmnichannelOpsService.list_conversations(
+            tenant_id=tenant_id,
+            channel_id=channel_id,
+            since=filter_payload.since,
+            until=filter_payload.until,
+            cursor=filter_payload.cursor,
+            limit=filter_payload.limit,
+        )
+        return jsonable_encoder(result)
+
+
+@console_ns.route("/workspaces/current/channels/<string:channel_id>/conversations/<string:conversation_id>/messages")
+class ChannelConversationMessageCollectionApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def get(self, channel_id: str, conversation_id: str):
+        _, tenant_id = current_account_with_tenant()
+        filter_payload = ChannelTimeFilterPayload.model_validate(request.args.to_dict())
+        result = OmnichannelOpsService.list_messages(
+            tenant_id=tenant_id,
+            channel_id=channel_id,
+            conversation_id=conversation_id,
+            since=filter_payload.since,
+            until=filter_payload.until,
+            cursor=filter_payload.cursor,
+            limit=filter_payload.limit,
+        )
+        return jsonable_encoder(result)
+
+
+@console_ns.route("/workspaces/current/channels/<string:channel_id>/sync-history")
+class ChannelSyncHistoryApi(Resource):
+    @console_ns.expect(console_ns.models[ChannelSyncHistoryPayload.__name__])
+    @setup_required
+    @login_required
+    @is_admin_or_owner_required
+    @account_initialization_required
+    def post(self, channel_id: str):
+        account, tenant_id = current_account_with_tenant()
+        payload = ChannelSyncHistoryPayload.model_validate(console_ns.payload or {})
+        try:
+            job = OmnichannelOpsService.create_sync_job(
+                tenant_id=tenant_id,
+                channel_id=channel_id,
+                created_by=account.id,
+                since=payload.since,
+                until=payload.until,
+            )
+        except ValueError:
+            raise NotFound("Channel not found")
+        run_omnichannel_sync_job.delay(tenant_id, channel_id, job["id"])
+        return jsonable_encoder({"data": job}), 202
+
+
+@console_ns.route("/workspaces/current/channels/<string:channel_id>/sync-jobs/<string:job_id>")
+class ChannelSyncJobApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def get(self, channel_id: str, job_id: str):
+        _, tenant_id = current_account_with_tenant()
+        job = OmnichannelOpsService.get_sync_job(tenant_id=tenant_id, channel_id=channel_id, job_id=job_id)
+        if not job:
+            raise NotFound("Sync job not found")
+        return jsonable_encoder({"data": job})
+
+
+@console_ns.route("/workspaces/current/channels/<string:channel_id>/stats")
+class ChannelStatsApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def get(self, channel_id: str):
+        _, tenant_id = current_account_with_tenant()
+        filter_payload = ChannelTimeFilterPayload.model_validate(request.args.to_dict())
+        data = OmnichannelOpsService.get_channel_stats(
+            tenant_id=tenant_id,
+            channel_id=channel_id,
+            since=filter_payload.since,
+            until=filter_payload.until,
+        )
+        return jsonable_encoder({"data": data})
+
+
+@console_ns.route("/workspaces/current/channels/<string:channel_id>/health")
+class ChannelHealthApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def get(self, channel_id: str):
+        _, tenant_id = current_account_with_tenant()
+        try:
+            data = OmnichannelOpsService.get_health(tenant_id=tenant_id, channel_id=channel_id)
+        except ValueError:
+            raise NotFound("Channel not found")
+        return jsonable_encoder({"data": data})
+
+
+@console_ns.route("/workspaces/current/channels/<string:channel_id>/webhook/test")
+class ChannelWebhookTestApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def post(self, channel_id: str):
+        _, tenant_id = current_account_with_tenant()
+        try:
+            data = OmnichannelOpsService.test_webhook(tenant_id=tenant_id, channel_id=channel_id)
+        except ValueError:
+            raise NotFound("Channel not found")
+        return jsonable_encoder({"data": data})
 
 
 @console_ns.route("/workspaces/current/omnichannel/messenger/channels")

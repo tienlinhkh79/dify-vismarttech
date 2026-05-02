@@ -2,14 +2,30 @@
 
 from __future__ import annotations
 
-from typing import Any, TypedDict
+from typing import Any, NotRequired, TypedDict
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from core.helper import encrypter
 from extensions.ext_database import db
+from libs.datetime_utils import naive_utc_now
 from models.trigger import OmniChannelConfig, OmniChannelType
+
+
+def _zalo_oauth_status(config: OmniChannelConfig) -> str:
+    has_access = bool(
+        config.encrypted_page_access_token and config.decrypt_page_access_token().strip()
+    )
+    if not has_access:
+        return "pending_auth"
+    if (
+        config.oa_token_expires_at
+        and config.oa_token_expires_at < naive_utc_now()
+        and not config.encrypted_oa_refresh_token
+    ):
+        return "expired"
+    return "connected"
 
 
 class ChannelInput(TypedDict):
@@ -23,6 +39,7 @@ class ChannelInput(TypedDict):
     client_secret: str
     api_version: str
     enabled: bool
+    oauth_application_id: NotRequired[str | None]
 
 
 class ChannelManagementService:
@@ -32,12 +49,14 @@ class ChannelManagementService:
         OmniChannelType.FACEBOOK_MESSENGER.value,
         OmniChannelType.INSTAGRAM_DM.value,
         OmniChannelType.TIKTOK_MESSAGING.value,
+        OmniChannelType.ZALO_OA.value,
     }
 
     _PLATFORM_TO_TYPE = {
         "messenger": OmniChannelType.FACEBOOK_MESSENGER,
         "instagram": OmniChannelType.INSTAGRAM_DM,
         "tiktok": OmniChannelType.TIKTOK_MESSAGING,
+        "zalo": OmniChannelType.ZALO_OA,
     }
 
     _TYPE_TO_PLATFORM = {value: key for key, value in _PLATFORM_TO_TYPE.items()}
@@ -54,9 +73,11 @@ class ChannelManagementService:
 
     @classmethod
     def _to_masked_dict(cls, config: OmniChannelConfig) -> dict[str, Any]:
+        from services.omnichannel.zalo_oauth_service import ZaloOAuthService
+
         platform = cls._TYPE_TO_PLATFORM.get(config.channel_type, "messenger")
-        callback_path = f"/api/triggers/{platform}/webhook/{config.channel_id}"
-        return {
+        callback_path = f"/triggers/{platform}/webhook/{config.channel_id}"
+        row: dict[str, Any] = {
             "id": config.id,
             "channel_id": config.channel_id,
             "channel_type": config.channel_type.value,
@@ -74,6 +95,11 @@ class ChannelManagementService:
             "created_at": config.created_at,
             "updated_at": config.updated_at,
         }
+        if config.channel_type == OmniChannelType.ZALO_OA:
+            row["oauth_status"] = _zalo_oauth_status(config)
+            row["oauth_application_id"] = config.oauth_application_id
+            row["oauth_callback_url"] = ZaloOAuthService.public_callback_url()
+        return row
 
     @classmethod
     def list_channels(cls, tenant_id: str, channel_type: str | None = None) -> list[dict[str, Any]]:
@@ -101,6 +127,21 @@ class ChannelManagementService:
     @staticmethod
     def create_channel(tenant_id: str, user_id: str, payload: ChannelInput) -> dict[str, Any]:
         channel_type = ChannelManagementService._to_channel_type(payload["channel_type"])
+        access_token_plain = (payload.get("access_token") or "").strip()
+        oauth_application_id = (payload.get("oauth_application_id") or "").strip() or None
+
+        if channel_type != OmniChannelType.ZALO_OA and not access_token_plain:
+            raise ValueError("access_token is required for this channel type")
+
+        if channel_type == OmniChannelType.ZALO_OA and not access_token_plain and not oauth_application_id:
+            raise ValueError("Zalo OA requires oauth_application_id when access_token is empty")
+
+        encrypted_access: str | None
+        if access_token_plain:
+            encrypted_access = encrypter.encrypt_token(tenant_id, access_token_plain)
+        else:
+            encrypted_access = None
+
         with Session(db.engine, expire_on_commit=False) as session:
             existed = session.scalar(select(OmniChannelConfig).where(OmniChannelConfig.channel_id == payload["channel_id"]))
             if existed:
@@ -116,9 +157,10 @@ class ChannelManagementService:
                 enabled=payload["enabled"],
                 page_id=payload["external_resource_id"],
                 graph_api_version=payload["api_version"],
+                oauth_application_id=oauth_application_id,
                 encrypted_verify_token=encrypter.encrypt_token(tenant_id, payload["verify_token"]),
                 encrypted_app_secret=encrypter.encrypt_token(tenant_id, payload["client_secret"]),
-                encrypted_page_access_token=encrypter.encrypt_token(tenant_id, payload["access_token"]),
+                encrypted_page_access_token=encrypted_access,
             )
             session.add(row)
             session.commit()
@@ -151,8 +193,16 @@ class ChannelManagementService:
                 row.encrypted_verify_token = encrypter.encrypt_token(tenant_id, payload["verify_token"])
             if "client_secret" in payload:
                 row.encrypted_app_secret = encrypter.encrypt_token(tenant_id, payload["client_secret"])
+            if "oauth_application_id" in payload:
+                zid = payload["oauth_application_id"]
+                row.oauth_application_id = (str(zid).strip() if zid else "") or None
             if "access_token" in payload:
-                row.encrypted_page_access_token = encrypter.encrypt_token(tenant_id, payload["access_token"])
+                at = payload["access_token"]
+                if row.channel_type == OmniChannelType.ZALO_OA:
+                    if at and str(at).strip():
+                        row.encrypted_page_access_token = encrypter.encrypt_token(tenant_id, str(at).strip())
+                elif at:
+                    row.encrypted_page_access_token = encrypter.encrypt_token(tenant_id, str(at))
             if "channel_type" in payload:
                 row.channel_type = ChannelManagementService._to_channel_type(payload["channel_type"])
 

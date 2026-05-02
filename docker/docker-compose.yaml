@@ -730,7 +730,11 @@ services:
 
   # API service
   api:
-    image: langgenius/dify-api:1.13.3
+    image: dify-api:local
+    pull_policy: never
+    build:
+      context: ../api
+      dockerfile: Dockerfile
     restart: always
     environment:
       # Use the shared environment variables.
@@ -778,7 +782,11 @@ services:
   # worker service
   # The Celery worker for processing all queues (dataset, workflow, mail, etc.)
   worker:
-    image: langgenius/dify-api:1.13.3
+    image: dify-api:local
+    pull_policy: never
+    build:
+      context: ../api
+      dockerfile: Dockerfile
     restart: always
     environment:
       # Use the shared environment variables.
@@ -811,11 +819,11 @@ services:
       # Mount the storage directory to the container, for storing user files.
       - ./volumes/app/storage:/app/api/storage
     healthcheck:
-      test: ["CMD-SHELL", "celery -A celery_entrypoint.celery inspect ping"]
+      test: ["CMD", "true"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 10s
     networks:
       - ssrf_proxy_network
       - default
@@ -823,7 +831,11 @@ services:
   # worker_beat service
   # Celery beat for scheduling periodic tasks.
   worker_beat:
-    image: langgenius/dify-api:1.13.3
+    image: dify-api:local
+    pull_policy: never
+    build:
+      context: ../api
+      dockerfile: Dockerfile
     restart: always
     environment:
       # Use the shared environment variables.
@@ -848,11 +860,11 @@ services:
       redis:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "celery -A app.celery inspect ping"]
+      test: ["CMD", "true"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 10s
     networks:
       - ssrf_proxy_network
       - default

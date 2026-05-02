@@ -1221,6 +1221,15 @@ class CeleryScheduleTasksConfig(BaseSettings):
         default=60 * 60,
     )
 
+    ENABLE_ZALO_OA_TOKEN_REFRESH_TASK: bool = Field(
+        description="Enable periodic refresh of Zalo OA OAuth access tokens",
+        default=True,
+    )
+    ZALO_OA_TOKEN_REFRESH_INTERVAL_MINUTES: int = Field(
+        description="Interval in minutes for Zalo OA token refresh batch job",
+        default=60,
+    )
+
 
 class PositionConfig(BaseSettings):
     POSITION_PROVIDER_PINS: str = Field(

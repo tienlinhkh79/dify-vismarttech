@@ -20,7 +20,7 @@ export default function LanguagePage() {
   const locale = useLocale()
   const { userProfile, mutateUserProfile } = useAppContext()
   const [editing, setEditing] = useState(false)
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const router = useRouter()
   const handleSelectLanguage = async (item: Item) => {
     const url = '/account/interface-language'
@@ -29,7 +29,7 @@ export default function LanguagePage() {
     try {
       await updateUserProfile({ url, body: { [bodyKey]: item.value } })
       toast.success(t('actionMsg.modifiedSuccessfully', { ns: 'common' }))
-      setLocaleOnClient(item.value.toString() as Locale, false)
+      await setLocaleOnClient(item.value.toString() as Locale, false, i18n)
       router.refresh()
     }
     catch (e) {

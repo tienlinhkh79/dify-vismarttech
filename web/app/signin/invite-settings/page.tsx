@@ -21,7 +21,7 @@ import { timezones } from '@/utils/timezone'
 import { resolvePostLoginRedirect } from '../utils/post-login-redirect'
 
 export default function InviteSettingsPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const systemFeatures = useGlobalPublicStore(s => s.systemFeatures)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -55,7 +55,7 @@ export default function InviteSettingsPage() {
       })
       if (res.result === 'success') {
         // Tokens are now stored in cookies by the backend
-        await setLocaleOnClient(language, false)
+        await setLocaleOnClient(language, false, i18n)
         const redirectUrl = resolvePostLoginRedirect()
         router.replace(redirectUrl || '/apps')
       }
@@ -63,7 +63,7 @@ export default function InviteSettingsPage() {
     catch {
       recheck()
     }
-  }, [language, name, recheck, timezone, token, router, t])
+  }, [language, name, recheck, timezone, token, router, t, i18n])
 
   if (!checkRes)
     return <Loading />
