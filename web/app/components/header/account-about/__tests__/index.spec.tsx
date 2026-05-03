@@ -56,7 +56,7 @@ describe('AccountAbout', () => {
 
       render(<AccountAbout langGeniusVersionInfo={mockVersionInfo} onCancel={mockOnCancel} />)
 
-      expect(screen.getByAltText('Dify logo')).toBeInTheDocument()
+      expect(screen.getByAltText('Vismarttech logo')).toBeInTheDocument()
     })
   })
 

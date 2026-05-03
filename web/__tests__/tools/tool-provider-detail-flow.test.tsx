@@ -245,7 +245,7 @@ const { default: ProviderDetail } = await import('@/app/components/tools/provide
 const makeCollection = (overrides: Partial<Collection> = {}): Collection => ({
   id: 'test-collection',
   name: 'test_collection',
-  author: 'Dify',
+  author: 'Vismarttech',
   description: { en_US: 'Test collection description', zh_Hans: '测试集合描述' },
   icon: 'https://example.com/icon.png',
   label: { en_US: 'Test Collection', zh_Hans: '测试集合' },
@@ -273,7 +273,7 @@ describe('Tool Provider Detail Flow Integration', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('title')).toHaveTextContent('Test Collection')
-        expect(screen.getByTestId('org-info')).toHaveTextContent('Dify')
+        expect(screen.getByTestId('org-info')).toHaveTextContent('Vismarttech')
         expect(screen.getByTestId('description')).toHaveTextContent('Test collection description')
       })
     })

@@ -276,6 +276,61 @@ export const refreshOmnichannelConversationParticipant = (channelId: string, con
   )
 }
 
+export type MiniCrmLeadRow = {
+  lead_id?: string | null
+  conversation_id: string
+  channel_id: string
+  channel_type: string
+  channel_name: string
+  external_user_id: string
+  participant_display_name?: string | null
+  last_message_at?: string | null
+  stage: string
+  owner_account_id?: string | null
+  notes?: string | null
+  source_override?: string | null
+  source_display: string
+  crm_updated_at?: string | null
+}
+
+export type MiniCrmLeadsResponse = {
+  data: MiniCrmLeadRow[]
+  total: number
+  offset: number
+  limit: number
+}
+
+export const listMiniCrmLeads = (params?: {
+  channel_type?: string
+  stage?: string
+  /** Plain-text filter; sent as query param ``q`` for backward-compatible REST. */
+  search_query?: string
+  page_offset?: number
+  page_size?: number
+}) => {
+  const { search_query, page_offset, page_size, channel_type, stage } = params ?? {}
+  return get<MiniCrmLeadsResponse>('/workspaces/current/mini-crm/leads', {
+    params: {
+      channel_type,
+      stage,
+      q: search_query,
+      offset: page_offset,
+      limit: page_size,
+    },
+  })
+}
+
+export const patchMiniCrmLead = (conversationId: string, body: {
+  stage?: string
+  owner_account_id?: string | null
+  notes?: string | null
+  source_override?: string | null
+}) => {
+  return patch<{ data: MiniCrmLeadRow }>(`/workspaces/current/mini-crm/leads/${encodeURIComponent(conversationId)}`, {
+    body,
+  })
+}
+
 export const listOmnichannelConversations = (channelId: string, params?: {
   since?: string
   until?: string

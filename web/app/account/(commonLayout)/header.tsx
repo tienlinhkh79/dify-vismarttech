@@ -4,6 +4,7 @@ import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import Button from '@/app/components/base/button'
 import DifyLogo from '@/app/components/base/logo/dify-logo'
+import { APP_DISPLAY_NAME } from '@/config/app-display-name'
 import { useGlobalPublicStore } from '@/context/global-public-context'
 import { useRouter } from '@/next/navigation'
 import Avatar from './avatar'
@@ -26,7 +27,7 @@ const Header = () => {
                 <img
                   src={systemFeatures.branding.login_page_logo}
                   className="block h-[22px] w-auto object-contain"
-                  alt="Dify logo"
+                  alt={`${APP_DISPLAY_NAME} logo`}
                 />
               )
             : <DifyLogo />}

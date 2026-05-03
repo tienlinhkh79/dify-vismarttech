@@ -10,6 +10,7 @@ import ThemeSwitcher from '@/app/components/base/theme-switcher'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLinkItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/app/components/base/ui/dropdown-menu'
 import { ACCOUNT_SETTING_TAB } from '@/app/components/header/account-setting/constants'
 import { IS_CLOUD_EDITION } from '@/config'
+import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import { useAppContext } from '@/context/app-context'
 import { useGlobalPublicStore } from '@/context/global-public-context'
 import { useDocLink } from '@/context/i18n'
@@ -175,7 +176,7 @@ export default function AppSelector() {
             />
           </DropdownMenuGroup>
           <DropdownMenuSeparator className="my-0! bg-divider-subtle" />
-          {!systemFeatures.branding.enabled && (
+          {showDifyOfficialChrome(systemFeatures.branding.enabled) && (
             <>
               <AccountMenuSection>
                 <AccountMenuExternalItem

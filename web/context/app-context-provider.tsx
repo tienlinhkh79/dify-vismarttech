@@ -16,6 +16,7 @@ import {
   useSelector,
 } from '@/context/app-context'
 import { env } from '@/env'
+import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import {
   useCurrentWorkspace,
   useLangGeniusVersion,
@@ -34,7 +35,7 @@ export const AppContextProvider: FC<AppContextProviderProps> = ({ children }) =>
   const { data: currentWorkspaceResp, isPending: isLoadingCurrentWorkspace, isFetching: isValidatingCurrentWorkspace } = useCurrentWorkspace()
   const langGeniusVersionQuery = useLangGeniusVersion(
     userProfileResp?.meta.currentVersion,
-    !systemFeatures.branding.enabled,
+    showDifyOfficialChrome(systemFeatures.branding.enabled),
   )
 
   const userProfile = useMemo<UserProfileResponse>(() => userProfileResp?.profile || userProfilePlaceholder, [userProfileResp?.profile])

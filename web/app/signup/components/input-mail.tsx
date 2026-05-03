@@ -11,6 +11,7 @@ import { useGlobalPublicStore } from '@/context/global-public-context'
 import { useLocale } from '@/context/i18n'
 import Link from '@/next/link'
 import { useSendMail } from '@/service/use-common'
+import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 
 type Props = {
   onSuccess: (email: string, payload: string) => void
@@ -87,7 +88,7 @@ export default function Form({
         </Link>
       </div>
 
-      {!systemFeatures.branding.enabled && (
+      {showDifyOfficialChrome(systemFeatures.branding.enabled) && (
         <>
           <div className="system-xs-regular mt-3 block w-full text-text-tertiary">
             {t('tosDesc', { ns: 'login' })}

@@ -167,7 +167,7 @@ describe('TextGenerationSidebar', () => {
       },
     })
 
-    expect(screen.getByAltText('Dify logo')).toBeInTheDocument()
+    expect(screen.getByAltText('Vismarttech logo')).toBeInTheDocument()
 
     rerender(
       <TextGenerationSidebar

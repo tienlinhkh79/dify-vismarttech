@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from '#i18n'
+import { useSearchParams } from '@/next/navigation'
 import Button from '@/app/components/base/button'
 import Input from '@/app/components/base/input'
 import { ProviderLogo } from '@/app/components/header/account-setting/channels-ui'
@@ -47,14 +48,6 @@ type ChannelHealth = {
 }
 
 const terminalSyncStatuses = new Set(['succeeded', 'failed'])
-
-const getChannelGradient = (channelType?: string) => {
-  if (channelType?.includes('instagram'))
-    return 'from-purple-500/20 via-pink-500/20 to-orange-400/20'
-  if (channelType?.includes('zalo'))
-    return 'from-blue-500/20 via-cyan-400/20 to-sky-300/20'
-  return 'from-blue-500/20 via-indigo-500/20 to-violet-500/20'
-}
 
 const isImageUrl = (url: string) => /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url)
 
@@ -173,6 +166,9 @@ const messageMatchesSearch = (message: OmnichannelMessage, q: string) => {
 }
 
 const OmnichannelPage = () => {
+  const searchParams = useSearchParams()
+  const urlChannelId = searchParams.get('channel_id') ?? ''
+  const urlConversationId = searchParams.get('conversation_id') ?? ''
   const { t, i18n } = useTranslation('common')
   const dateLocale = i18n.language?.replace('_', '-') || undefined
   const toLocaleText = (value?: string) => {
@@ -217,6 +213,7 @@ const OmnichannelPage = () => {
   const isMessagesLoadingRef = useRef(false)
   const isLoadingOlderMessagesRef = useRef(false)
   const omnichannelRealtimeDebounceRef = useRef<number | null>(null)
+  const pendingDeepConversationIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     selectedChannelIdRef.current = selectedChannelId
@@ -278,12 +275,20 @@ const OmnichannelPage = () => {
       const response = await listChannels()
       const nextChannels = response.data || []
       setChannels(nextChannels)
-      if (nextChannels.length > 0)
+      const deepChannel = urlChannelId.trim()
+      const deepConv = urlConversationId.trim()
+      if (deepChannel && nextChannels.some(c => c.channel_id === deepChannel)) {
+        setSelectedChannelId(deepChannel)
+        if (deepConv)
+          pendingDeepConversationIdRef.current = deepConv
+      }
+      else if (nextChannels.length > 0) {
         setSelectedChannelId(nextChannels[0].channel_id)
+      }
     })().catch(() => {
       setError(t('settings.omnichannelErrorLoadChannels'))
     })
-  }, [t, i18n.language])
+  }, [t, i18n.language, urlChannelId, urlConversationId])
 
   useEffect(() => {
     if (!selectedChannelId)
@@ -301,6 +306,11 @@ const OmnichannelPage = () => {
         const nextConversations = conversationRes.data || []
         setConversations(nextConversations)
         setSelectedConversationId((prev) => {
+          const pending = pendingDeepConversationIdRef.current
+          if (pending && nextConversations.some(item => item.id === pending)) {
+            pendingDeepConversationIdRef.current = null
+            return pending
+          }
           if (prev && nextConversations.some(item => item.id === prev))
             return prev
           return nextConversations[0]?.id || ''
@@ -769,7 +779,7 @@ const OmnichannelPage = () => {
 
   return (
     <div className='mx-auto w-full max-w-[1600px] px-6 py-6'>
-      <div className={`mb-4 rounded-2xl border border-components-panel-border bg-gradient-to-r ${getChannelGradient(selectedChannel?.channel_type)} p-5`}>
+      <div className='mb-4 rounded-2xl border border-components-panel-border bg-gradient-to-r from-background-gradient-bg-fill-chat-bg-2 to-background-gradient-bg-fill-chat-bg-1 p-5'>
         <div className='flex items-center justify-between gap-4'>
           <div>
             <h2 className='text-xl font-semibold text-text-primary'>{t('settings.omnichannelPageTitle')}</h2>
@@ -777,7 +787,7 @@ const OmnichannelPage = () => {
               {t('settings.omnichannelPageSubtitle')}
             </p>
           </div>
-          <div className='hidden items-center gap-3 rounded-xl border border-white/40 bg-white/50 px-3 py-2 backdrop-blur md:flex'>
+          <div className='hidden items-center gap-3 rounded-xl border border-divider-regular bg-background-default/80 px-3 py-2 backdrop-blur-sm md:flex'>
             <ProviderLogo provider={selectedChannel?.channel_type || 'facebook_messenger'} className='size-8 rounded-lg' />
             <div>
               <div className='text-xs text-text-tertiary'>{t('settings.omnichannelActiveChannel')}</div>
@@ -804,7 +814,7 @@ const OmnichannelPage = () => {
             <div className='mt-3 space-y-2 rounded-lg border border-divider-subtle bg-background-default p-3 text-xs text-text-secondary'>
               <div className='flex items-center justify-between'>
                 <span>{t('settings.omnichannelStatus')}</span>
-                <span className={health?.enabled ? 'text-green-600' : 'text-yellow-600'}>
+                <span className={health?.enabled ? 'text-text-success' : 'text-text-warning'}>
                   {health?.enabled ? t('settings.omnichannelStatusEnabled') : t('settings.omnichannelStatusDisabled')}
                 </span>
               </div>
@@ -838,7 +848,7 @@ const OmnichannelPage = () => {
                   key={item.id}
                   className={`block w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
                     selectedConversationId === item.id
-                      ? 'border-primary-300 bg-primary-50'
+                      ? 'border-state-accent-solid bg-state-accent-hover'
                       : 'border-divider-subtle hover:bg-components-button-secondary-bg'
                   }`}
                   onClick={() => setSelectedConversationId(item.id)}
@@ -978,7 +988,7 @@ const OmnichannelPage = () => {
                         )}
                         <div className={`max-w-[min(85%,520px)] rounded-2xl border px-3 py-2 text-sm shadow-sm ${
                           isOutbound
-                            ? 'border-primary-200 bg-primary-50'
+                            ? 'border-state-accent-hover-alt bg-state-accent-hover'
                             : 'border-divider-subtle bg-components-panel-bg'
                         }`}
                         >
@@ -1070,19 +1080,19 @@ const OmnichannelPage = () => {
             <div className='grid grid-cols-2 gap-2'>
               <div className='rounded-lg border border-divider-subtle bg-background-default p-3'>
                 <div className='text-xs text-text-tertiary'>{t('settings.omnichannelStatTotal')}</div>
-                <div className='mt-1 text-lg font-semibold'>{stats?.total_messages ?? 0}</div>
+                <div className='mt-1 text-lg font-semibold text-text-primary'>{stats?.total_messages ?? 0}</div>
               </div>
               <div className='rounded-lg border border-divider-subtle bg-background-default p-3'>
                 <div className='text-xs text-text-tertiary'>{t('settings.omnichannelStatConversations')}</div>
-                <div className='mt-1 text-lg font-semibold'>{stats?.active_conversations ?? 0}</div>
+                <div className='mt-1 text-lg font-semibold text-text-primary'>{stats?.active_conversations ?? 0}</div>
               </div>
               <div className='rounded-lg border border-divider-subtle bg-background-default p-3'>
                 <div className='text-xs text-text-tertiary'>{t('settings.omnichannelStatInbound')}</div>
-                <div className='mt-1 text-lg font-semibold'>{stats?.inbound_messages ?? 0}</div>
+                <div className='mt-1 text-lg font-semibold text-text-primary'>{stats?.inbound_messages ?? 0}</div>
               </div>
               <div className='rounded-lg border border-divider-subtle bg-background-default p-3'>
                 <div className='text-xs text-text-tertiary'>{t('settings.omnichannelStatOutbound')}</div>
-                <div className='mt-1 text-lg font-semibold'>{stats?.outbound_messages ?? 0}</div>
+                <div className='mt-1 text-lg font-semibold text-text-primary'>{stats?.outbound_messages ?? 0}</div>
               </div>
             </div>
           </div>
@@ -1108,7 +1118,7 @@ const OmnichannelPage = () => {
       </div>
 
       {error && (
-        <div className='mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600'>
+        <div className='mt-4 rounded-lg border border-state-destructive-border bg-state-destructive-hover-alt px-3 py-2 text-sm text-text-destructive'>
           {error}
         </div>
       )}

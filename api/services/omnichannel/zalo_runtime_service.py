@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TypedDict
+from typing import Any, TypedDict
 
 from core.app.entities.app_invoke_entities import InvokeFrom
 from core.helper.ssrf_proxy import ssrf_proxy
@@ -12,6 +12,7 @@ from services.app_generate_service import AppGenerateService
 from services.end_user_service import EndUserService
 from services.omnichannel.messenger_runtime_service import MessengerRuntimeService
 from services.omnichannel.messenger_service import OmniChannelIncomingEvent
+from services.omnichannel.omnichannel_app_start_input_keys import OmnichannelAppStartInputKey
 from services.omnichannel.omnichannel_ops_service import OmnichannelOpsService
 
 logger = logging.getLogger(__name__)
@@ -65,8 +66,9 @@ class ZaloRuntimeService:
                 event_query = MessengerRuntimeService._build_event_query(event)
                 if not event_query:
                     continue
+                record_message_result: dict[str, Any] | None = None
                 try:
-                    OmnichannelOpsService.record_message(
+                    record_message_result = OmnichannelOpsService.record_message(
                         {
                             "tenant_id": app.tenant_id,
                             "channel_id": channel_id,
@@ -83,11 +85,20 @@ class ZaloRuntimeService:
                 except Exception:
                     logger.debug("Failed to persist inbound Zalo message channel=%s", channel_id, exc_info=True)
 
+                workflow_start_inputs: dict[str, str] = {}
+                if record_message_result:
+                    workflow_start_inputs = {
+                        OmnichannelAppStartInputKey.CHANNEL_ID: channel_id,
+                        OmnichannelAppStartInputKey.CHANNEL_TYPE: str(record_message_result.get("channel_type") or ""),
+                        OmnichannelAppStartInputKey.CONVERSATION_ID: str(record_message_result.get("conversation_id") or ""),
+                        OmnichannelAppStartInputKey.EXTERNAL_USER_ID: str(recipient_user_id),
+                    }
+
                 result = AppGenerateService.generate(
                     app_model=app,
                     user=end_user,
                     args={
-                        "inputs": {},
+                        "inputs": workflow_start_inputs,
                         "query": event_query,
                         "files": MessengerRuntimeService._build_event_files(event),
                         "response_mode": "blocking",

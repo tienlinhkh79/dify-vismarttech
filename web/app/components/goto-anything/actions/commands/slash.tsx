@@ -5,6 +5,8 @@ import { useEffect } from 'react'
 import { getI18n, useTranslation } from 'react-i18next'
 import type { Locale } from '@/i18n-config'
 import { setLocaleOnClient } from '@/i18n-config'
+import { useGlobalPublicStore } from '@/context/global-public-context'
+import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import { accountCommand } from './account'
 import { executeCommand } from './command-bus'
 import { communityCommand } from './community'
@@ -40,24 +42,26 @@ export const slashAction: ActionItem = {
 }
 
 // Register/unregister default handlers for slash commands with external dependencies.
-const registerSlashCommands = (deps: Record<string, any>) => {
-  // Register command handlers to the registry system with their respective dependencies
+const registerSlashCommands = (deps: { setTheme: (t: string) => void, setLocale: (locale: string) => void, showOfficialDifyChrome: boolean }) => {
   slashCommandRegistry.register(themeCommand, { setTheme: deps.setTheme })
   slashCommandRegistry.register(languageCommand, { setLocale: deps.setLocale })
-  slashCommandRegistry.register(forumCommand, {})
-  slashCommandRegistry.register(docsCommand, {})
-  slashCommandRegistry.register(communityCommand, {})
+  if (deps.showOfficialDifyChrome) {
+    slashCommandRegistry.register(forumCommand, {})
+    slashCommandRegistry.register(docsCommand, {})
+    slashCommandRegistry.register(communityCommand, {})
+  }
   slashCommandRegistry.register(accountCommand, {})
   slashCommandRegistry.register(zenCommand, {})
 }
 
-const unregisterSlashCommands = () => {
-  // Remove command handlers from registry system (automatically calls each command's unregister method)
+const unregisterSlashCommands = (showOfficialDifyChrome: boolean) => {
   slashCommandRegistry.unregister('theme')
   slashCommandRegistry.unregister('language')
-  slashCommandRegistry.unregister('forum')
-  slashCommandRegistry.unregister('docs')
-  slashCommandRegistry.unregister('community')
+  if (showOfficialDifyChrome) {
+    slashCommandRegistry.unregister('forum')
+    slashCommandRegistry.unregister('docs')
+    slashCommandRegistry.unregister('community')
+  }
   slashCommandRegistry.unregister('account')
   slashCommandRegistry.unregister('zen')
 }
@@ -65,13 +69,16 @@ const unregisterSlashCommands = () => {
 export const SlashCommandProvider = () => {
   const theme = useTheme()
   const { i18n } = useTranslation()
+  const brandingEnabled = useGlobalPublicStore(s => s.systemFeatures.branding.enabled)
+  const showOfficialDifyChrome = showDifyOfficialChrome(brandingEnabled)
   useEffect(() => {
     registerSlashCommands({
       setTheme: theme.setTheme,
       setLocale: (locale: string) => setLocaleOnClient(locale as Locale, false, i18n),
+      showOfficialDifyChrome,
     })
-    return () => unregisterSlashCommands()
-  }, [theme.setTheme, i18n])
+    return () => unregisterSlashCommands(showOfficialDifyChrome)
+  }, [theme.setTheme, i18n, showOfficialDifyChrome])
 
   return null
 }

@@ -47,14 +47,14 @@ vi.mock('@/app/components/plugins/plugin-auth', () => ({
 describe('DataSourcePage Component', () => {
   const mockProviders: DataSourceAuth[] = [
     {
-      author: 'Dify',
+      author: 'Vismarttech',
       provider: 'dify',
       plugin_id: 'plugin-1',
       plugin_unique_identifier: 'unique-1',
       icon: 'icon-1',
-      name: 'Dify Source',
-      label: { en_US: 'Dify Source', zh_Hans: 'zh_hans_dify_source' },
-      description: { en_US: 'Dify Description', zh_Hans: 'zh_hans_dify_description' },
+      name: 'Vismarttech Source',
+      label: { en_US: 'Vismarttech Source', zh_Hans: 'zh_hans_dify_source' },
+      description: { en_US: 'Vismarttech Description', zh_Hans: 'zh_hans_dify_description' },
       credentials_list: [],
     },
     {
@@ -110,7 +110,7 @@ describe('DataSourcePage Component', () => {
       render(<DataSourcePage />)
 
       // Assert
-      expect(screen.queryByText('Dify Source')).not.toBeInTheDocument()
+      expect(screen.queryByText('Vismarttech Source')).not.toBeInTheDocument()
       expect(screen.queryByText('common.modelProvider.installDataSourceProvider')).not.toBeInTheDocument()
     })
   })
@@ -132,7 +132,7 @@ describe('DataSourcePage Component', () => {
       render(<DataSourcePage />)
 
       // Assert
-      expect(screen.getByText('Dify Source')).toBeInTheDocument()
+      expect(screen.getByText('Vismarttech Source')).toBeInTheDocument()
       expect(screen.getByText('Partner Source')).toBeInTheDocument()
     })
   })
@@ -193,7 +193,7 @@ describe('DataSourcePage Component', () => {
       render(<DataSourcePage />)
 
       // Assert
-      expect(screen.queryByText('Dify Source')).not.toBeInTheDocument()
+      expect(screen.queryByText('Vismarttech Source')).not.toBeInTheDocument()
       expect(screen.getByText('common.modelProvider.installDataSourceProvider')).toBeInTheDocument()
     })
 

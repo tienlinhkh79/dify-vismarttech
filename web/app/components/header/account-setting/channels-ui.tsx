@@ -44,7 +44,7 @@ const BrandFacebookMessengerComboIcon = () => (
     <div className="absolute left-0 top-0 flex h-[82%] w-[82%] items-center justify-center rounded-md bg-[#1877F2] p-0.5">
       <BrandFacebookIcon />
     </div>
-    <div className="absolute bottom-0 right-0 flex h-[58%] w-[58%] items-center justify-center rounded-md bg-[#00B2FF] p-0.5 ring-1 ring-white">
+    <div className="absolute bottom-0 right-0 flex h-[58%] w-[58%] items-center justify-center rounded-md bg-[#00B2FF] p-0.5 ring-1 ring-background-default">
       <BrandMessengerIcon />
     </div>
   </div>
@@ -86,19 +86,19 @@ const getProviderLogo = (provider: string, gid: string) => {
   if (normalized.includes('instagram')) {
     return {
       icon: <BrandInstagramIcon gid={gid} />,
-      className: 'bg-white',
+      className: 'border border-divider-subtle bg-background-default',
     }
   }
   if (normalized.includes('tiktok')) {
     return {
       icon: <BrandTikTokIcon />,
-      className: 'bg-black',
+      className: 'border border-divider-subtle bg-[#010101]',
     }
   }
   if (normalized.includes('messenger') || normalized.includes('facebook')) {
     return {
       icon: <BrandFacebookMessengerComboIcon />,
-      className: 'bg-white',
+      className: 'border border-divider-subtle bg-background-default',
     }
   }
   return {
@@ -135,12 +135,12 @@ export const ProviderSummaryCard = ({
         </div>
         {provider.status === 'coming_soon'
           ? (
-            <div className="rounded bg-yellow-100 px-1.5 py-0.5 text-[10px] text-yellow-700">
+            <div className="rounded bg-state-warning-hover-alt px-1.5 py-0.5 text-[10px] text-text-warning">
               {t('settings.channelsComingSoon', { ns: 'common' })}
             </div>
             )
           : (
-            <div className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] text-green-700">
+            <div className="rounded bg-state-success-hover px-1.5 py-0.5 text-[10px] text-text-success">
               {t('dataSource.website.active', { ns: 'common' })}
             </div>
             )}
@@ -156,12 +156,12 @@ const getChannelConnectionBadge = (channel: Channel, t: TranslateFn) => {
   if (!channel.enabled)
     return { label: t('dataSource.website.inactive', { ns: 'common' }), className: 'bg-components-button-secondary-bg text-text-tertiary' }
   if (channel.channel_type === 'zalo_oa' && channel.oauth_status === 'pending_auth')
-    return { label: t('settings.channelsZaloOAuthPending', { ns: 'common' }), className: 'bg-yellow-100 text-yellow-700' }
+    return { label: t('settings.channelsZaloOAuthPending', { ns: 'common' }), className: 'bg-state-warning-hover-alt text-text-warning' }
   if (channel.channel_type === 'zalo_oa' && channel.oauth_status === 'expired')
-    return { label: t('settings.channelsNeedsReauth', { ns: 'common' }), className: 'bg-yellow-100 text-yellow-700' }
+    return { label: t('settings.channelsNeedsReauth', { ns: 'common' }), className: 'bg-state-warning-hover-alt text-text-warning' }
   if (channel.status === 'inactive')
-    return { label: t('settings.channelsNeedsReauth', { ns: 'common' }), className: 'bg-yellow-100 text-yellow-700' }
-  return { label: t('settings.channelsConnected', { ns: 'common' }), className: 'bg-green-100 text-green-700' }
+    return { label: t('settings.channelsNeedsReauth', { ns: 'common' }), className: 'bg-state-warning-hover-alt text-text-warning' }
+  return { label: t('settings.channelsConnected', { ns: 'common' }), className: 'bg-state-success-hover text-text-success' }
 }
 
 export const ChannelItem = ({
@@ -214,9 +214,9 @@ export const SetupProgress = ({ setupStep, t }: { setupStep: SetupStep, t: Trans
             <div
               key={item}
               className={`rounded-md px-2 py-1 text-center text-xs ${isCompleted
-                ? 'bg-green-100 text-green-700'
+                ? 'bg-state-success-hover text-text-success'
                 : isCurrent
-                  ? 'bg-primary-50 text-primary-700'
+                  ? 'border border-state-accent-solid bg-state-accent-hover text-text-accent'
                   : 'bg-components-button-secondary-bg text-text-tertiary'}`}
             >
               {item}
@@ -251,7 +251,7 @@ export const SetupProviderSelector = ({
             type="button"
             disabled={isComingSoon}
             className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left transition-colors ${isSelected
-              ? 'border-primary-300 bg-primary-50'
+              ? 'border-state-accent-solid bg-state-accent-hover'
               : 'border-divider-subtle hover:bg-components-button-secondary-bg'} ${isComingSoon ? 'cursor-not-allowed opacity-70' : ''}`}
             onClick={() => !isComingSoon && onSelect(provider)}
           >
@@ -261,12 +261,12 @@ export const SetupProviderSelector = ({
             </div>
             {isComingSoon
               ? (
-                <div className="rounded bg-yellow-100 px-1.5 py-0.5 text-[10px] text-yellow-700">
+                <div className="rounded bg-state-warning-hover-alt px-1.5 py-0.5 text-[10px] text-text-warning">
                   {t('settings.channelsComingSoon', { ns: 'common' })}
                 </div>
                 )
               : (
-                <div className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] text-green-700">
+                <div className="rounded bg-state-success-hover px-1.5 py-0.5 text-[10px] text-text-success">
                   {t('dataSource.website.active', { ns: 'common' })}
                 </div>
                 )}

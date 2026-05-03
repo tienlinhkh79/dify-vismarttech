@@ -8,10 +8,12 @@ from typing import Any, NotRequired, TypedDict
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from configs import dify_config
 from core.helper import encrypter
 from extensions.ext_database import db
 from libs.datetime_utils import naive_utc_now
 from models.trigger import OmniChannelConfig, OmniChannelType
+from services.feature_service import FeatureService
 
 
 def _zalo_oauth_status(config: OmniChannelConfig) -> str:
@@ -156,6 +158,12 @@ class ChannelManagementService:
             existed = session.scalar(select(OmniChannelConfig).where(OmniChannelConfig.channel_id == payload["channel_id"]))
             if existed:
                 raise ValueError("Channel ID already exists")
+
+            if dify_config.BILLING_ENABLED:
+                feats = FeatureService.get_features(tenant_id)
+                ch = feats.omnichannel_channels
+                if 0 < ch.limit <= ch.size:
+                    raise ValueError("The number of omnichannel channels has reached the limit of your subscription.")
 
             row = OmniChannelConfig(
                 tenant_id=tenant_id,

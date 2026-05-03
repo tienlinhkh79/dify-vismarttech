@@ -181,6 +181,7 @@ services:
       ENABLE_WEBSITE_JINAREADER: ${ENABLE_WEBSITE_JINAREADER:-true}
       ENABLE_WEBSITE_FIRECRAWL: ${ENABLE_WEBSITE_FIRECRAWL:-true}
       ENABLE_WEBSITE_WATERCRAWL: ${ENABLE_WEBSITE_WATERCRAWL:-true}
+      HIDE_COMMUNITY_UI: ${HIDE_COMMUNITY_UI:-false}
 
   # The PostgreSQL database.
   db_postgres:
@@ -938,6 +939,32 @@ services:
     volumes:
       - ./volumes/unstructured:/app/data
 
+  # Reference Billing API for self-hosted SaaS (see repo `billing_saas/`). Api/worker read BILLING_* from env.
+  billing_saas:
+    build:
+      context: ../billing_saas
+      dockerfile: Dockerfile
+    image: dify-billing-saas:local
+    pull_policy: never
+    restart: unless-stopped
+    environment:
+      BILLING_API_SECRET_KEY: ${BILLING_API_SECRET_KEY:-dev-billing-secret-change-me}
+      BILLING_PLAN_CATALOG_PATH: /app/plan_catalog.json
+      BILLING_SAAS_DB_PATH: /data/billing_saas.db
+    volumes:
+      - billing_saas_data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
 networks:
   # create a network between sandbox, api and ssrf_proxy, and can not access outside.
   ssrf_proxy_network:
@@ -952,3 +979,4 @@ networks:
 volumes:
   oradata:
   dify_es01_data:
+  billing_saas_data:

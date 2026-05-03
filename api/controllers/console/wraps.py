@@ -57,6 +57,20 @@ def only_edition_cloud[**P, R](view: Callable[P, R]) -> Callable[P, R]:
     return decorated
 
 
+def cloud_or_saas_billing[**P, R](view: Callable[P, R]) -> Callable[P, R]:
+    """Allow console billing routes on CLOUD or on self-hosted SaaS when BILLING_ENABLED."""
+
+    @wraps(view)
+    def decorated(*args: P.args, **kwargs: P.kwargs):
+        if dify_config.EDITION == "CLOUD":
+            return view(*args, **kwargs)
+        if dify_config.EDITION == "SELF_HOSTED" and dify_config.BILLING_ENABLED:
+            return view(*args, **kwargs)
+        abort(404)
+
+    return decorated
+
+
 def only_edition_enterprise[**P, R](view: Callable[P, R]) -> Callable[P, R]:
     @wraps(view)
     def decorated(*args: P.args, **kwargs: P.kwargs):

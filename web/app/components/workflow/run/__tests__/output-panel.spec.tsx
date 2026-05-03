@@ -78,9 +78,9 @@ describe('OutputPanel', () => {
   })
 
   it('renders a plain text output as markdown', () => {
-    render(<OutputPanel outputs={{ answer: 'Hello Dify' }} />)
+    render(<OutputPanel outputs={{ answer: 'Hello Vismarttech' }} />)
 
-    expect(screen.getByTestId('markdown')).toHaveTextContent('Hello Dify')
+    expect(screen.getByTestId('markdown')).toHaveTextContent('Hello Vismarttech')
   })
 
   it('renders array text outputs as joined markdown content', () => {

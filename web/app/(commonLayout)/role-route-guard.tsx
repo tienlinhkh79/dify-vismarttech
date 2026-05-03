@@ -6,7 +6,7 @@ import Loading from '@/app/components/base/loading'
 import { useAppContext } from '@/context/app-context'
 import { usePathname, useRouter } from '@/next/navigation'
 
-const datasetOperatorRedirectRoutes = ['/apps', '/app', '/explore', '/tools', '/omnichannel'] as const
+const datasetOperatorRedirectRoutes = ['/apps', '/app', '/explore', '/tools', '/omnichannel', '/mini-crm'] as const
 
 const isPathUnderRoute = (pathname: string, route: string) => pathname === route || pathname.startsWith(`${route}/`)
 

@@ -1,5 +1,9 @@
 'use client'
 
+import {
+  RiCustomerService2Fill,
+  RiCustomerService2Line,
+} from '@remixicon/react'
 import { useTranslation } from 'react-i18next'
 import Link from '@/next/link'
 import { useSelectedLayoutSegment } from '@/next/navigation'
@@ -19,9 +23,11 @@ const OmnichannelNav = ({
   return (
     <Link
       href="/omnichannel"
-      className={cn('group flex items-center text-sm font-medium', activated && 'hover:bg-components-main-nav-nav-button-bg-active-hover bg-components-main-nav-nav-button-bg-active font-semibold shadow-md', activated ? 'text-components-main-nav-nav-button-text-active' : 'text-components-main-nav-nav-button-text hover:bg-components-main-nav-nav-button-bg-hover', className)}
+      className={cn(className, 'group', activated && 'bg-components-main-nav-nav-button-bg-active shadow-md', activated ? 'text-components-main-nav-nav-button-text-active' : 'text-components-main-nav-nav-button-text hover:bg-components-main-nav-nav-button-bg-hover')}
     >
-      <span className={cn('h-1.5 w-1.5 rounded-full', activated ? 'bg-primary-600' : 'bg-text-tertiary')} />
+      {activated
+        ? <RiCustomerService2Fill className="h-4 w-4 shrink-0" aria-hidden />
+        : <RiCustomerService2Line className="h-4 w-4 shrink-0" aria-hidden />}
       <div className="ml-2 max-[1024px]:hidden">
         {t('menus.omnichannel', { ns: 'common' })}
       </div>

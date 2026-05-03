@@ -174,7 +174,7 @@ describe('EmbeddedChatbot index', () => {
       render(<EmbeddedChatbot />)
 
       expect(screen.getByText('share.chat.poweredBy')).toBeInTheDocument()
-      expect(screen.getByAltText('Dify logo')).toBeInTheDocument()
+      expect(screen.getByAltText('Vismarttech logo')).toBeInTheDocument()
     })
 
     it('should show custom logo when workspace branding logo is unavailable', () => {

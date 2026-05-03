@@ -5,7 +5,7 @@ import { useGlobalPublicStore, useIsSystemFeaturesPending } from '@/context/glob
  *
  * This hook manages the browser document title with support for:
  * - Custom branding (when enabled in system features)
- * - Default "Dify" branding
+ * - Default "Vismarttech" branding
  * - Pending state handling (prevents title flicker during loading)
  * - Page-specific titles with automatic suffix
  *
@@ -53,8 +53,8 @@ describe('title should be empty if systemFeatures is pending', () => {
 })
 
 /**
- * Test default Dify branding behavior
- * When custom branding is disabled, should use "Dify" as the brand name
+ * Test default Vismarttech branding behavior
+ * When custom branding is disabled, should use "Vismarttech" as the brand name
  */
 describe('use default branding', () => {
   beforeEach(() => {
@@ -67,20 +67,20 @@ describe('use default branding', () => {
   })
   /**
    * Test title format with page title and default branding
-   * Format: "[page] - Dify"
+   * Format: "[page] - Vismarttech"
    */
-  it('document title should be test-Dify if set title', () => {
+  it('document title should be test-Vismarttech if set title', () => {
     renderHook(() => useDocumentTitle('test'))
-    expect(document.title).toBe('test - Dify')
+    expect(document.title).toBe('test - Vismarttech')
   })
 
   /**
    * Test title with only default branding (no page title)
-   * Format: "Dify"
+   * Format: "Vismarttech"
    */
-  it('document title should be Dify if not set title', () => {
+  it('document title should be Vismarttech if not set title', () => {
     renderHook(() => useDocumentTitle(''))
-    expect(document.title).toBe('Dify')
+    expect(document.title).toBe('Vismarttech')
   })
 })
 

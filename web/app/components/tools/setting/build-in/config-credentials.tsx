@@ -390,7 +390,7 @@ const ConfigCredential: FC<Props> = ({
                         />
                         <input
                           className="w-full rounded-lg border border-components-input-border bg-components-input-bg-normal px-2 py-2 text-text-primary"
-                          placeholder="app_id (Dify app UUID)"
+                          placeholder="app_id (Vismarttech app UUID)"
                           value={channelAppIdInput}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setChannelAppIdInput(e.target.value)}
                         />

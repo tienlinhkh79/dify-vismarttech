@@ -22,6 +22,7 @@ import Link from '@/next/link'
 import { useFeaturedTriggersRecommendations } from '@/service/use-plugins'
 import { useAllTriggerPlugins, useInvalidateAllTriggerPlugins } from '@/service/use-triggers'
 import { cn } from '@/utils/classnames'
+import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import { getMarketplaceUrl } from '@/utils/var'
 import { useMarketplacePlugins } from '../../plugins/marketplace/hooks'
 import { PluginCategoryEnum } from '../../plugins/types'
@@ -54,7 +55,8 @@ const AllStartBlocks = ({
   const { t } = useTranslation()
   const [hasStartBlocksContent, setHasStartBlocksContent] = useState(false)
   const [hasPluginContent, setHasPluginContent] = useState(false)
-  const { enable_marketplace } = useGlobalPublicStore(s => s.systemFeatures)
+  const { enable_marketplace, branding } = useGlobalPublicStore(s => s.systemFeatures)
+  const showOfficialDifyChrome = showDifyOfficialChrome(branding.enabled)
   const pluginRef = useRef<ListRef>(null)
   const wrapElemRef = useRef<HTMLDivElement>(null)
 
@@ -191,18 +193,20 @@ const AllStartBlocks = ({
               <div className="text-sm font-medium text-text-secondary">
                 {t('tabs.noPluginsFound', { ns: 'workflow' })}
               </div>
-              <Link
-                href="https://github.com/langgenius/dify-plugins/issues/new?template=plugin_request.yaml"
-                target="_blank"
-              >
-                <Button
-                  size="small"
-                  variant="secondary-accent"
-                  className="h-6 cursor-pointer px-3 text-xs"
+              {showOfficialDifyChrome && (
+                <Link
+                  href="https://github.com/langgenius/dify-plugins/issues/new?template=plugin_request.yaml"
+                  target="_blank"
                 >
-                  {t('tabs.requestToCommunity', { ns: 'workflow' })}
-                </Button>
-              </Link>
+                  <Button
+                    size="small"
+                    variant="secondary-accent"
+                    className="h-6 cursor-pointer px-3 text-xs"
+                  >
+                    {t('tabs.requestToCommunity', { ns: 'workflow' })}
+                  </Button>
+                </Link>
+              )}
             </div>
           )}
         </div>

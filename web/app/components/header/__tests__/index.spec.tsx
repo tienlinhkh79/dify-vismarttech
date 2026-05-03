@@ -184,7 +184,7 @@ describe('Header', () => {
     expect(screen.getByRole('img', { name: /dify logo/i })).toBeInTheDocument()
   })
 
-  it('should show default Dify logo when branding is enabled but no workspace_logo', () => {
+  it('should show default Vismarttech logo when branding is enabled but no workspace_logo', () => {
     mockBrandingEnabled = true
     mockBrandingTitle = 'Custom Title'
     mockBrandingLogo = null
@@ -195,14 +195,14 @@ describe('Header', () => {
     expect(screen.getByRole('img', { name: /dify logo/i })).toBeInTheDocument()
   })
 
-  it('should show default Dify text when branding enabled but no application_title', () => {
+  it('should show default Vismarttech text when branding enabled but no application_title', () => {
     mockBrandingEnabled = true
     mockBrandingTitle = null
     mockBrandingLogo = null
 
     render(<Header />)
 
-    expect(screen.getByText('Dify')).toBeInTheDocument()
+    expect(screen.getByText('Vismarttech')).toBeInTheDocument()
   })
 
   it('should show dataset nav for editor who is not dataset operator', () => {

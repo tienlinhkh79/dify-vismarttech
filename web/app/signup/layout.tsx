@@ -4,6 +4,7 @@ import Header from '@/app/signin/_header'
 import { useGlobalPublicStore } from '@/context/global-public-context'
 import useDocumentTitle from '@/hooks/use-document-title'
 import { cn } from '@/utils/classnames'
+import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 
 export default function RegisterLayout({ children }: any) {
   const { systemFeatures } = useGlobalPublicStore()
@@ -18,7 +19,7 @@ export default function RegisterLayout({ children }: any) {
               {children}
             </div>
           </div>
-          {systemFeatures.branding.enabled === false && (
+          {showDifyOfficialChrome(systemFeatures.branding.enabled) && (
             <div className="system-xs-regular px-8 py-6 text-text-tertiary">
               ©
               {' '}

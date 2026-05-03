@@ -19,7 +19,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Compound scroll container built on Base UI ScrollArea. These stories focus on panel-style compositions that already exist throughout Dify: dense sidebars, sticky list headers, multi-pane workbenches, horizontal rails, and overlay surfaces. Scrollbar placement should be adjusted by consumer spacing classes such as margin-based overrides instead of right/bottom positioning utilities.',
+        component: 'Compound scroll container built on Base UI ScrollArea. These stories focus on panel-style compositions that already exist throughout Vismarttech: dense sidebars, sticky list headers, multi-pane workbenches, horizontal rails, and overlay surfaces. Scrollbar placement should be adjusted by consumer spacing classes such as margin-based overrides instead of right/bottom positioning utilities.',
       },
     },
   },
@@ -532,7 +532,7 @@ export const VerticalPanels: Story = {
     <StoryCard
       eyebrow="Panels"
       title="Default and extended vertical panes"
-      description="Two common Dify surfaces: a straightforward content panel using the shipped scrollbar skin, and a denser queue pane that adds sticky structure, a viewport mask, and a slightly inset scrollbar."
+      description="Two common Vismarttech surfaces: a straightforward content panel using the shipped scrollbar skin, and a denser queue pane that adds sticky structure, a viewport mask, and a slightly inset scrollbar."
     >
       <div className="grid gap-5 xl:grid-cols-2">
         <VerticalPanelPane />

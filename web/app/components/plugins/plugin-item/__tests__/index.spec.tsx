@@ -344,7 +344,7 @@ describe('PluginItem', () => {
   })
 
   describe('Version Compatibility', () => {
-    it('should show warning icon when Dify version is not compatible', () => {
+    it('should show warning icon when Vismarttech version is not compatible', () => {
       // Arrange
       mockLangGeniusVersionInfo.mockReturnValue({ current_version: '0.3.0' })
       const plugin = createPluginDetail({
@@ -361,7 +361,7 @@ describe('PluginItem', () => {
       expect(warningIcon).toBeInTheDocument()
     })
 
-    it('should not show warning when Dify version is compatible', () => {
+    it('should not show warning when Vismarttech version is compatible', () => {
       // Arrange
       mockLangGeniusVersionInfo.mockReturnValue({ current_version: '1.0.0' })
       const plugin = createPluginDetail({

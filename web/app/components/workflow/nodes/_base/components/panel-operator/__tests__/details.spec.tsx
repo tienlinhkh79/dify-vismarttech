@@ -99,7 +99,7 @@ describe('panel-operator details', () => {
       isSingleton: false,
       isUndeletable: false,
       description: 'Node description',
-      author: 'Dify',
+      author: 'Vismarttech',
       helpLinkUri: 'https://docs.example.com/node',
     } as ReturnType<typeof useNodeMetaData>)
     mockUseNodesInteractions.mockReturnValue({
@@ -248,7 +248,7 @@ describe('panel-operator details', () => {
         isSingleton: true,
         isUndeletable: true,
         description: 'Read only node',
-        author: 'Dify',
+        author: 'Vismarttech',
       } as ReturnType<typeof useNodeMetaData>)
 
       rerender(

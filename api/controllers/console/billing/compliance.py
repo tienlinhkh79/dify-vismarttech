@@ -7,7 +7,7 @@ from libs.login import current_account_with_tenant, login_required
 from services.billing_service import BillingService
 
 from .. import console_ns
-from ..wraps import account_initialization_required, only_edition_cloud, setup_required
+from ..wraps import account_initialization_required, cloud_or_saas_billing, setup_required
 
 
 class ComplianceDownloadQuery(BaseModel):
@@ -28,7 +28,7 @@ class ComplianceApi(Resource):
     @setup_required
     @login_required
     @account_initialization_required
-    @only_edition_cloud
+    @cloud_or_saas_billing
     def get(self):
         current_user, current_tenant_id = current_account_with_tenant()
         args = ComplianceDownloadQuery.model_validate(request.args.to_dict(flat=True))

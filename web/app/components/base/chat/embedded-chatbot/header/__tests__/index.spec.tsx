@@ -160,10 +160,10 @@ describe('EmbeddedChatbot Header', () => {
 
       render(<Header title="Test Chatbot" />)
 
-      expect(screen.getByAltText('Dify logo')).toBeInTheDocument()
+      expect(screen.getByAltText('Vismarttech logo')).toBeInTheDocument()
     })
 
-    it('should render Dify logo by default when branding enabled is true but no logo provided', () => {
+    it('should render Vismarttech logo by default when branding enabled is true but no logo provided', () => {
       vi.mocked(useGlobalPublicStore).mockImplementation((selector: (s: GlobalPublicStoreMock) => unknown) => selector({
         systemFeatures: {
           ...defaultSystemFeatures,
@@ -176,10 +176,10 @@ describe('EmbeddedChatbot Header', () => {
         setSystemFeatures: vi.fn(),
       }))
       render(<Header title="Test Chatbot" />)
-      expect(screen.getByAltText('Dify logo')).toBeInTheDocument()
+      expect(screen.getByAltText('Vismarttech logo')).toBeInTheDocument()
     })
 
-    it('should render Dify logo when branding is disabled', () => {
+    it('should render Vismarttech logo when branding is disabled', () => {
       vi.mocked(useGlobalPublicStore).mockImplementation((selector: (s: GlobalPublicStoreMock) => unknown) => selector({
         systemFeatures: {
           ...defaultSystemFeatures,
@@ -191,7 +191,7 @@ describe('EmbeddedChatbot Header', () => {
         setSystemFeatures: vi.fn(),
       }))
       render(<Header title="Test Chatbot" />)
-      expect(screen.getByAltText('Dify logo')).toBeInTheDocument()
+      expect(screen.getByAltText('Vismarttech logo')).toBeInTheDocument()
     })
 
     it('should NOT render branding when remove_webapp_brand is true', () => {

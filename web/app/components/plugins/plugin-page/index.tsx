@@ -24,6 +24,7 @@ import Link from '@/next/link'
 import { fetchBundleInfoFromMarketPlace, fetchManifestFromMarketPlace } from '@/service/plugins'
 import { sleep } from '@/utils'
 import { cn } from '@/utils/classnames'
+import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import { PLUGIN_PAGE_TABS_MAP } from '../hooks'
 import InstallFromLocalPackage from '../install-plugin/install-from-local-package'
 import InstallFromMarketplace from '../install-plugin/install-from-marketplace'
@@ -121,7 +122,8 @@ const PluginPage = ({
   const options = usePluginPageContext(v => v.options)
   const activeTab = usePluginPageContext(v => v.activeTab)
   const setActiveTab = usePluginPageContext(v => v.setActiveTab)
-  const { enable_marketplace } = useGlobalPublicStore(s => s.systemFeatures)
+  const { enable_marketplace, branding } = useGlobalPublicStore(s => s.systemFeatures)
+  const showOfficialDifyChrome = showDifyOfficialChrome(branding.enabled)
 
   const isPluginsTab = useMemo(() => activeTab === PLUGIN_PAGE_TABS_MAP.plugins, [activeTab])
   const isExploringMarketplace = useMemo(() => {
@@ -174,17 +176,19 @@ const PluginPage = ({
             {
               isExploringMarketplace && (
                 <>
-                  <Link
-                    href="https://github.com/langgenius/dify-plugins/issues/new?template=plugin_request.yaml"
-                    target="_blank"
-                  >
-                    <Button
-                      variant="ghost"
-                      className="text-text-tertiary"
+                  {showOfficialDifyChrome && (
+                    <Link
+                      href="https://github.com/langgenius/dify-plugins/issues/new?template=plugin_request.yaml"
+                      target="_blank"
                     >
-                      {t('requestAPlugin', { ns: 'plugin' })}
-                    </Button>
-                  </Link>
+                      <Button
+                        variant="ghost"
+                        className="text-text-tertiary"
+                      >
+                        {t('requestAPlugin', { ns: 'plugin' })}
+                      </Button>
+                    </Link>
+                  )}
                   <Link
                     href={docLink('/develop-plugin/publishing/marketplace-listing/release-to-dify-marketplace')}
                     target="_blank"

@@ -304,7 +304,7 @@ const meta = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: 'Dify toast host built on Base UI Toast. The story is organized as multiple example panels that all feed the same shared toast viewport, matching the way the Base UI documentation showcases toast behavior.',
+        component: 'Vismarttech toast host built on Base UI Toast. The story is organized as multiple example panels that all feed the same shared toast viewport, matching the way the Base UI documentation showcases toast behavior.',
       },
     },
   },

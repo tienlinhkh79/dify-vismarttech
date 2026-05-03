@@ -18,6 +18,7 @@ import dynamic from '@/next/dynamic'
 import { useInfiniteAppList } from '@/service/use-apps'
 import { AppModeEnum, AppModes } from '@/types/app'
 import { cn } from '@/utils/classnames'
+import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import AppCard from './app-card'
 import { AppCardSkeleton } from './app-card-skeleton'
 import Empty from './empty'
@@ -264,7 +265,7 @@ const List: FC<Props> = ({
             <span className="system-xs-regular">{t('newApp.dropDSLToCreateApp', { ns: 'app' })}</span>
           </div>
         )}
-        {!systemFeatures.branding.enabled && (
+        {showDifyOfficialChrome(systemFeatures.branding.enabled) && (
           <Footer />
         )}
         <CheckModal />

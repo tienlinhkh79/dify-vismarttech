@@ -7,7 +7,11 @@ from pydantic import BaseModel, Field
 from werkzeug.exceptions import BadRequest
 
 from controllers.console import console_ns
-from controllers.console.wraps import account_initialization_required, only_edition_cloud, setup_required
+from controllers.console.wraps import (
+    account_initialization_required,
+    cloud_or_saas_billing,
+    setup_required,
+)
 from enums.cloud_plan import CloudPlan
 from libs.login import current_account_with_tenant, login_required
 from services.billing_service import BillingService
@@ -33,7 +37,7 @@ class Subscription(Resource):
     @setup_required
     @login_required
     @account_initialization_required
-    @only_edition_cloud
+    @cloud_or_saas_billing
     def get(self):
         current_user, current_tenant_id = current_account_with_tenant()
         args = SubscriptionQuery.model_validate(request.args.to_dict(flat=True))
@@ -46,7 +50,7 @@ class Invoices(Resource):
     @setup_required
     @login_required
     @account_initialization_required
-    @only_edition_cloud
+    @cloud_or_saas_billing
     def get(self):
         current_user, current_tenant_id = current_account_with_tenant()
         BillingService.is_tenant_owner_or_admin(current_user)
@@ -69,7 +73,7 @@ class PartnerTenants(Resource):
     @setup_required
     @login_required
     @account_initialization_required
-    @only_edition_cloud
+    @cloud_or_saas_billing
     def put(self, partner_key: str):
         current_user, _ = current_account_with_tenant()
 

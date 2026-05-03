@@ -27,7 +27,7 @@ describe('SuggestedQuestions', () => {
     content: '',
     isAnswer: true,
     isOpeningStatement: true,
-    suggestedQuestions: ['What is Dify?', 'How to use it?', '  ', ''],
+    suggestedQuestions: ['What is Vismarttech?', 'How to use it?', '  ', ''],
   }
 
   it('should render suggested questions and filter out empty ones', () => {
@@ -35,7 +35,7 @@ describe('SuggestedQuestions', () => {
 
     const questions = screen.getAllByTestId('suggested-question')
     expect(questions).toHaveLength(2)
-    expect(questions[0]).toHaveTextContent('What is Dify?')
+    expect(questions[0]).toHaveTextContent('What is Vismarttech?')
     expect(questions[1]).toHaveTextContent('How to use it?')
   })
 
@@ -46,7 +46,7 @@ describe('SuggestedQuestions', () => {
     const questions = screen.getAllByTestId('suggested-question')
     await user.click(questions[0])
 
-    expect(mockOnSend).toHaveBeenCalledWith('What is Dify?')
+    expect(mockOnSend).toHaveBeenCalledWith('What is Vismarttech?')
   })
 
   it('should not render if isOpeningStatement is false', () => {

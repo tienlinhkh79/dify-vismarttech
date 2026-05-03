@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from configs import dify_config
 from enums.cloud_plan import CloudPlan
 from enums.hosted_provider import HostedTrialProvider
+from services.billing_fork_usage import ForkBillingUsageHelper
 from services.billing_service import BillingService
 from services.enterprise.enterprise_service import EnterpriseService
 
@@ -138,6 +139,9 @@ class FeatureModel(BaseModel):
     is_allow_transfer_workspace: bool = True
     trigger_event: Quota = Quota(usage=0, limit=3000, reset_date=0)
     api_rate_limit: Quota = Quota(usage=0, limit=5000, reset_date=0)
+    # Fork SaaS: omnichannel channel rows and CRM leads (limits from billing API when set).
+    omnichannel_channels: LimitationModel = LimitationModel(size=0, limit=0)
+    crm_leads: LimitationModel = LimitationModel(size=0, limit=0)
     # Controls whether email delivery is allowed for HumanInput nodes.
     human_input_email_delivery_enabled: bool = False
     # pydantic configs
@@ -187,6 +191,7 @@ class FeatureService:
 
         if dify_config.BILLING_ENABLED and tenant_id:
             cls._fulfill_params_from_billing_api(features, tenant_id)
+            ForkBillingUsageHelper.apply_fork_usage_sizes(features, tenant_id)
 
         if dify_config.ENTERPRISE_ENABLED:
             features.webapp_copyright_enabled = True
@@ -340,6 +345,13 @@ class FeatureService:
 
         if "next_credit_reset_date" in billing_info:
             features.next_credit_reset_date = billing_info["next_credit_reset_date"]
+
+        if "omnichannel_channels" in billing_info:
+            oc = billing_info["omnichannel_channels"]
+            features.omnichannel_channels.limit = int(oc.get("limit", 0))
+        if "crm_leads" in billing_info:
+            cr = billing_info["crm_leads"]
+            features.crm_leads.limit = int(cr.get("limit", 0))
 
     @classmethod
     def _fulfill_params_from_enterprise(cls, features: SystemFeatureModel, is_authenticated: bool = False):

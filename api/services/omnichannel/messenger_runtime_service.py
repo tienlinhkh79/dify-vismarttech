@@ -24,6 +24,7 @@ from services.omnichannel.messenger_graph_profile import (
     fetch_messenger_user_profile,
     fetch_page_profile,
 )
+from services.omnichannel.omnichannel_app_start_input_keys import OmnichannelAppStartInputKey
 from services.omnichannel.omnichannel_ops_service import MessageWritePayload, OmnichannelOpsService
 from services.omnichannel.messenger_service import OmniChannelIncomingEvent
 from models.trigger import OmniChannelMessageDirection, OmniChannelMessageSource
@@ -227,7 +228,13 @@ class MessengerRuntimeService:
         return app
 
     @staticmethod
-    def _generate_reply(app: App, channel_id: str, event: OmniChannelIncomingEvent) -> str | None:
+    def _generate_reply(
+        app: App,
+        channel_id: str,
+        event: OmniChannelIncomingEvent,
+        *,
+        record_message_result: dict[str, Any] | None = None,
+    ) -> str | None:
         session_user_id = f"messenger:{channel_id}:{event['external_user_id']}"
         end_user = EndUserService.get_or_create_end_user_by_type(
             type=InvokeFrom.SERVICE_API,
@@ -240,8 +247,17 @@ class MessengerRuntimeService:
         if not event_query:
             return None
 
+        workflow_start_inputs: dict[str, str] = {}
+        if record_message_result:
+            workflow_start_inputs = {
+                OmnichannelAppStartInputKey.CHANNEL_ID: channel_id,
+                OmnichannelAppStartInputKey.CHANNEL_TYPE: str(record_message_result.get("channel_type") or ""),
+                OmnichannelAppStartInputKey.CONVERSATION_ID: str(record_message_result.get("conversation_id") or ""),
+                OmnichannelAppStartInputKey.EXTERNAL_USER_ID: str(event.get("external_user_id") or ""),
+            }
+
         args: dict[str, Any] = {
-            "inputs": {},
+            "inputs": workflow_start_inputs,
             "query": event_query,
             "files": MessengerRuntimeService._build_event_files(event),
             "response_mode": "blocking",
@@ -274,7 +290,7 @@ class MessengerRuntimeService:
         participant_profile_pic_url: str | None = None,
         channel_actor_name: str | None = None,
         channel_actor_picture_url: str | None = None,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         try:
             payload: dict[str, Any] = {
                 "tenant_id": app.tenant_id,
@@ -296,9 +312,10 @@ class MessengerRuntimeService:
                 payload["channel_actor_name"] = channel_actor_name
             if channel_actor_picture_url:
                 payload["channel_actor_picture_url"] = channel_actor_picture_url
-            OmnichannelOpsService.record_message(cast(MessageWritePayload, payload))
+            return OmnichannelOpsService.record_message(cast(MessageWritePayload, payload))
         except Exception:
             logger.debug("Failed to persist omnichannel message channel=%s", channel_id, exc_info=True)
+            return None
 
     @staticmethod
     def _send_quick_replies_reply(
@@ -625,7 +642,7 @@ class MessengerRuntimeService:
                         channel_config=channel_config,
                     )
                 uname, upic = sender_display_for_event(event, recipient_psid)
-                cls._record_message(
+                record_message_result = cls._record_message(
                     app=app,
                     channel_id=channel_id,
                     event=event,
@@ -635,7 +652,9 @@ class MessengerRuntimeService:
                     participant_display_name=uname or None,
                     participant_profile_pic_url=upic or None,
                 )
-                reply_text = cls._generate_reply(app, channel_id, event)
+                reply_text = cls._generate_reply(
+                    app, channel_id, event, record_message_result=record_message_result
+                )
                 if not reply_text:
                     continue
                 if is_comment_event:

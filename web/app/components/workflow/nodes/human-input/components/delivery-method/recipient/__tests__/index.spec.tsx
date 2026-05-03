@@ -72,7 +72,7 @@ describe('Recipient', () => {
     })
     mockUseAppContext.mockReturnValue({
       userProfile: { email: 'owner@example.com' },
-      currentWorkspace: { name: 'Dify\'s Lab' },
+      currentWorkspace: { name: 'Vismarttech\'s Lab' },
     })
     mockUseMembers.mockReturnValue({
       data: {
@@ -100,7 +100,7 @@ describe('Recipient', () => {
     )
 
     expect(screen.getByText('D')).toBeInTheDocument()
-    expect(screen.getByText('Dify’s Lab')).toBeInTheDocument()
+    expect(screen.getByText('Vismarttech’s Lab')).toBeInTheDocument()
 
     fireEvent.click(screen.getByText('add-member'))
     fireEvent.click(screen.getByText('add-email'))

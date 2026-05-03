@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useGlobalPublicStore } from '@/context/global-public-context'
 import useDocumentTitle from '@/hooks/use-document-title'
 import { cn } from '@/utils/classnames'
+import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 
 export default function SignInLayout({ children }: PropsWithChildren) {
   const { t } = useTranslation()
@@ -20,7 +21,7 @@ export default function SignInLayout({ children }: PropsWithChildren) {
               {children}
             </div>
           </div>
-          {systemFeatures.branding.enabled === false && (
+          {showDifyOfficialChrome(systemFeatures.branding.enabled) && (
             <div className="system-xs-regular px-8 py-6 text-text-tertiary">
               ©
               {' '}

@@ -22,6 +22,7 @@ import { useGlobalPublicStore } from '@/context/global-public-context'
 import { useGetLanguage } from '@/context/i18n'
 import Link from '@/next/link'
 import { cn } from '@/utils/classnames'
+import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import { getMarketplaceUrl } from '@/utils/var'
 import { useMarketplacePlugins } from '../../plugins/marketplace/hooks'
 import { PluginCategoryEnum } from '../../plugins/types'
@@ -167,7 +168,8 @@ const AllTools = ({
     plugins: notInstalledPlugins = [],
   } = useMarketplacePlugins()
 
-  const { enable_marketplace } = useGlobalPublicStore(s => s.systemFeatures)
+  const { enable_marketplace, branding } = useGlobalPublicStore(s => s.systemFeatures)
+  const showOfficialDifyChrome = showDifyOfficialChrome(branding.enabled)
 
   useEffect(() => {
     if (!enable_marketplace)
@@ -295,18 +297,20 @@ const AllTools = ({
               <div className="text-sm font-medium text-text-secondary">
                 {t('tabs.noPluginsFound', { ns: 'workflow' })}
               </div>
-              <Link
-                href="https://github.com/langgenius/dify-plugins/issues/new?template=plugin_request.yaml"
-                target="_blank"
-              >
-                <Button
-                  size="small"
-                  variant="secondary-accent"
-                  className="h-6 cursor-pointer px-3 text-xs"
+              {showOfficialDifyChrome && (
+                <Link
+                  href="https://github.com/langgenius/dify-plugins/issues/new?template=plugin_request.yaml"
+                  target="_blank"
                 >
-                  {t('tabs.requestToCommunity', { ns: 'workflow' })}
-                </Button>
-              </Link>
+                  <Button
+                    size="small"
+                    variant="secondary-accent"
+                    className="h-6 cursor-pointer px-3 text-xs"
+                  >
+                    {t('tabs.requestToCommunity', { ns: 'workflow' })}
+                  </Button>
+                </Link>
+              )}
             </div>
           )}
         </div>

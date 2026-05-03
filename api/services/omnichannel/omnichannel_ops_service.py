@@ -387,7 +387,17 @@ class OmnichannelOpsService:
             message_id=msg_row_id,
             kind="messages",
         )
-        return {"id": msg_row_id, "conversation_id": conv_row_id}
+        from services.omnichannel.mini_crm_service import MiniCrmService
+
+        MiniCrmService.ensure_lead_for_conversation(
+            tenant_id=payload["tenant_id"],
+            conversation_id=conv_row_id,
+        )
+        return {
+            "id": msg_row_id,
+            "conversation_id": conv_row_id,
+            "channel_type": channel_type.value,
+        }
 
     @classmethod
     def create_sync_job(

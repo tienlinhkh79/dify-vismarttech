@@ -75,7 +75,7 @@ export class ComponentAnalyzer {
       return 'layout'
     if (/\/providers?\//.test(normalizedPath))
       return 'provider'
-    // Dify-specific types
+    // Vismarttech-specific types
     if (normalizedPath.includes('/components/base/'))
       return 'base-component'
     if (normalizedPath.includes('/context/'))

@@ -1,6 +1,7 @@
 'use client'
 import { useCallback } from 'react'
 import DifyLogo from '@/app/components/base/logo/dify-logo'
+import { APP_DISPLAY_NAME } from '@/config/app-display-name'
 import WorkplaceSelector from '@/app/components/header/account-dropdown/workplace-selector'
 import { ACCOUNT_SETTING_TAB } from '@/app/components/header/account-setting/constants'
 import { useAppContext } from '@/context/app-context'
@@ -17,6 +18,7 @@ import DatasetNav from './dataset-nav'
 import EnvNav from './env-nav'
 import ExploreNav from './explore-nav'
 import LicenseNav from './license-env'
+import MiniCrmNav from './mini-crm-nav'
 import OmnichannelNav from './omnichannel-nav'
 import PlanBadge from './plan-badge'
 import PluginsNav from './plugins-nav'
@@ -48,7 +50,7 @@ const Header = () => {
     <h1>
       <Link href="/apps" className="flex h-8 shrink-0 items-center justify-center gap-1 overflow-hidden px-0.5">
         <span className="sr-only">
-          {isBrandingEnabled && systemFeatures.branding.application_title ? systemFeatures.branding.application_title : 'Dify'}
+          {isBrandingEnabled && systemFeatures.branding.application_title ? systemFeatures.branding.application_title : APP_DISPLAY_NAME}
         </span>
         <DifyLogo />
       </Link>
@@ -79,6 +81,7 @@ const Header = () => {
           {!isCurrentWorkspaceDatasetOperator && <AppNav />}
           {(isCurrentWorkspaceEditor || isCurrentWorkspaceDatasetOperator) && <DatasetNav />}
           {!isCurrentWorkspaceDatasetOperator && <OmnichannelNav className={navClassName} />}
+          {!isCurrentWorkspaceDatasetOperator && <MiniCrmNav className={navClassName} />}
           {!isCurrentWorkspaceDatasetOperator && <ToolsNav className={navClassName} />}
         </div>
       </div>
@@ -100,6 +103,7 @@ const Header = () => {
         {!isCurrentWorkspaceDatasetOperator && <AppNav />}
         {(isCurrentWorkspaceEditor || isCurrentWorkspaceDatasetOperator) && <DatasetNav />}
         {!isCurrentWorkspaceDatasetOperator && <OmnichannelNav className={navClassName} />}
+        {!isCurrentWorkspaceDatasetOperator && <MiniCrmNav className={navClassName} />}
         {!isCurrentWorkspaceDatasetOperator && <ToolsNav className={navClassName} />}
       </div>
       <div className="flex min-w-0 flex-1 items-center justify-end pl-2 pr-3 min-[1280px]:pl-3">

@@ -11,6 +11,7 @@ import { invitationCheck } from '@/service/common'
 import { useIsLogin } from '@/service/use-common'
 import { LicenseStatus } from '@/types/feature'
 import { cn } from '@/utils/classnames'
+import { showDifyOfficialChrome, useEnterpriseStyleAuthChrome } from '@/utils/dify-official-chrome'
 import Loading from '../components/base/loading'
 import MailAndCodeAuth from './components/mail-and-code-auth'
 import MailAndPasswordAuth from './components/mail-and-password-auth'
@@ -156,7 +157,7 @@ const NormalForm = () => {
             )
           : (
               <div className="mx-auto w-full">
-                <h2 className="text-text-primary title-4xl-semi-bold">{systemFeatures.branding.enabled ? t('pageTitleForE', { ns: 'login' }) : t('pageTitle', { ns: 'login' })}</h2>
+                <h2 className="text-text-primary title-4xl-semi-bold">{useEnterpriseStyleAuthChrome(systemFeatures.branding.enabled) ? t('pageTitleForE', { ns: 'login' }) : t('pageTitle', { ns: 'login' })}</h2>
                 <p className="mt-2 text-text-tertiary body-md-regular">{t('welcome', { ns: 'login' })}</p>
               </div>
             )}
@@ -234,42 +235,40 @@ const NormalForm = () => {
               </div>
             </>
           )}
-          {!systemFeatures.branding.enabled && (
-            <>
-              <div className="mt-2 block w-full text-text-tertiary system-xs-regular">
-                {t('tosDesc', { ns: 'login' })}
+          {showDifyOfficialChrome(systemFeatures.branding.enabled) && (
+            <div className="mt-2 block w-full text-text-tertiary system-xs-regular">
+              {t('tosDesc', { ns: 'login' })}
               &nbsp;
-                <Link
-                  className="text-text-secondary system-xs-medium hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href="https://dify.ai/terms"
-                >
-                  {t('tos', { ns: 'login' })}
-                </Link>
+              <Link
+                className="text-text-secondary system-xs-medium hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://dify.ai/terms"
+              >
+                {t('tos', { ns: 'login' })}
+              </Link>
               &nbsp;&&nbsp;
-                <Link
-                  className="text-text-secondary system-xs-medium hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href="https://dify.ai/privacy"
-                >
-                  {t('pp', { ns: 'login' })}
-                </Link>
-              </div>
-              {IS_CE_EDITION && (
-                <div className="w-hull mt-2 block text-text-tertiary system-xs-regular">
-                  {t('goToInit', { ns: 'login' })}
+              <Link
+                className="text-text-secondary system-xs-medium hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://dify.ai/privacy"
+              >
+                {t('pp', { ns: 'login' })}
+              </Link>
+            </div>
+          )}
+          {!systemFeatures.branding.enabled && IS_CE_EDITION && (
+            <div className="w-hull mt-2 block text-text-tertiary system-xs-regular">
+              {t('goToInit', { ns: 'login' })}
               &nbsp;
-                  <Link
-                    className="text-text-secondary system-xs-medium hover:underline"
-                    href="/install"
-                  >
-                    {t('setAdminAccount', { ns: 'login' })}
-                  </Link>
-                </div>
-              )}
-            </>
+              <Link
+                className="text-text-secondary system-xs-medium hover:underline"
+                href="/install"
+              >
+                {t('setAdminAccount', { ns: 'login' })}
+              </Link>
+            </div>
           )}
         </div>
       </div>

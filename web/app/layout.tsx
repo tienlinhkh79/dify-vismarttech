@@ -13,6 +13,7 @@ import { AgentationLoader } from './components/devtools/agentation-loader'
 import { ReactScanLoader } from './components/devtools/react-scan/loader'
 import { I18nServerProvider } from './components/provider/i18n-server'
 import RoutePrefixHandle from './routePrefixHandle'
+import { APP_DISPLAY_NAME } from '@/config/app-display-name'
 import { basePath } from '@/utils/var'
 import './styles/globals.css'
 import './styles/markdown.css'
@@ -43,7 +44,7 @@ const LocaleLayout = async ({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Dify" />
+        <meta name="apple-mobile-web-app-title" content={APP_DISPLAY_NAME} />
         <link rel="apple-touch-icon" href={appIconHref} />
         <link rel="icon" type="image/png" sizes="32x32" href={appIconHref} />
         <link rel="icon" type="image/png" sizes="16x16" href={appIconHref} />

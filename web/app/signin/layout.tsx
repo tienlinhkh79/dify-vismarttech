@@ -3,6 +3,7 @@ import { useGlobalPublicStore } from '@/context/global-public-context'
 
 import useDocumentTitle from '@/hooks/use-document-title'
 import { cn } from '@/utils/classnames'
+import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import Header from './_header'
 
 export default function SignInLayout({ children }: any) {
@@ -18,7 +19,7 @@ export default function SignInLayout({ children }: any) {
               {children}
             </div>
           </div>
-          {systemFeatures.branding.enabled === false && (
+          {showDifyOfficialChrome(systemFeatures.branding.enabled) && (
             <div className="system-xs-regular px-8 py-6 text-text-tertiary">
               ©
               {' '}

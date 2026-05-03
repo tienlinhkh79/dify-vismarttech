@@ -41,6 +41,13 @@ class OmniChannelMessageDirection(StrEnum):
     OUTBOUND = "outbound"
 
 
+class OmniChannelCrmLeadStage(StrEnum):
+    NEW = "new"
+    QUALIFIED = "qualified"
+    WON = "won"
+    LOST = "lost"
+
+
 class OmniChannelMessageSource(StrEnum):
     WEBHOOK = "webhook"
     SYNC = "sync"
@@ -255,6 +262,41 @@ class OmniChannelConversation(TypeBase, kw_only=True):
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     participant_display_name: Mapped[str | None] = mapped_column(String(512), nullable=True)
     participant_profile_pic_url: Mapped[str | None] = mapped_column(LongText, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp(), init=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.current_timestamp(),
+        server_onupdate=func.current_timestamp(),
+        init=False,
+    )
+
+
+class OmniChannelCrmLead(TypeBase, kw_only=True):
+    """CRM row keyed by omnichannel conversation (one lead per conversation per tenant)."""
+
+    __tablename__ = "omnichannel_crm_leads"
+    __table_args__ = (
+        sa.PrimaryKeyConstraint("id", name="omnichannel_crm_lead_pkey"),
+        sa.UniqueConstraint("tenant_id", "conversation_id", name="uniq_omni_crm_lead_tenant_conversation"),
+        Index("idx_omni_crm_lead_tenant_stage", "tenant_id", "stage"),
+    )
+
+    id: Mapped[str] = mapped_column(
+        String(36), insert_default=lambda: str(uuidv7()), default_factory=lambda: str(uuidv7()), init=False
+    )
+    tenant_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    conversation_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    stage: Mapped[OmniChannelCrmLeadStage] = mapped_column(
+        EnumText(OmniChannelCrmLeadStage, length=32),
+        nullable=False,
+        default=OmniChannelCrmLeadStage.NEW,
+    )
+    owner_account_id: Mapped[str | None] = mapped_column(String(36), nullable=True, default=None)
+    notes: Mapped[str | None] = mapped_column(LongText, nullable=True, default=None)
+    source_override: Mapped[str | None] = mapped_column(String(512), nullable=True, default=None)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=func.current_timestamp(), init=False
     )

@@ -103,6 +103,9 @@ x-shared-env: &shared-api-worker-env
   CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://:difyai123456@redis:6379/1}
   CELERY_BACKEND: ${CELERY_BACKEND:-redis}
   BROKER_USE_SSL: ${BROKER_USE_SSL:-false}
+  BILLING_ENABLED: ${BILLING_ENABLED:-false}
+  BILLING_API_URL: ${BILLING_API_URL:-}
+  BILLING_API_SECRET_KEY: ${BILLING_API_SECRET_KEY:-dev-billing-secret-change-me}
   CELERY_USE_SENTINEL: ${CELERY_USE_SENTINEL:-false}
   CELERY_SENTINEL_MASTER_NAME: ${CELERY_SENTINEL_MASTER_NAME:-}
   CELERY_SENTINEL_PASSWORD: ${CELERY_SENTINEL_PASSWORD:-}
@@ -788,6 +791,8 @@ services:
       - ../api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py
       - ../api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py:/app/api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py
       - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
+      - ../api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py
+      - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
       - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
       - ../api/services/omnichannel:/app/api/services/omnichannel
@@ -852,6 +857,8 @@ services:
       - ../api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py
       - ../api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py:/app/api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py
       - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
+      - ../api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py
+      - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
       - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
       - ../api/services/omnichannel:/app/api/services/omnichannel
@@ -909,6 +916,8 @@ services:
       - ../api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py
       - ../api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py:/app/api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py
       - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
+      - ../api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py
+      - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
       - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
       - ../api/services/omnichannel:/app/api/services/omnichannel
@@ -955,6 +964,7 @@ services:
       ENABLE_WEBSITE_JINAREADER: ${ENABLE_WEBSITE_JINAREADER:-true}
       ENABLE_WEBSITE_FIRECRAWL: ${ENABLE_WEBSITE_FIRECRAWL:-true}
       ENABLE_WEBSITE_WATERCRAWL: ${ENABLE_WEBSITE_WATERCRAWL:-true}
+      HIDE_COMMUNITY_UI: ${HIDE_COMMUNITY_UI:-false}
 
   # The PostgreSQL database.
   db_postgres:
@@ -1714,6 +1724,31 @@ services:
     volumes:
       - ./volumes/unstructured:/app/data
 
+  billing_saas:
+    build:
+      context: ../billing_saas
+      dockerfile: Dockerfile
+    image: dify-billing-saas:local
+    pull_policy: never
+    restart: unless-stopped
+    environment:
+      BILLING_API_SECRET_KEY: ${BILLING_API_SECRET_KEY:-dev-billing-secret-change-me}
+      BILLING_PLAN_CATALOG_PATH: /app/plan_catalog.json
+      BILLING_SAAS_DB_PATH: /data/billing_saas.db
+    volumes:
+      - billing_saas_data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
 networks:
   # create a network between sandbox, api and ssrf_proxy, and can not access outside.
   ssrf_proxy_network:
@@ -1728,3 +1763,4 @@ networks:
 volumes:
   oradata:
   dify_es01_data:
+  billing_saas_data:

@@ -17,6 +17,7 @@ import Link from '@/next/link'
 import { useRouter, useSearchParams } from '@/next/navigation'
 import { activateMember } from '@/service/common'
 import { useInvitationCheck } from '@/service/use-common'
+import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import { timezones } from '@/utils/timezone'
 import { resolvePostLoginRedirect } from '../utils/post-login-redirect'
 
@@ -152,7 +153,7 @@ export default function InviteSettingsPage() {
           </Button>
         </div>
       </form>
-      {!systemFeatures.branding.enabled && (
+      {showDifyOfficialChrome(systemFeatures.branding.enabled) && (
         <div className="mt-2 block w-full text-text-tertiary system-xs-regular">
           {t('license.tip', { ns: 'login' })}
       &nbsp;

@@ -1,4 +1,5 @@
 'use client'
+import { APP_DISPLAY_NAME } from '@/config/app-display-name'
 import useTheme from '@/hooks/use-theme'
 import { cn } from '@/utils/classnames'
 import { basePath } from '@/utils/var'
@@ -36,7 +37,7 @@ const DifyLogo = ({
     <img
       src={`${basePath}${logoPathMap[themedStyle]}`}
       className={cn('block object-contain', logoSizeMap[size], className)}
-      alt="Dify logo"
+      alt={`${APP_DISPLAY_NAME} logo`}
     />
   )
 }

@@ -76,6 +76,7 @@ const { mockConfig, mockEnv } = vi.hoisted(() => ({
   mockEnv: {
     env: {
       NEXT_PUBLIC_SITE_ABOUT: 'show',
+      NEXT_PUBLIC_HIDE_COMMUNITY_UI: false,
     },
   },
 }))
@@ -157,6 +158,7 @@ describe('AccountDropdown', () => {
     vi.stubGlobal('localStorage', { removeItem: vi.fn() })
     mockConfig.IS_CLOUD_EDITION = false
     mockEnv.env.NEXT_PUBLIC_SITE_ABOUT = 'show'
+    mockEnv.env.NEXT_PUBLIC_HIDE_COMMUNITY_UI = false
 
     vi.mocked(useAppContext).mockReturnValue(baseAppContextValue)
     vi.mocked(useGlobalPublicStore).mockImplementation((selector?: unknown) => {
@@ -315,6 +317,16 @@ describe('AccountDropdown', () => {
   })
 
   describe('Branding and Environment', () => {
+    it('should hide community sections when NEXT_PUBLIC_HIDE_COMMUNITY_UI is true', () => {
+      mockEnv.env.NEXT_PUBLIC_HIDE_COMMUNITY_UI = true
+
+      renderWithRouter(<AppSelector />)
+      fireEvent.click(screen.getByRole('button'))
+
+      expect(screen.queryByText('common.userProfile.helpCenter')).not.toBeInTheDocument()
+      expect(screen.queryByText('common.userProfile.roadmap')).not.toBeInTheDocument()
+    })
+
     it('should hide sections when branding is enabled', () => {
       // Arrange
       vi.mocked(useGlobalPublicStore).mockImplementation((selector?: unknown) => {
