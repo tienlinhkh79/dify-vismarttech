@@ -110,5 +110,7 @@ export type CurrentPlanInfoBackend = {
 }
 
 export type SubscriptionUrlsBackend = {
-  url: string
+  url?: string
+  /** Legacy billing payloads; normalized to `url` on the API. */
+  payment_link?: string
 }

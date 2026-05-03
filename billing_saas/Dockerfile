@@ -2,7 +2,7 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir "fastapi>=0.115.0" "uvicorn[standard]>=0.32.0"
+RUN pip install --no-cache-dir "fastapi>=0.115.0" "python-multipart>=0.0.9" "uvicorn[standard]>=0.32.0"
 
 COPY plan_catalog.json /app/plan_catalog.json
 COPY app /app/app

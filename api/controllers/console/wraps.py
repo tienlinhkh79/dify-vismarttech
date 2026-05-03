@@ -58,13 +58,17 @@ def only_edition_cloud[**P, R](view: Callable[P, R]) -> Callable[P, R]:
 
 
 def cloud_or_saas_billing[**P, R](view: Callable[P, R]) -> Callable[P, R]:
-    """Allow console billing routes on CLOUD or on self-hosted SaaS when BILLING_ENABLED."""
+    """Allow console billing routes on CLOUD or whenever SaaS billing is enabled.
+
+    ``BILLING_ENABLED`` alone is sufficient for fork/self-hosted deployments that set a
+    non-default ``EDITION`` string but still use ``billing_saas`` / external billing.
+    """
 
     @wraps(view)
     def decorated(*args: P.args, **kwargs: P.kwargs):
         if dify_config.EDITION == "CLOUD":
             return view(*args, **kwargs)
-        if dify_config.EDITION == "SELF_HOSTED" and dify_config.BILLING_ENABLED:
+        if dify_config.BILLING_ENABLED:
             return view(*args, **kwargs)
         abort(404)
 

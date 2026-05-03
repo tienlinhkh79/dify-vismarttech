@@ -21,7 +21,7 @@ if not exist "%SCRIPT_PATH%" (
 )
 
 echo [INFO] Starting one-click mode...
-echo [INFO] This will auto-detect tunnel URL, update docker/.env, and restart web + nginx.
+echo [INFO] Auto-detect tunnel URL, update docker/.env (API prefix, 9Pay return, billing URLs — no example.com), restart web + nginx + billing_saas.
 echo(
 powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_PATH%" -OriginUrl "http://127.0.0.1:80"
 

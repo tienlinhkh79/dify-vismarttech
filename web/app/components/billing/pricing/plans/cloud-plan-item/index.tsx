@@ -89,8 +89,13 @@ const CloudPlanItem: FC<CloudPlanItemProps> = ({
         return
 
       const res = await fetchSubscriptionUrls(plan, isYear ? 'year' : 'month')
+      const payUrl = res.url ?? res.payment_link
+      if (!payUrl) {
+        toast.error(t('paymentUrlMissing', { ns: 'billing' }))
+        return
+      }
       // Adb Block additional tracking block the gtag, so we need to redirect directly
-      window.location.href = res.url
+      window.location.href = payUrl
     }
     finally {
       setLoading(false)

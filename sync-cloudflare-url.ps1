@@ -68,20 +68,30 @@ $uri = [Uri]$resolvedUrl
 $baseUrl = "$($uri.Scheme)://$($uri.Host)"
 
 Write-Host "Using tunnel URL: $baseUrl" -ForegroundColor Cyan
-Write-Host "Updating docker/.env: CONSOLE_API_URL and APP_API_URL..." -ForegroundColor Cyan
+Write-Host "Updating docker/.env: console URLs, NEXT_PUBLIC_API_PREFIX, 9Pay return, billing stubs..." -ForegroundColor Cyan
+
+$apiPrefix = "$baseUrl/console/api"
+$ninepayReturn = "$baseUrl/billing/9pay-return"
+$checkoutStub = "$baseUrl/billing/checkout"
+$invoicesStub = "$baseUrl/account"
 
 $envContent = Get-Content -Raw -Path $envFile
 $envContent = Set-OrAppendEnvVar -Content $envContent -Key 'CONSOLE_API_URL' -Value $baseUrl
+$envContent = Set-OrAppendEnvVar -Content $envContent -Key 'CONSOLE_WEB_URL' -Value $baseUrl
 $envContent = Set-OrAppendEnvVar -Content $envContent -Key 'APP_API_URL' -Value $baseUrl
+$envContent = Set-OrAppendEnvVar -Content $envContent -Key 'NEXT_PUBLIC_API_PREFIX' -Value $apiPrefix
+$envContent = Set-OrAppendEnvVar -Content $envContent -Key 'NINEPAY_RETURN_URL_BASE' -Value $ninepayReturn
+$envContent = Set-OrAppendEnvVar -Content $envContent -Key 'BILLING_CHECKOUT_BASE_URL' -Value $checkoutStub
+$envContent = Set-OrAppendEnvVar -Content $envContent -Key 'BILLING_INVOICES_URL' -Value $invoicesStub
 Set-Content -Path $envFile -Value $envContent -Encoding UTF8
 
-Write-Host "Updated $envFile" -ForegroundColor Green
+Write-Host "Updated $envFile (no example.com for billing stubs)." -ForegroundColor Green
 
 if (-not $SkipRestart) {
-    Write-Host "Restarting web and nginx containers..." -ForegroundColor Cyan
+    Write-Host "Restarting web, nginx, billing_saas..." -ForegroundColor Cyan
     Push-Location $dockerDir
     try {
-        docker compose up -d --force-recreate --no-deps web nginx
+        docker compose up -d --force-recreate --no-deps web nginx billing_saas
     }
     finally {
         Pop-Location

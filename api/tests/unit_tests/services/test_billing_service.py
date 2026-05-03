@@ -346,7 +346,8 @@ class TestBillingServiceSubscriptionInfo:
         result = BillingService.get_subscription(plan, interval, email, tenant_id)
 
         # Assert
-        assert result == expected_response
+        assert result["url"] == "https://payment.example.com/checkout"
+        assert result["payment_link"] == "https://payment.example.com/checkout"
         mock_send_request.assert_called_once_with(
             "GET",
             "/subscription/payment-link",
@@ -1075,7 +1076,8 @@ class TestBillingServiceEdgeCases:
         result = BillingService.get_subscription(plan, interval, "", "")
 
         # Assert
-        assert result == expected_response
+        assert result["url"] == "https://payment.example.com/checkout"
+        assert result["payment_link"] == "https://payment.example.com/checkout"
         mock_send_request.assert_called_once_with(
             "GET",
             "/subscription/payment-link",
@@ -1426,6 +1428,7 @@ class TestBillingServiceIntegrationScenarios:
         # Step 2: Get payment link for upgrade
         mock_send_request.return_value = {"payment_link": "https://payment.example.com/upgrade"}
         payment_link = BillingService.get_subscription("professional", "monthly", "user@example.com", tenant_id)
+        assert payment_link["url"] == "https://payment.example.com/upgrade"
         assert "payment_link" in payment_link
 
         # Step 3: Verify new rate limits after upgrade

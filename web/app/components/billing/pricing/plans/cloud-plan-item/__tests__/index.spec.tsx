@@ -219,6 +219,45 @@ describe('CloudPlanItem', () => {
       })
     })
 
+    it('should redirect using payment_link when url is absent', async () => {
+      mockFetchSubscriptionUrls.mockResolvedValueOnce({ payment_link: 'https://legacy-pay.example' })
+      render(
+        <CloudPlanItem
+          plan={Plan.professional}
+          currentPlan={Plan.sandbox}
+          planRange={PlanRange.monthly}
+          canPay
+        />,
+      )
+
+      fireEvent.click(screen.getByRole('button', { name: 'billing.plansCommon.startBuilding' }))
+
+      await waitFor(() => {
+        expect(assignedHref).toBe('https://legacy-pay.example')
+      })
+    })
+
+    it('should toast when payment url is missing', async () => {
+      const toastError = vi.spyOn(toast, 'error').mockImplementation(() => 'id')
+      mockFetchSubscriptionUrls.mockResolvedValueOnce({})
+      renderWithToastHost(
+        <CloudPlanItem
+          plan={Plan.professional}
+          currentPlan={Plan.sandbox}
+          planRange={PlanRange.monthly}
+          canPay
+        />,
+      )
+
+      fireEvent.click(screen.getByRole('button', { name: 'billing.plansCommon.startBuilding' }))
+
+      await waitFor(() => {
+        expect(toastError).toHaveBeenCalled()
+      })
+      expect(assignedHref).toBe('')
+      toastError.mockRestore()
+    })
+
     // Covers L92-93: isFreePlan guard inside handleGetPayUrl
     it('should do nothing when clicking sandbox plan CTA that is not the current plan', async () => {
       render(

@@ -48,6 +48,21 @@ class BillingStore:
                     amount INTEGER NOT NULL,
                     refunded INTEGER NOT NULL DEFAULT 0
                 );
+                CREATE TABLE IF NOT EXISTS ninepay_pending (
+                    invoice_no TEXT PRIMARY KEY,
+                    tenant_id TEXT NOT NULL,
+                    plan TEXT NOT NULL,
+                    interval TEXT NOT NULL,
+                    created_at INTEGER NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS ninepay_applied (
+                    invoice_no TEXT PRIMARY KEY,
+                    payment_no TEXT,
+                    tenant_id TEXT NOT NULL,
+                    plan TEXT NOT NULL,
+                    interval TEXT NOT NULL,
+                    applied_at INTEGER NOT NULL
+                );
                 """
             )
             conn.commit()
@@ -167,3 +182,86 @@ class BillingStore:
             conn.execute("UPDATE usage_charges SET refunded = 1 WHERE id = ?", (history_id,))
             conn.commit()
         return True
+
+    def save_ninepay_pending(self, invoice_no: str, tenant_id: str, plan: str, interval: str, created_at: int) -> None:
+        self.ensure_tenant(tenant_id)
+        with self._lock, self._connect() as conn:
+            conn.execute(
+                "INSERT OR REPLACE INTO ninepay_pending (invoice_no, tenant_id, plan, interval, created_at) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (invoice_no, tenant_id, plan, interval, created_at),
+            )
+            conn.commit()
+
+    def get_ninepay_pending(self, invoice_no: str) -> dict[str, Any] | None:
+        with self._lock, self._connect() as conn:
+            row = conn.execute("SELECT * FROM ninepay_pending WHERE invoice_no = ?", (invoice_no,)).fetchone()
+            if row is None:
+                return None
+            return dict(row)
+
+    def delete_ninepay_pending(self, invoice_no: str) -> None:
+        with self._lock, self._connect() as conn:
+            conn.execute("DELETE FROM ninepay_pending WHERE invoice_no = ?", (invoice_no,))
+            conn.commit()
+
+    def ninepay_is_applied(self, invoice_no: str) -> bool:
+        with self._lock, self._connect() as conn:
+            row = conn.execute(
+                "SELECT 1 FROM ninepay_applied WHERE invoice_no = ? LIMIT 1",
+                (invoice_no,),
+            ).fetchone()
+            return row is not None
+
+    def list_ninepay_pending_older_than(self, max_created_at: int) -> list[dict[str, Any]]:
+        """Pending rows with created_at <= max_created_at (e.g. now - 20 minutes)."""
+        with self._lock, self._connect() as conn:
+            rows = conn.execute(
+                "SELECT * FROM ninepay_pending WHERE created_at <= ? ORDER BY created_at ASC",
+                (max_created_at,),
+            ).fetchall()
+            return [dict(r) for r in rows]
+
+    def try_apply_ninepay_success(self, invoice_no: str, payment_no: str, applied_at: int) -> str:
+        """Load pending row inside txn; apply plan once per invoice. Returns applied | duplicate | missing_pending."""
+        with self._lock, self._connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                pending = conn.execute(
+                    "SELECT * FROM ninepay_pending WHERE invoice_no = ?",
+                    (invoice_no,),
+                ).fetchone()
+                if pending is None:
+                    dup = conn.execute(
+                        "SELECT 1 FROM ninepay_applied WHERE invoice_no = ? LIMIT 1",
+                        (invoice_no,),
+                    ).fetchone()
+                    conn.rollback()
+                    return "duplicate" if dup is not None else "missing_pending"
+
+                tenant_id = str(pending["tenant_id"])
+                plan = str(pending["plan"])
+                interval = str(pending["interval"])
+                conn.execute("INSERT OR IGNORE INTO tenants (tenant_id) VALUES (?)", (tenant_id,))
+
+                try:
+                    conn.execute(
+                        "INSERT INTO ninepay_applied (invoice_no, payment_no, tenant_id, plan, interval, applied_at) "
+                        "VALUES (?, ?, ?, ?, ?, ?)",
+                        (invoice_no, payment_no, tenant_id, plan, interval, applied_at),
+                    )
+                except sqlite3.IntegrityError:
+                    conn.rollback()
+                    return "duplicate"
+
+                conn.execute(
+                    "UPDATE tenants SET plan = ?, interval = ? WHERE tenant_id = ?",
+                    (plan, interval, tenant_id),
+                )
+                conn.execute("DELETE FROM ninepay_pending WHERE invoice_no = ?", (invoice_no,))
+            except Exception:
+                conn.rollback()
+                raise
+            else:
+                conn.commit()
+        return "applied"

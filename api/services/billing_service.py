@@ -76,7 +76,13 @@ class BillingService:
     @classmethod
     def get_subscription(cls, plan: str, interval: str, prefilled_email: str = "", tenant_id: str = ""):
         params = {"plan": plan, "interval": interval, "prefilled_email": prefilled_email, "tenant_id": tenant_id}
-        return cls._send_request("GET", "/subscription/payment-link", params=params)
+        data = cls._send_request("GET", "/subscription/payment-link", params=params)
+        if not isinstance(data, dict):
+            return data
+        link = data.get("url") or data.get("payment_link")
+        if link:
+            return {**data, "url": link}
+        return data
 
     @classmethod
     def get_model_provider_payment_link(cls, provider_name: str, tenant_id: str, account_id: str, prefilled_email: str):

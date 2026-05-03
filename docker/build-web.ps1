@@ -1,4 +1,5 @@
 # Build image `web` từ source (Windows). Tránh lỗi BuildKit + symlink trong docker/volumes.
+# Sau khi thêm route mới (vd. /billing/checkout) mà container vẫn 404: build lại bằng script này rồi recreate web.
 # Nếu Execution Policy chặn .ps1: dùng `build-web.cmd` trong cùng thư mục, hoặc
 #   powershell -NoProfile -ExecutionPolicy Bypass -File .\build-web.ps1
 # Sau build thành công mặc định chạy lại container `web` (--force-recreate) vì chỉ `up -d web`

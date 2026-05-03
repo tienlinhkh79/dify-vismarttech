@@ -35,17 +35,27 @@ function Update-DockerEnvWithTunnelUrl {
         throw "Cannot find docker env file: $envFile"
     }
 
+    $apiPrefix = "$TunnelBaseUrl/console/api"
+    $ninepayReturn = "$TunnelBaseUrl/billing/9pay-return"
+    $checkoutStub = "$TunnelBaseUrl/billing/checkout"
+    $invoicesStub = "$TunnelBaseUrl/account"
+
     $envContent = Get-Content -Raw -Path $envFile
     $envContent = Set-OrAppendEnvVar -Content $envContent -Key 'CONSOLE_API_URL' -Value $TunnelBaseUrl
+    $envContent = Set-OrAppendEnvVar -Content $envContent -Key 'CONSOLE_WEB_URL' -Value $TunnelBaseUrl
     $envContent = Set-OrAppendEnvVar -Content $envContent -Key 'APP_API_URL' -Value $TunnelBaseUrl
+    $envContent = Set-OrAppendEnvVar -Content $envContent -Key 'NEXT_PUBLIC_API_PREFIX' -Value $apiPrefix
+    $envContent = Set-OrAppendEnvVar -Content $envContent -Key 'NINEPAY_RETURN_URL_BASE' -Value $ninepayReturn
+    $envContent = Set-OrAppendEnvVar -Content $envContent -Key 'BILLING_CHECKOUT_BASE_URL' -Value $checkoutStub
+    $envContent = Set-OrAppendEnvVar -Content $envContent -Key 'BILLING_INVOICES_URL' -Value $invoicesStub
     Set-Content -Path $envFile -Value $envContent -Encoding UTF8
 
-    Write-Host "Updated docker/.env with $TunnelBaseUrl" -ForegroundColor Green
+    Write-Host "Updated docker/.env (tunnel + NEXT_PUBLIC_API_PREFIX + billing stubs, no example.com)." -ForegroundColor Green
 
     Push-Location $dockerDir
     try {
-        Write-Host "Restarting web + nginx..." -ForegroundColor Cyan
-        docker compose up -d --force-recreate --no-deps web nginx
+        Write-Host "Restarting web, nginx, billing_saas..." -ForegroundColor Cyan
+        docker compose up -d --force-recreate --no-deps web nginx billing_saas
     }
     finally {
         Pop-Location

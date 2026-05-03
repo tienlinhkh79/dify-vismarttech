@@ -182,5 +182,15 @@
   "viewBilling": "Manage billing and subscriptions",
   "viewBillingAction": "Manage",
   "viewBillingDescription": "Manage payment methods, invoices, and subscription changes",
-  "viewBillingTitle": "Billing and Subscriptions"
+  "viewBillingTitle": "Billing and Subscriptions",
+  "paymentUrlMissing": "Payment link is unavailable. Check billing service configuration.",
+  "ninepayReturn.title": "Payment",
+  "ninepayReturn.description": "If your payment succeeded, your workspace plan will update shortly after confirmation from the payment provider. You can open billing from your account menu to verify your plan.",
+  "ninepayReturn.openApps": "Go to workspace",
+  "ninepayReturn.openAccount": "Account settings",
+  "checkoutStub.title": "Subscription checkout",
+  "checkoutStub.body": "Card payment is not active on this deployment yet. When your administrator enables 9Pay (or another gateway) on the billing service, choosing a paid plan will open the real payment page instead of this screen.",
+  "checkoutStub.selection": "Selected plan: {{plan}} ({{interval}})",
+  "checkoutStub.backToApps": "Back to Studio",
+  "checkoutStub.accountSettings": "Account settings"
 }
