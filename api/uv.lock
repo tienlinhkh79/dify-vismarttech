@@ -1522,7 +1522,7 @@ requires-dist = [
     { name = "opentelemetry-instrumentation-httpx", specifier = "==0.61b0" },
     { name = "opentelemetry-instrumentation-redis", specifier = "==0.61b0" },
     { name = "opentelemetry-instrumentation-sqlalchemy", specifier = "==0.61b0" },
-    { name = "opentelemetry-propagator-b3", specifier = "==1.40.0" },
+    { name = "opentelemetry-propagator-b3", specifier = "==1.41.1" },
     { name = "opentelemetry-proto", specifier = "==1.40.0" },
     { name = "opentelemetry-sdk", specifier = "==1.40.0" },
     { name = "opentelemetry-semantic-conventions", specifier = "==0.61b0" },
@@ -3947,15 +3947,15 @@ wheels = [
 
 [[package]]
 name = "opentelemetry-propagator-b3"
-version = "1.40.0"
+version = "1.41.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "opentelemetry-api" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/eb/fe/e0c84af5c654ec42165ba57af83c7f67e4b8af77f836ddc29dee59ff73c6/opentelemetry_propagator_b3-1.40.0.tar.gz", hash = "sha256:59b6925498947c08a1b7e0dd38193ff97e5009bec74ec23824300c2e32f77bcf", size = 9587, upload-time = "2026-03-04T14:17:30.079Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/ef/e2c1093e21fb9b5f8e44fa6cebacf2cbb60b47b4646d652805dcce48f3b8/opentelemetry_propagator_b3-1.41.1.tar.gz", hash = "sha256:e8563b588aa5f1f90740dcd678f04d5634de2d4e0077b7ca4a177c71a02f745d", size = 9587, upload-time = "2026-04-24T13:15:48.349Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8f/84/8654cc0539b5145046b2e60d058cebad401a600dd0b1240f1711c6788643/opentelemetry_propagator_b3-1.40.0-py3-none-any.whl", hash = "sha256:cb72a1698fd1d1b434f70dc90c1de62da8ade1dd84850d1f040eccf6a420fa7b", size = 8922, upload-time = "2026-03-04T14:17:14.732Z" },
+    { url = "https://files.pythonhosted.org/packages/c8/78/388ea1ae84fd3d2858c782f0410d73d936ffbd1a54711e45874490c576e7/opentelemetry_propagator_b3-1.41.1-py3-none-any.whl", hash = "sha256:f4b045d0aa4b5c17ac25a371bf3d08173a2f4b8f19a94357e57ae690c15415dc", size = 8921, upload-time = "2026-04-24T13:15:30.408Z" },
 ]
 
 [[package]]
