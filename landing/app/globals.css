@@ -242,6 +242,61 @@ a {
   background: var(--surface-soft);
 }
 
+.floating-contact {
+  position: fixed;
+  right: clamp(1rem, 2.6vw, 2rem);
+  bottom: clamp(1.25rem, 4vw, 2.5rem);
+  z-index: 30;
+  display: inline-flex;
+}
+
+.floating-contact-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  background: #1f6fff;
+  box-shadow: 0 12px 24px rgba(15, 32, 80, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.floating-contact-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px rgba(15, 32, 80, 0.25);
+}
+
+.floating-contact-button svg {
+  width: 1.7rem;
+  height: 1.7rem;
+  color: #fff;
+}
+
+.floating-contact-chatbot {
+  color: #fff;
+}
+
+.floating-contact-chatbot svg {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.floating-contact-chatbot svg path:not(:first-child) {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.3;
+}
+
+.floating-contact-chatbot svg path:first-child {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.3;
+}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -493,6 +548,16 @@ a {
 @media (max-width: 640px) {
   .container {
     width: min(100% - 1rem, 1120px);
+  }
+
+  .floating-contact {
+    right: 0.8rem;
+    bottom: 1rem;
+  }
+
+  .floating-contact-button {
+    width: 3rem;
+    height: 3rem;
   }
 
   .mockup-grid {

@@ -53,6 +53,16 @@ function MenuIcon() {
   )
 }
 
+function ChatbotIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 56 56">
+      <path d="M12.5 24.5c0-7 5.7-12.5 12.7-12.5h5.6c7 0 12.7 5.5 12.7 12.5v3.6c0 7-5.7 12.5-12.7 12.5H26L19 46v-5.6a12.7 12.7 0 0 1-6.5-11.1v-4.8Z" />
+      <path d="M21.8 27.8h.1M34.2 27.8h.1M22.8 34c2.9 2.1 7.5 2.1 10.4 0" />
+      <path d="M40.6 13.8v4.8M38.2 16.2H43M15.8 13.8v4.8M13.4 16.2h4.8" />
+    </svg>
+  )
+}
+
 export default function SiteShell({ children }: SiteShellProps) {
   const pathname = usePathname()
   const year = new Date().getFullYear()
@@ -151,6 +161,12 @@ export default function SiteShell({ children }: SiteShellProps) {
         )}
       </header>
       {children}
+
+      <aside className="floating-contact" aria-label="Quick contact">
+        <a aria-label="Chatbot" className="floating-contact-button floating-contact-chatbot" href={links.app}>
+          <ChatbotIcon />
+        </a>
+      </aside>
 
       <footer className="border-t border-[var(--border)] bg-white/70">
         <div className="container py-12">
