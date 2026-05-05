@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { PreferencesProvider } from '@/components/preferences-context'
 import { siteContent } from '@/content/site'
 import './globals.css'
 
@@ -20,7 +21,9 @@ type RootLayoutProps = Readonly<{
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <PreferencesProvider>{children}</PreferencesProvider>
+      </body>
     </html>
   )
 }

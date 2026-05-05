@@ -1,3 +1,7 @@
+'use client'
+
+import { usePreferences } from '@/components/preferences-context'
+import { copy } from '@/content/i18n'
 import SiteShell from '@/components/site-shell'
 import { siteContent } from '@/content/site'
 import { links } from '@/lib/links'
@@ -18,13 +22,23 @@ const sections = [
 ]
 
 export default function FeaturesPage() {
+  const { lang } = usePreferences()
+  const t = copy[lang]
+  const intro = lang === 'vi'
+    ? `Năng lực nền tảng của ${siteContent.company}`
+    : `${siteContent.company} platform capabilities`
+  const desc = lang === 'vi'
+    ? 'Bộ tính năng được tổ chức theo nhu cầu triển khai AI thực tế: từ thiết kế flow, quản trị dữ liệu tri thức đến vận hành và chăm sóc khách hàng đa kênh.'
+    : 'Feature modules are organized for real-world AI delivery: from workflow design and knowledge operations to omnichannel customer support.'
+  const ctaTitle = lang === 'vi' ? 'Sẵn sàng đưa AI vào production?' : 'Ready to move AI into production?'
+  const ctaButton = lang === 'vi' ? 'Bắt đầu ngay' : 'Get Started'
+
   return (
     <SiteShell>
       <section className="container py-16 md:py-20">
-        <h1 className="text-4xl font-bold tracking-tight">Năng lực nền tảng của {siteContent.company}</h1>
+        <h1 className="text-4xl font-bold tracking-tight">{intro}</h1>
         <p className="mt-4 max-w-2xl text-slate-600">
-          Bộ tính năng được tổ chức theo nhu cầu triển khai AI thực tế: từ thiết kế flow, quản trị dữ liệu
-          tri thức đến vận hành và chăm sóc khách hàng đa kênh.
+          {desc}
         </p>
         <div className="mt-8 grid gap-5 md:grid-cols-3">
           {sections.map(section => (
@@ -41,10 +55,10 @@ export default function FeaturesPage() {
       </section>
       <section className="container pb-16">
         <div className="card p-8 text-center">
-          <h2 className="text-2xl font-bold">Sẵn sàng đưa AI vào production?</h2>
+          <h2 className="text-2xl font-bold">{ctaTitle}</h2>
           <div className="mt-6 flex justify-center">
             <a className="btn btn-primary" href={links.signin}>
-              Bắt đầu ngay
+              {ctaButton}
             </a>
           </div>
         </div>

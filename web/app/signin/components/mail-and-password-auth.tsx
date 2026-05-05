@@ -6,13 +6,16 @@ import { trackEvent } from '@/app/components/base/amplitude'
 import Button from '@/app/components/base/button'
 import Input from '@/app/components/base/input'
 import { toast } from '@/app/components/base/ui/toast'
-import { emailRegex } from '@/config'
+import { API_PREFIX, emailRegex } from '@/config'
 import { useLocale } from '@/context/i18n'
 import Link from '@/next/link'
 import { useRouter, useSearchParams } from '@/next/navigation'
 import { login } from '@/service/common'
 import { setWebAppAccessToken } from '@/service/webapp-auth'
+import { getPurifyHref } from '@/utils'
+import { cn } from '@/utils/classnames'
 import { encryptPassword } from '@/utils/encryption'
+import style from '../page.module.css'
 import { resolvePostLoginRedirect } from '../utils/post-login-redirect'
 
 type MailAndPasswordAuthProps = {
@@ -32,6 +35,8 @@ export default function MailAndPasswordAuth({ isInvite, isEmailSetup, allowRegis
   const [password, setPassword] = useState('')
 
   const [isLoading, setIsLoading] = useState(false)
+  const googleOAuthLink = getPurifyHref(`${API_PREFIX}/oauth/login/google`)
+  const googleAuthHref = isInvite ? `${googleOAuthLink}?${searchParams.toString()}` : googleOAuthLink
 
   const handleEmailPasswordLogin = async () => {
     if (!email) {
@@ -162,6 +167,17 @@ export default function MailAndPasswordAuth({ isInvite, isEmailSetup, allowRegis
           {t('signBtn', { ns: 'login' })}
         </Button>
       </div>
+      <div className="my-4 flex items-center">
+        <div className="h-px flex-1 bg-divider-regular" />
+        <span className="px-3 text-text-tertiary system-xs-medium-uppercase">{t('or', { ns: 'login' })}</span>
+        <div className="h-px flex-1 bg-divider-regular" />
+      </div>
+      <a href={googleAuthHref}>
+        <Button className="w-full" variant="secondary">
+          <span className={cn(style.googleIcon, 'mr-2 h-5 w-5')} />
+          <span className="truncate leading-normal">{t('withGoogle', { ns: 'login' })}</span>
+        </Button>
+      </a>
     </form>
   )
 }
