@@ -19,11 +19,14 @@ describe('Loading Component', () => {
     expect(container.firstChild).toHaveClass('h-full')
   })
 
-  it('contains SVG with spin-animation class', () => {
+  it('contains loading animation container', () => {
     const { container } = render(<Loading />)
+    expect(container.querySelector('.spin-animation')).toBeInTheDocument()
+  })
 
-    const svgElement = container.querySelector('svg')
-    expect(svgElement).toHaveClass('spin-animation')
+  it('shows logo when using app type', () => {
+    const { container } = render(<Loading type="app" />)
+    expect(container.querySelector('img')).toBeInTheDocument()
   })
 
   it('handles undefined props correctly', () => {

@@ -3,7 +3,8 @@ import type { FC, PropsWithChildren } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import AppUnavailable from '@/app/components/base/app-unavailable'
-import Loading from '@/app/components/base/loading'
+import LoadingAnim from '@/app/components/base/chat/chat/loading-anim'
+import DifyLogo from '@/app/components/base/logo/dify-logo'
 import { useWebAppStore } from '@/context/web-app-context'
 import { useRouter, useSearchParams } from '@/next/navigation'
 import { fetchAccessToken } from '@/service/share'
@@ -102,8 +103,9 @@ const Splash: FC<PropsWithChildren> = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <Loading />
+      <div className="flex h-full flex-col items-center justify-center gap-y-4">
+        <DifyLogo size="large" />
+        <LoadingAnim type="text" />
       </div>
     )
   }
