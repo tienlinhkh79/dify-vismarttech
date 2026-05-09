@@ -18,8 +18,17 @@ export default function ZaloOAuthReturnHandler() {
     if (!zalo)
       return
 
-    const reasonRaw = params.get('reason') || ''
-    const reasonSuffix = reasonRaw ? `: ${reasonRaw}` : ''
+    const reasonRaw = (params.get('reason') || '').trim()
+    const knownReason = new Set([
+      'missing_state',
+      'expired_state',
+      'missing_code',
+      'channel_not_found',
+      'oauth_callback_error',
+    ])
+    const reasonKey = knownReason.has(reasonRaw) ? `settings.channelsZaloOAuthReason.${reasonRaw}` : ''
+    const reasonText = reasonKey ? t(reasonKey, { ns: 'common' }) : reasonRaw
+    const reasonSuffix = reasonText ? `: ${reasonText}` : ''
     if (zalo === 'success')
       toast.success(t('settings.channelsZaloOAuthToastSuccess', { ns: 'common' }))
     else

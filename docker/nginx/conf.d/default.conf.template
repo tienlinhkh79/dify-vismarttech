@@ -5,6 +5,14 @@ server {
     server_name ${NGINX_SERVER_NAME};
     resolver 127.0.0.11 valid=10s ipv6=off;
 
+    # Canonicalize host + protocol so auth cookies stay on one domain.
+    if ($host != ${NGINX_SERVER_NAME}) {
+      return 301 https://${NGINX_SERVER_NAME}$request_uri;
+    }
+    if ($scheme = http) {
+      return 301 https://$host$request_uri;
+    }
+
     set $api_upstream http://api:5001;
     set $web_upstream http://web:3000;
     set $plugin_upstream http://plugin_daemon:5002;
@@ -60,6 +68,10 @@ server {
     # when the request clearly comes from marketing pages.
     location ^~ /_next/ {
       set $next_upstream $web_upstream;
+      # Landing routes: root and marketing pages.
+      if ($http_referer ~* "https?://[^/]+/?(\\?|$)") {
+        set $next_upstream http://landing:3001;
+      }
       if ($http_referer ~* "/(features|pricing|contact|privacy|terms)(\\?|/|$)") {
         set $next_upstream http://landing:3001;
       }

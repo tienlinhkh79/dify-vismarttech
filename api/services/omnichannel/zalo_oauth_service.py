@@ -33,6 +33,16 @@ class _OAuthStatePayload(TypedDict):
     code_verifier: str
 
 
+class ZaloOAuthCallbackError(ValueError):
+    """Typed OAuth callback failure with stable reason code for UI redirects."""
+
+    reason: str
+
+    def __init__(self, reason: str, message: str) -> None:
+        super().__init__(message)
+        self.reason = reason
+
+
 class ZaloOAuthService:
     AUTH_URL = "https://oauth.zaloapp.com/v4/oa/permission"
     TOKEN_URL = "https://oauth.zaloapp.com/v4/oa/access_token"
@@ -119,10 +129,10 @@ class ZaloOAuthService:
     @classmethod
     def _decode_state(cls, state: str | None) -> _OAuthStatePayload:
         if not state:
-            raise ValueError("Missing OAuth state")
+            raise ZaloOAuthCallbackError("missing_state", "Missing OAuth state")
         raw = redis_client.get(cls._redis_key(state))
         if raw is None:
-            raise ValueError("Invalid or expired OAuth state")
+            raise ZaloOAuthCallbackError("expired_state", "Invalid or expired OAuth state")
         if isinstance(raw, bytes):
             raw = raw.decode("utf-8")
         data = json.loads(raw)
@@ -153,7 +163,7 @@ class ZaloOAuthService:
     @classmethod
     def handle_callback(cls, *, code: str | None, state: str | None) -> str:
         if not code:
-            raise ValueError("Missing authorization code")
+            raise ZaloOAuthCallbackError("missing_code", "Missing authorization code")
         oauth_state = cls._decode_state(state)
         redis_client.delete(cls._redis_key(state or ""))
 
@@ -166,7 +176,7 @@ class ZaloOAuthService:
                 )
             )
             if not row or not row.oauth_application_id:
-                raise ValueError("Zalo channel not found")
+                raise ZaloOAuthCallbackError("channel_not_found", "Zalo channel not found")
 
             app_secret = row.decrypt_app_secret()
             token_payload = cls._post_token(

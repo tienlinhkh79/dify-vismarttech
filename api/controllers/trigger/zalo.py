@@ -12,6 +12,7 @@ from flask import jsonify, redirect, request
 from configs import dify_config
 from controllers.trigger import bp
 from services.omnichannel.channel_config_service import ChannelConfigService
+from services.omnichannel.zalo_oauth_service import ZaloOAuthCallbackError
 from services.omnichannel.zalo_oauth_service import ZaloOAuthService
 from services.omnichannel.zalo_runtime_service import ZaloRuntimeService
 from services.omnichannel.zalo_service import ZaloService
@@ -33,9 +34,12 @@ def zalo_oauth_callback():
     try:
         channel_id = ZaloOAuthService.handle_callback(code=code, state=state)
         return redirect(f"{base}/?zalo_oauth=success&channel_id={quote(channel_id, safe='')}")
+    except ZaloOAuthCallbackError as e:
+        logger.warning("Zalo OAuth callback failed reason=%s", e.reason, exc_info=True)
+        return redirect(f"{base}/?zalo_oauth=error&reason={quote(e.reason, safe='')}")
     except ValueError:
         logger.warning("Zalo OAuth callback failed", exc_info=True)
-        return redirect(f"{base}/?zalo_oauth=error&reason=invalid_callback")
+        return redirect(f"{base}/?zalo_oauth=error&reason=oauth_callback_error")
 
 
 @bp.route("/zalo/webhook/<string:channel_id>", methods=["GET"])
