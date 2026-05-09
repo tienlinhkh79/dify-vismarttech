@@ -85,6 +85,7 @@ a {
   font-size: clamp(1.625rem, 2vw, 2.1rem);
   font-weight: 700;
   letter-spacing: -0.02em;
+  color: #0b1736;
 }
 
 .animate-fade-up {
@@ -302,6 +303,68 @@ a {
   border: 1px solid var(--border);
   border-radius: 18px;
   box-shadow: 0 12px 30px rgba(19, 45, 112, 0.08);
+}
+
+.pricing-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4f83ff, #8a5bff);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.pricing-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 38px rgba(24, 53, 126, 0.16);
+}
+
+.pricing-card:hover::before {
+  opacity: 1;
+}
+
+.pricing-card-featured {
+  border-color: #88a8ff;
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgba(95, 128, 255, 0.22) 0%, rgba(95, 128, 255, 0) 50%),
+    linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+  box-shadow: 0 24px 44px rgba(52, 90, 185, 0.24);
+}
+
+.pricing-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 0.85rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #2f67ff, #8458ff);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0.35rem 0.65rem;
+  text-transform: uppercase;
+}
+
+.pricing-item {
+  position: relative;
+  padding-left: 1.1rem;
+}
+
+.pricing-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.42rem;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--primary);
 }
 
 .card-featured {

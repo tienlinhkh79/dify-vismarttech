@@ -6,7 +6,6 @@ import ProductMockup from '@/components/product-mockup'
 import SiteShell from '@/components/site-shell'
 import WorkflowFlow from '@/components/workflow-flow'
 import { planCards } from '@/content/site'
-import { links } from '@/lib/links'
 
 const featureList = [
   {
@@ -108,10 +107,10 @@ export default function HomePage() {
               {t.description}
             </p>
             <div className="animate-fade-up delay-3 mt-8 flex flex-wrap gap-3">
-              <a className="btn btn-primary" href={links.signin}>
+              <a className="btn btn-primary" href="/signin">
                 {t.ctaFree}
               </a>
-              <a className="btn btn-secondary" href={links.register}>
+              <a className="btn btn-secondary" href="/signup">
                 {t.ctaRegister}
               </a>
               <a className="btn btn-secondary" href="#features">
@@ -241,10 +240,10 @@ export default function HomePage() {
             {t.finalDesc}
           </p>
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <a className="btn btn-primary" href={links.signin}>
+            <a className="btn btn-primary" href="/signin">
               {t.finalCta1}
             </a>
-            <a className="btn btn-secondary" href={links.app}>
+            <a className="btn btn-secondary" href="/apps">
               {t.finalCta2}
             </a>
           </div>

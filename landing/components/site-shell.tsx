@@ -6,7 +6,6 @@ import { useState, type ReactNode } from 'react'
 import { usePreferences } from '@/components/preferences-context'
 import { copy } from '@/content/i18n'
 import { siteContent } from '@/content/site'
-import { links } from '@/lib/links'
 
 type SiteShellProps = {
   children: ReactNode
@@ -78,7 +77,7 @@ export default function SiteShell({ children }: SiteShellProps) {
       <header className="container sticky top-4 z-20 py-4">
         <div className="glass-header grid grid-cols-[1fr_auto_1fr] items-center gap-4 rounded-2xl px-5 py-3">
           <Link className="flex items-center" href="/" aria-label={siteContent.company}>
-            <img alt={`${siteContent.company} logo`} className="h-8 w-auto" src="/vismarttech-logo.png" />
+            <img alt={`${siteContent.company} logo`} className="h-8 w-auto" src="/logo/logo.png" />
           </Link>
 
           <button
@@ -123,7 +122,7 @@ export default function SiteShell({ children }: SiteShellProps) {
                 <GlobeIcon />
                 <span>{lang === 'vi' ? 'EN' : 'VI'}</span>
               </button>
-              <a className="btn btn-primary header-cta" href={links.app} target="_blank" rel="noreferrer">{t.nav.app}</a>
+              <a className="btn btn-primary header-cta" href="/apps">{t.nav.app}</a>
             </div>
           </nav>
         </div>
@@ -155,7 +154,7 @@ export default function SiteShell({ children }: SiteShellProps) {
                   <span>{lang === 'vi' ? 'EN' : 'VI'}</span>
                 </button>
               </div>
-              <a className="btn btn-primary w-full" href={links.app} target="_blank" rel="noreferrer">{t.nav.app}</a>
+              <a className="btn btn-primary w-full" href="/apps">{t.nav.app}</a>
             </nav>
           </div>
         )}
@@ -163,7 +162,7 @@ export default function SiteShell({ children }: SiteShellProps) {
       {children}
 
       <aside className="floating-contact" aria-label="Quick contact">
-        <a aria-label="Chatbot" className="floating-contact-button floating-contact-chatbot" href={links.app}>
+        <a aria-label="Chatbot" className="floating-contact-button floating-contact-chatbot" href="/apps">
           <ChatbotIcon />
         </a>
       </aside>

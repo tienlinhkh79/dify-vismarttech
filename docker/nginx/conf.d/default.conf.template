@@ -54,6 +54,61 @@ server {
       include proxy.conf;
     }
 
+    # Resolve Next.js static asset conflict between landing and web apps.
+    # Default to web console assets to avoid chunk 404 on app routes
+    # (e.g. /omnichannel, /datasets, /plugins). Route to landing only
+    # when the request clearly comes from marketing pages.
+    location ^~ /_next/ {
+      set $next_upstream $web_upstream;
+      if ($http_referer ~* "/(features|pricing|contact|privacy|terms)(\\?|/|$)") {
+        set $next_upstream http://landing:3001;
+      }
+      proxy_pass $next_upstream;
+      include proxy.conf;
+    }
+
+    # Serve landing page on root without exposing port 3001.
+    location = / {
+      proxy_pass http://landing:3001;
+      include proxy.conf;
+    }
+
+    # Serve landing subpages from the same domain root.
+    location ^~ /features {
+      proxy_pass http://landing:3001;
+      include proxy.conf;
+    }
+
+    location ^~ /pricing {
+      proxy_pass http://landing:3001;
+      include proxy.conf;
+    }
+
+    location ^~ /contact {
+      proxy_pass http://landing:3001;
+      include proxy.conf;
+    }
+
+    location ^~ /privacy {
+      proxy_pass http://landing:3001;
+      include proxy.conf;
+    }
+
+    location ^~ /terms {
+      proxy_pass http://landing:3001;
+      include proxy.conf;
+    }
+
+    location = /robots.txt {
+      proxy_pass http://landing:3001;
+      include proxy.conf;
+    }
+
+    location = /sitemap.xml {
+      proxy_pass http://landing:3001;
+      include proxy.conf;
+    }
+
     location / {
       proxy_pass $web_upstream;
       include proxy.conf;

@@ -3,7 +3,6 @@
 import { usePreferences } from '@/components/preferences-context'
 import SiteShell from '@/components/site-shell'
 import { planCards, siteContent } from '@/content/site'
-import { links } from '@/lib/links'
 
 export default function PricingPage() {
   const { lang } = usePreferences()
@@ -17,33 +16,44 @@ export default function PricingPage() {
   const note = lang === 'vi'
     ? `Bảng giá chi tiết sẽ được đội ngũ ${siteContent.company} tư vấn theo nhu cầu triển khai.`
     : `Detailed pricing can be tailored by ${siteContent.company} based on your rollout scope.`
+  const cardCta = lang === 'vi' ? 'Chọn gói này' : 'Choose this plan'
+  const includeText = lang === 'vi' ? 'Bao gồm' : 'Includes'
 
   return (
     <SiteShell>
       <section className="container py-16 md:py-20">
-        <h1 className="text-4xl font-bold tracking-tight">{title}</h1>
-        <p className="mt-4 max-w-2xl text-slate-600">
+        <p className="kicker mb-4">
+          <span className="dot" />
+          Pricing
+        </p>
+        <h1 className="text-4xl font-bold tracking-tight md:text-5xl">{title}</h1>
+        <p className="mt-4 max-w-2xl text-slate-600 text-lg">
           {desc}
         </p>
-        <div className="mt-8 grid gap-5 md:grid-cols-3">
-          {planCards.map(plan => (
-            <article className="card p-6" key={plan.name}>
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
+          {planCards.map((plan, index) => (
+            <article className={`card pricing-card p-6 ${index === 1 ? 'pricing-card-featured' : ''}`} key={plan.name}>
+              {index === 1 && <span className="pricing-badge">Khuyen nghi</span>}
               <h2 className="text-xl font-semibold">{plan.name}</h2>
-              <p className="mt-2 text-sm text-slate-600">{plan.summary}</p>
-              <ul className="mt-4 space-y-2 text-sm text-slate-700">
+              <p className="mt-2 text-sm text-slate-600 min-h-[40px]">{plan.summary}</p>
+              <p className="mt-4 text-xs uppercase tracking-[0.08em] text-slate-500">{includeText}</p>
+              <ul className="mt-3 space-y-2 text-sm text-slate-700">
                 {plan.highlights.map(item => (
-                  <li key={item}>- {item}</li>
+                  <li className="pricing-item" key={item}>{item}</li>
                 ))}
               </ul>
+              <a className={`btn mt-6 w-full ${index === 1 ? 'btn-primary' : 'btn-secondary'}`} href="/signin">
+                {cardCta}
+              </a>
             </article>
           ))}
         </div>
       </section>
       <section className="container pb-16">
-        <div className="card p-8 text-center">
+        <div className="card final-cta p-8 text-center">
           <h2 className="text-2xl font-bold">{ctaTitle}</h2>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <a className="btn btn-primary" href={links.signin}>
+            <a className="btn btn-primary" href="/signin">
               {ctaPrimary}
             </a>
             <a className="btn btn-secondary" href="/contact">

@@ -4,7 +4,6 @@ import { usePreferences } from '@/components/preferences-context'
 import { copy } from '@/content/i18n'
 import SiteShell from '@/components/site-shell'
 import { siteContent } from '@/content/site'
-import { links } from '@/lib/links'
 
 const sections = [
   {
@@ -57,7 +56,7 @@ export default function FeaturesPage() {
         <div className="card p-8 text-center">
           <h2 className="text-2xl font-bold">{ctaTitle}</h2>
           <div className="mt-6 flex justify-center">
-            <a className="btn btn-primary" href={links.signin}>
+            <a className="btn btn-primary" href="/signin">
               {ctaButton}
             </a>
           </div>
