@@ -1,0 +1,80 @@
+identity:
+  name: sapo_products
+  author: Dify Community
+  label:
+    en_US: Sapo Products
+    vi_VN: Sapo San pham
+description:
+  human:
+    en_US: Query products from Sapo store.
+    vi_VN: Truy van san pham tu cua hang Sapo.
+  llm: Manage Sapo products with actions list, get, count, create, update, delete.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, get, count, create, update, delete"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Products
+      - value: get
+        label:
+          en_US: Get Product by ID
+      - value: count
+        label:
+          en_US: Count Products
+      - value: create
+        label:
+          en_US: Create Product
+      - value: update
+        label:
+          en_US: Update Product
+      - value: delete
+        label:
+          en_US: Delete Product
+  - name: product_id
+    type: number
+    required: false
+    label:
+      en_US: Product ID
+    llm_description: Product ID for get action.
+    form: llm
+  - name: query
+    type: string
+    required: false
+    label:
+      en_US: Query
+    llm_description: Product name filter for list action.
+    form: llm
+  - name: product_payload
+    type: string
+    required: false
+    label:
+      en_US: Product Payload (JSON)
+    llm_description: JSON object payload used for create or update.
+    form: llm
+  - name: fields
+    type: string
+    required: false
+    label:
+      en_US: Fields
+    llm_description: Comma-separated fields for list/get.
+    form: llm
+  - name: limit
+    type: number
+    required: false
+    label:
+      en_US: Limit
+    llm_description: Number of records per page.
+    form: llm
+  - name: page
+    type: number
+    required: false
+    label:
+      en_US: Page
+    llm_description: Page index for list action.
+    form: llm

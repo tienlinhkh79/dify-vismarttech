@@ -36,4 +36,8 @@ def test_create_channel_rejects_at_omnichannel_limit(monkeypatch: pytest.MonkeyP
         fake_session = m_sess.return_value.__enter__.return_value
         fake_session.scalar.return_value = None
         with pytest.raises(ValueError, match="omnichannel channels"):
-            ChannelManagementService.create_channel("tenant-1", "user-1", _payload())
+            ChannelManagementService.create_channel(
+                "00000000-0000-0000-0000-000000000001",
+                "00000000-0000-0000-0000-000000000002",
+                _payload(),
+            )

@@ -108,7 +108,10 @@ export default function ZaloOAuthModal({
     void run()
 
     return () => {
-      clearPoll()
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
     }
   }, [open, channelId])
 

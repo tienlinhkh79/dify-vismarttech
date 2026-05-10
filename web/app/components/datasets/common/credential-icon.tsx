@@ -41,6 +41,7 @@ export const CredentialIcon: React.FC<CredentialIconProps> = ({
       >
         <img
           src={avatarUrl}
+          alt={name}
           width={size}
           height={size}
           className="shrink-0 object-contain"

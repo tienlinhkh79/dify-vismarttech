@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import uuid
 from collections.abc import Callable
 from typing import Any, NotRequired, TypedDict
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from configs import dify_config
@@ -14,6 +16,17 @@ from extensions.ext_database import db
 from libs.datetime_utils import naive_utc_now
 from models.trigger import OmniChannelConfig, OmniChannelType
 from services.feature_service import FeatureService
+
+
+def _validate_uuid_field(field_label: str, value: str) -> str:
+    """Reject invalid UUIDs before DB insert (avoids opaque SQLAlchemy/DB errors)."""
+    s = (value or "").strip()
+    if not s:
+        raise ValueError(f"{field_label} is required")
+    try:
+        return str(uuid.UUID(s))
+    except ValueError as e:
+        raise ValueError(f"{field_label} must be a valid UUID") from e
 
 
 def _zalo_oauth_status(config: OmniChannelConfig) -> str:
@@ -148,9 +161,13 @@ class ChannelManagementService:
         if channel_type == OmniChannelType.ZALO_OA and not access_token_plain and not oauth_application_id:
             raise ValueError("Zalo OA requires oauth_application_id when access_token is empty")
 
+        tenant_uuid = _validate_uuid_field("tenant_id", tenant_id)
+        user_uuid = _validate_uuid_field("user_id", user_id)
+        app_uuid = _validate_uuid_field("app_id", payload["app_id"])
+
         encrypted_access: str | None
         if access_token_plain:
-            encrypted_access = encrypter.encrypt_token(tenant_id, access_token_plain)
+            encrypted_access = encrypter.encrypt_token(tenant_uuid, access_token_plain)
         else:
             encrypted_access = None
 
@@ -161,14 +178,16 @@ class ChannelManagementService:
 
             if dify_config.BILLING_ENABLED:
                 feats = FeatureService.get_features(tenant_id)
-                ch = feats.omnichannel_channels
-                if 0 < ch.limit <= ch.size:
+                oc = feats.omnichannel_channels
+                limit_n = int(getattr(oc, "limit", 0) or 0)
+                size_n = int(getattr(oc, "size", 0) or 0)
+                if 0 < limit_n <= size_n:
                     raise ValueError("The number of omnichannel channels has reached the limit of your subscription.")
 
             row = OmniChannelConfig(
-                tenant_id=tenant_id,
-                app_id=payload["app_id"],
-                user_id=user_id,
+                tenant_id=tenant_uuid,
+                app_id=app_uuid,
+                user_id=user_uuid,
                 name=payload["name"],
                 channel_type=channel_type,
                 channel_id=payload["channel_id"],
@@ -176,12 +195,20 @@ class ChannelManagementService:
                 page_id=payload["external_resource_id"],
                 graph_api_version=payload["api_version"],
                 oauth_application_id=oauth_application_id,
-                encrypted_verify_token=encrypter.encrypt_token(tenant_id, payload["verify_token"]),
-                encrypted_app_secret=encrypter.encrypt_token(tenant_id, payload["client_secret"]),
+                encrypted_verify_token=encrypter.encrypt_token(tenant_uuid, payload["verify_token"]),
+                encrypted_app_secret=encrypter.encrypt_token(tenant_uuid, payload["client_secret"]),
                 encrypted_page_access_token=encrypted_access,
+                encrypted_oa_refresh_token=None,
+                oa_token_expires_at=None,
             )
             session.add(row)
-            session.commit()
+            try:
+                session.commit()
+            except IntegrityError as e:
+                session.rollback()
+                raise ValueError(
+                    "Channel ID already exists or conflicts with existing data."
+                ) from e
             session.refresh(row)
             return ChannelManagementService._to_masked_dict(row)
 
@@ -200,7 +227,7 @@ class ChannelManagementService:
             if "name" in payload:
                 row.name = payload["name"]
             if "app_id" in payload:
-                row.app_id = payload["app_id"]
+                row.app_id = _validate_uuid_field("app_id", str(payload["app_id"]))
             if "external_resource_id" in payload:
                 row.page_id = payload["external_resource_id"]
             if "api_version" in payload:

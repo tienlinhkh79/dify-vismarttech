@@ -11,7 +11,7 @@ import { invitationCheck } from '@/service/common'
 import { useIsLogin } from '@/service/use-common'
 import { LicenseStatus } from '@/types/feature'
 import { cn } from '@/utils/classnames'
-import { showDifyOfficialChrome, useEnterpriseStyleAuthChrome } from '@/utils/dify-official-chrome'
+import { shouldUseEnterpriseStyleAuthChrome, showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import Loading from '../components/base/loading'
 import MailAndCodeAuth from './components/mail-and-code-auth'
 import MailAndPasswordAuth from './components/mail-and-password-auth'
@@ -157,7 +157,7 @@ const NormalForm = () => {
             )
           : (
               <div className="mx-auto w-full">
-                <h2 className="text-text-primary title-4xl-semi-bold">{useEnterpriseStyleAuthChrome(systemFeatures.branding.enabled) ? t('pageTitleForE', { ns: 'login' }) : t('pageTitle', { ns: 'login' })}</h2>
+                <h2 className="text-text-primary title-4xl-semi-bold">{shouldUseEnterpriseStyleAuthChrome(systemFeatures.branding.enabled) ? t('pageTitleForE', { ns: 'login' }) : t('pageTitle', { ns: 'login' })}</h2>
                 <p className="mt-2 text-text-tertiary body-md-regular">{t('welcome', { ns: 'login' })}</p>
               </div>
             )}

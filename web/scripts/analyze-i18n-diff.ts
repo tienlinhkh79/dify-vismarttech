@@ -15,6 +15,7 @@ import { execSync } from 'node:child_process'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import * as ts from 'typescript'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -93,28 +94,73 @@ function formatValue(value: TranslationValue): string {
  * Parse TS file content to extract the translation object
  */
 function parseTsContent(content: string): NestedTranslation {
-  // Remove 'const translation = ' and 'export default translation'
-  let cleaned = content
-    .replace(/const\s+translation\s*=\s*/, '')
-    .replace(/export\s+default\s+translation\s*(?:;\s*)?$/, '')
-    .trim()
-
-  // Remove trailing semicolon if present
-  if (cleaned.endsWith(';'))
-    cleaned = cleaned.slice(0, -1)
-
-  // Use Function constructor to safely evaluate the object literal
-  // This handles JS object syntax like unquoted keys, template literals, etc.
-  try {
-    // eslint-disable-next-line no-new-func
-    const fn = new Function(`return (${cleaned})`)
-    return fn() as NestedTranslation
-  }
-  catch (e) {
-    console.error('Failed to parse TS content:', e)
-    console.error('Content preview:', cleaned.slice(0, 200))
+  const sourceFile = ts.createSourceFile('translation.ts', content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
+  const translationInitializer = findTranslationInitializer(sourceFile)
+  if (!translationInitializer)
     return {}
+
+  const parsed = parseTranslationExpression(translationInitializer)
+  return isNestedTranslation(parsed) ? parsed : {}
+}
+
+function findTranslationInitializer(sourceFile: ts.SourceFile): ts.Expression | undefined {
+  let initializer: ts.Expression | undefined
+
+  for (const statement of sourceFile.statements) {
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (ts.isIdentifier(declaration.name) && declaration.name.text === 'translation')
+          initializer = declaration.initializer
+      }
+    }
+    else if (ts.isExportAssignment(statement) && !ts.isIdentifier(statement.expression)) {
+      initializer = statement.expression
+    }
   }
+
+  return initializer
+}
+
+function parseTranslationExpression(expression: ts.Expression): string | string[] | NestedTranslation | undefined {
+  if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression))
+    return expression.text
+
+  if (ts.isArrayLiteralExpression(expression)) {
+    const values: string[] = []
+    for (const element of expression.elements) {
+      if (ts.isStringLiteral(element) || ts.isNoSubstitutionTemplateLiteral(element))
+        values.push(element.text)
+      else
+        return undefined
+    }
+    return values
+  }
+
+  if (ts.isObjectLiteralExpression(expression)) {
+    const result: NestedTranslation = {}
+    for (const property of expression.properties) {
+      if (!ts.isPropertyAssignment(property))
+        continue
+
+      const name = getPropertyName(property.name)
+      if (!name)
+        continue
+
+      const value = parseTranslationExpression(property.initializer)
+      if (value !== undefined)
+        result[name] = value
+    }
+    return result
+  }
+}
+
+function getPropertyName(name: ts.PropertyName): string | undefined {
+  if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name))
+    return name.text
+}
+
+function isNestedTranslation(value: string | string[] | NestedTranslation | undefined): value is NestedTranslation {
+  return !!value && typeof value === 'object' && !Array.isArray(value)
 }
 
 /**

@@ -44,6 +44,7 @@ vi.mock('@/app/components/base/select', async () => {
                   key={item.value}
                   type="button"
                   role="option"
+                  aria-selected={item.value === selectedValue}
                   onClick={() => {
                     setSelectedValue(item.value)
                     onSelect(item)

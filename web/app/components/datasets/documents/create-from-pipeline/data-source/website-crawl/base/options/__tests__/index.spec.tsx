@@ -34,21 +34,29 @@ vi.mock('@/app/components/rag-pipeline/hooks/use-input-fields', () => ({
 
 // Mock BaseField
 const mockBaseField = vi.fn()
+
+type MockFieldConfig = { variable?: string, label?: string } | undefined
+type MockFieldForm = {
+  getFieldValue?: (field: string) => string
+  setFieldValue?: (field: string, value: string) => void
+}
+
+const MockField = (config: MockFieldConfig, { form }: { form: MockFieldForm }) => (
+  <div data-testid={`field-${config?.variable || 'unknown'}`}>
+    <span data-testid={`field-label-${config?.variable}`}>{config?.label}</span>
+    <input
+      data-testid={`field-input-${config?.variable}`}
+      value={form.getFieldValue?.(config?.variable || '') || ''}
+      onChange={e => form.setFieldValue?.(config?.variable || '', e.target.value)}
+    />
+  </div>
+)
+
 vi.mock('@/app/components/base/form/form-scenarios/base/field', () => {
   const MockBaseFieldFactory = (props: Record<string, unknown>) => {
     mockBaseField(props)
-    const config = props.config as { variable?: string, label?: string } | undefined
-    const MockField = ({ form }: { form: { getFieldValue?: (field: string) => string, setFieldValue?: (field: string, value: string) => void } }) => (
-      <div data-testid={`field-${config?.variable || 'unknown'}`}>
-        <span data-testid={`field-label-${config?.variable}`}>{config?.label}</span>
-        <input
-          data-testid={`field-input-${config?.variable}`}
-          value={form.getFieldValue?.(config?.variable || '') || ''}
-          onChange={e => form.setFieldValue?.(config?.variable || '', e.target.value)}
-        />
-      </div>
-    )
-    return MockField
+    const config = props.config as MockFieldConfig
+    return MockField.bind(null, config)
   }
   return { default: MockBaseFieldFactory }
 })

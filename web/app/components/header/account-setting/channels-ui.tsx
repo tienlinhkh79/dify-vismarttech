@@ -168,10 +168,12 @@ export const ChannelItem = ({
   channel,
   t,
   onEdit,
+  onDelete,
 }: {
   channel: Channel
   t: TranslateFn
   onEdit: (channel: Channel) => void
+  onDelete: (channel: Channel) => void
 }) => {
   const channelBadge = getChannelConnectionBadge(channel, t)
   return (
@@ -186,9 +188,14 @@ export const ChannelItem = ({
           {channel.platform} · {channel.channel_id} · {channel.enabled ? t('dataSource.website.active', { ns: 'common' }) : t('dataSource.website.inactive', { ns: 'common' })}
         </div>
       </div>
-      <Button size="small" variant="secondary" onClick={() => onEdit(channel)}>
-        {t('operation.edit', { ns: 'common' })}
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button size="small" variant="secondary" onClick={() => onEdit(channel)}>
+          {t('operation.edit', { ns: 'common' })}
+        </Button>
+        <Button size="small" destructive onClick={() => onDelete(channel)}>
+          {t('operation.delete', { ns: 'common' })}
+        </Button>
+      </div>
     </div>
   )
 }

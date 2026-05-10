@@ -105,14 +105,11 @@ const BlockInput: FC<IBlockInputProps> = ({
     handleSubmit(value)
   }, [])
 
-  // Prevent rerendering caused cursor to jump to the start of the contentEditable element
-  const TextAreaContentView = () => {
-    return (
-      <div className={cn(style, className)} data-testid="block-input-content">
-        {renderSafeContent(currentValue || '')}
-      </div>
-    )
-  }
+  const textAreaContentView = (
+    <div className={cn(style, className)} data-testid="block-input-content">
+      {renderSafeContent(currentValue || '')}
+    </div>
+  )
 
   const placeholder = ''
   const editAreaClassName = 'focus:outline-hidden bg-transparent text-sm'
@@ -139,7 +136,7 @@ const BlockInput: FC<IBlockInputProps> = ({
               />
             </div>
           )
-        : <TextAreaContentView />}
+        : textAreaContentView}
     </div>
   )
 

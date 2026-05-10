@@ -9,7 +9,7 @@ import type {
   WorkflowToolProviderResponse,
 } from '@/app/components/tools/types'
 import { buildProviderQuery } from './_tools_util'
-import { get, patch, post } from './base'
+import { del, get, patch, post } from './base'
 
 export type MessengerChannel = {
   id?: string
@@ -231,16 +231,24 @@ export const listChannels = () => {
   return get<ChannelListResponse>('/workspaces/current/channels')
 }
 
-export const createChannel = (payload: Channel) => {
-  return post<ChannelItemResponse>('/workspaces/current/channels', {
-    body: payload,
-  })
+export const createChannel = (payload: Channel, options?: { silent?: boolean }) => {
+  return post<ChannelItemResponse>(
+    '/workspaces/current/channels',
+    { body: payload },
+    options?.silent ? { silent: true } : {},
+  )
 }
 
-export const updateChannel = (channelId: string, payload: Partial<Channel>) => {
-  return patch<ChannelItemResponse>(`/workspaces/current/channels/${channelId}`, {
-    body: payload,
-  })
+export const updateChannel = (channelId: string, payload: Partial<Channel>, options?: { silent?: boolean }) => {
+  return patch<ChannelItemResponse>(
+    `/workspaces/current/channels/${channelId}`,
+    { body: payload },
+    options?.silent ? { silent: true } : {},
+  )
+}
+
+export const deleteChannel = (channelId: string) => {
+  return del<{ result: string }>(`/workspaces/current/channels/${channelId}`)
 }
 
 export type ZaloOAuthStartResponse = {

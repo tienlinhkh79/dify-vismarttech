@@ -6,6 +6,7 @@ import type { Tag } from '@/app/components/base/tag-management/constant'
 import type { CreateAppModalProps } from '@/app/components/explore/create-app-modal'
 import type { EnvironmentVariable } from '@/app/components/workflow/types'
 import type { App } from '@/types/app'
+import type { TFunction } from 'i18next'
 import { RiBuildingLine, RiGlobalLine, RiLockLine, RiMoreFill, RiVerifiedBadgeLine } from '@remixicon/react'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -65,6 +66,105 @@ const AccessControl = dynamic(() => import('@/app/components/app/app-access-cont
 type AppCardProps = {
   app: App
   onRefresh?: () => void
+}
+
+type AppCardOperationsProps = HtmlContentProps & {
+  app: App
+  t: TFunction
+  webappAuthEnabled: boolean
+  isCurrentWorkspaceEditor: boolean
+  openInstalledApp: () => Promise<void>
+  onEdit: () => void
+  onDuplicate: () => void
+  onExport: () => void | Promise<void>
+  onSwitch: () => void
+  onDelete: () => void
+  onAccessControl: () => void
+}
+
+const AppCardOperations = ({
+  app,
+  t,
+  webappAuthEnabled,
+  isCurrentWorkspaceEditor,
+  openInstalledApp,
+  onEdit,
+  onDuplicate,
+  onExport,
+  onSwitch,
+  onDelete,
+  onAccessControl,
+  open,
+  onClose,
+  onClick,
+}: AppCardOperationsProps) => {
+  const { data: userCanAccessApp, isLoading: isGettingUserCanAccessApp } = useGetUserCanAccessApp({
+    appId: app.id,
+    enabled: !!open && webappAuthEnabled,
+  })
+
+  const runAction = (e: React.MouseEvent<HTMLButtonElement>, action: () => void | Promise<void>) => {
+    e.stopPropagation()
+    onClick?.()
+    e.preventDefault()
+    void action()
+  }
+
+  const canOpenInstalledApp = !app.has_draft_trigger
+    && (!webappAuthEnabled || !(isGettingUserCanAccessApp || !userCanAccessApp?.result))
+
+  return (
+    <div className="relative flex w-full flex-col py-1" onMouseLeave={() => onClose?.()}>
+      <button type="button" className="mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 hover:bg-state-base-hover" onClick={e => runAction(e, onEdit)}>
+        <span className="text-text-secondary system-sm-regular">{t('editApp', { ns: 'app' })}</span>
+      </button>
+      <Divider className="my-1" />
+      <button type="button" className="mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 hover:bg-state-base-hover" onClick={e => runAction(e, onDuplicate)}>
+        <span className="text-text-secondary system-sm-regular">{t('duplicate', { ns: 'app' })}</span>
+      </button>
+      <button type="button" className="mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 hover:bg-state-base-hover" onClick={e => runAction(e, onExport)}>
+        <span className="text-text-secondary system-sm-regular">{t('export', { ns: 'app' })}</span>
+      </button>
+      {(app.mode === AppModeEnum.COMPLETION || app.mode === AppModeEnum.CHAT) && (
+        <>
+          <Divider className="my-1" />
+          <button
+            type="button"
+            className="mx-1 flex h-8 cursor-pointer items-center rounded-lg px-3 hover:bg-state-base-hover"
+            onClick={e => runAction(e, onSwitch)}
+          >
+            <span className="text-sm leading-5 text-text-secondary">{t('switch', { ns: 'app' })}</span>
+          </button>
+        </>
+      )}
+      {canOpenInstalledApp && (
+        <>
+          <Divider className="my-1" />
+          <button type="button" className="mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 hover:bg-state-base-hover" onClick={e => runAction(e, openInstalledApp)}>
+            <span className="text-text-secondary system-sm-regular">{t('openInExplore', { ns: 'app' })}</span>
+          </button>
+        </>
+      )}
+      <Divider className="my-1" />
+      {webappAuthEnabled && isCurrentWorkspaceEditor && (
+        <>
+          <button type="button" className="mx-1 flex h-8 cursor-pointer items-center rounded-lg px-3 hover:bg-state-base-hover" onClick={e => runAction(e, onAccessControl)}>
+            <span className="text-sm leading-5 text-text-secondary">{t('accessControl', { ns: 'app' })}</span>
+          </button>
+          <Divider className="my-1" />
+        </>
+      )}
+      <button
+        type="button"
+        className="group mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 py-[6px] hover:bg-state-destructive-hover"
+        onClick={e => runAction(e, onDelete)}
+      >
+        <span className="text-text-secondary system-sm-regular group-hover:text-text-destructive">
+          {t('operation.delete', { ns: 'common' })}
+        </span>
+      </button>
+    </div>
+  )
 }
 
 const AppCard = ({ app, onRefresh }: AppCardProps) => {
@@ -206,136 +306,24 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
     setShowAccessControl(false)
   }, [onRefresh, setShowAccessControl])
 
-  const Operations = (props: HtmlContentProps) => {
-    const { data: userCanAccessApp, isLoading: isGettingUserCanAccessApp } = useGetUserCanAccessApp({ appId: app?.id, enabled: (!!props?.open && systemFeatures.webapp_auth.enabled) })
-    const onMouseLeave = async () => {
-      props.onClose?.()
+  const openInstalledApp = useCallback(async () => {
+    try {
+      await openAsyncWindow(async () => {
+        const { installed_apps } = await fetchInstalledAppList(app.id)
+        if (installed_apps?.length > 0)
+          return `${basePath}/explore/installed/${installed_apps[0].id}`
+        throw new Error('No app found in Explore')
+      }, {
+        onError: (err) => {
+          toast.error(`${err.message || err}`)
+        },
+      })
     }
-    const onClickSettings = async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation()
-      props.onClick?.()
-      e.preventDefault()
-      setShowEditModal(true)
+    catch (e: unknown) {
+      const message = e instanceof Error ? e.message : `${e}`
+      toast.error(message)
     }
-    const onClickDuplicate = async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation()
-      props.onClick?.()
-      e.preventDefault()
-      setShowDuplicateModal(true)
-    }
-    const onClickExport = async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation()
-      props.onClick?.()
-      e.preventDefault()
-      exportCheck()
-    }
-    const onClickSwitch = async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation()
-      props.onClick?.()
-      e.preventDefault()
-      setShowSwitchModal(true)
-    }
-    const onClickDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation()
-      props.onClick?.()
-      e.preventDefault()
-      setShowConfirmDelete(true)
-    }
-    const onClickAccessControl = async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation()
-      props.onClick?.()
-      e.preventDefault()
-      setShowAccessControl(true)
-    }
-    const onClickInstalledApp = async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation()
-      props.onClick?.()
-      e.preventDefault()
-      try {
-        await openAsyncWindow(async () => {
-          const { installed_apps } = await fetchInstalledAppList(app.id)
-          if (installed_apps?.length > 0)
-            return `${basePath}/explore/installed/${installed_apps[0].id}`
-          throw new Error('No app found in Explore')
-        }, {
-          onError: (err) => {
-            toast.error(`${err.message || err}`)
-          },
-        })
-      }
-      catch (e: unknown) {
-        const message = e instanceof Error ? e.message : `${e}`
-        toast.error(message)
-      }
-    }
-    return (
-      <div className="relative flex w-full flex-col py-1" onMouseLeave={onMouseLeave}>
-        <button type="button" className="mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 hover:bg-state-base-hover" onClick={onClickSettings}>
-          <span className="text-text-secondary system-sm-regular">{t('editApp', { ns: 'app' })}</span>
-        </button>
-        <Divider className="my-1" />
-        <button type="button" className="mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 hover:bg-state-base-hover" onClick={onClickDuplicate}>
-          <span className="text-text-secondary system-sm-regular">{t('duplicate', { ns: 'app' })}</span>
-        </button>
-        <button type="button" className="mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 hover:bg-state-base-hover" onClick={onClickExport}>
-          <span className="text-text-secondary system-sm-regular">{t('export', { ns: 'app' })}</span>
-        </button>
-        {(app.mode === AppModeEnum.COMPLETION || app.mode === AppModeEnum.CHAT) && (
-          <>
-            <Divider className="my-1" />
-            <button
-              type="button"
-              className="mx-1 flex h-8 cursor-pointer items-center rounded-lg px-3 hover:bg-state-base-hover"
-              onClick={onClickSwitch}
-            >
-              <span className="text-sm leading-5 text-text-secondary">{t('switch', { ns: 'app' })}</span>
-            </button>
-          </>
-        )}
-        {
-          !app.has_draft_trigger && (
-            (!systemFeatures.webapp_auth.enabled)
-              ? (
-                  <>
-                    <Divider className="my-1" />
-                    <button type="button" className="mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 hover:bg-state-base-hover" onClick={onClickInstalledApp}>
-                      <span className="text-text-secondary system-sm-regular">{t('openInExplore', { ns: 'app' })}</span>
-                    </button>
-                  </>
-                )
-              : !(isGettingUserCanAccessApp || !userCanAccessApp?.result) && (
-                  <>
-                    <Divider className="my-1" />
-                    <button type="button" className="mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 hover:bg-state-base-hover" onClick={onClickInstalledApp}>
-                      <span className="text-text-secondary system-sm-regular">{t('openInExplore', { ns: 'app' })}</span>
-                    </button>
-                  </>
-                )
-          )
-        }
-        <Divider className="my-1" />
-        {
-          systemFeatures.webapp_auth.enabled && isCurrentWorkspaceEditor && (
-            <>
-              <button type="button" className="mx-1 flex h-8 cursor-pointer items-center rounded-lg px-3 hover:bg-state-base-hover" onClick={onClickAccessControl}>
-                <span className="text-sm leading-5 text-text-secondary">{t('accessControl', { ns: 'app' })}</span>
-              </button>
-              <Divider className="my-1" />
-            </>
-          )
-        }
-        <button
-          type="button"
-          className="group mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 py-[6px] hover:bg-state-destructive-hover"
-          onClick={onClickDelete}
-        >
-          <span className="text-text-secondary system-sm-regular group-hover:text-text-destructive">
-            {t('operation.delete', { ns: 'common' })}
-          </span>
-        </button>
-      </div>
-    )
-  }
+  }, [app.id, openAsyncWindow])
 
   const [tags, setTags] = useState<Tag[]>(app.tags)
   useEffect(() => {
@@ -436,7 +424,21 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
               <div className="mx-1 hidden! h-[14px] w-px shrink-0 bg-divider-regular group-hover:flex!" />
               <div className="hidden! shrink-0 group-hover:flex!">
                 <CustomPopover
-                  htmlContent={<Operations />}
+                  htmlContent={(
+                    <AppCardOperations
+                      app={app}
+                      t={t}
+                      webappAuthEnabled={systemFeatures.webapp_auth.enabled}
+                      isCurrentWorkspaceEditor={isCurrentWorkspaceEditor}
+                      openInstalledApp={openInstalledApp}
+                      onEdit={() => setShowEditModal(true)}
+                      onDuplicate={() => setShowDuplicateModal(true)}
+                      onExport={exportCheck}
+                      onSwitch={() => setShowSwitchModal(true)}
+                      onDelete={() => setShowConfirmDelete(true)}
+                      onAccessControl={() => setShowAccessControl(true)}
+                    />
+                  )}
                   position="br"
                   trigger="click"
                   btnElement={(

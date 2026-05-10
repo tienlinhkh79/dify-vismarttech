@@ -1,0 +1,89 @@
+identity:
+  name: sapo_orders
+  author: Dify Community
+  label:
+    en_US: Sapo Orders
+    vi_VN: Sapo Don hang
+description:
+  human:
+    en_US: Query and manage Sapo orders.
+    vi_VN: Truy van va quan ly don hang Sapo.
+  llm: Manage Sapo orders with actions list, get, count, create, update, delete, close, open, cancel.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, get, count, create, update, delete, close, open, cancel"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Orders
+      - value: get
+        label:
+          en_US: Get Order by ID
+      - value: count
+        label:
+          en_US: Count Orders
+      - value: create
+        label:
+          en_US: Create Order
+      - value: update
+        label:
+          en_US: Update Order
+      - value: delete
+        label:
+          en_US: Delete Order
+      - value: close
+        label:
+          en_US: Close Order
+      - value: open
+        label:
+          en_US: Open Order
+      - value: cancel
+        label:
+          en_US: Cancel Order
+  - name: order_id
+    type: number
+    required: false
+    label:
+      en_US: Order ID
+    llm_description: Order ID for get, update, delete actions.
+    form: llm
+  - name: order_payload
+    type: string
+    required: false
+    label:
+      en_US: Order Payload (JSON)
+    llm_description: JSON object payload used for create or update.
+    form: llm
+  - name: status
+    type: string
+    required: false
+    label:
+      en_US: Status
+    llm_description: Order status filter for list action.
+    form: llm
+  - name: fields
+    type: string
+    required: false
+    label:
+      en_US: Fields
+    llm_description: Comma-separated fields for list/get.
+    form: llm
+  - name: limit
+    type: number
+    required: false
+    label:
+      en_US: Limit
+    llm_description: Number of records per page.
+    form: llm
+  - name: page
+    type: number
+    required: false
+    label:
+      en_US: Page
+    llm_description: Page index for list action.
+    form: llm

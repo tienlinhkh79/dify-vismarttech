@@ -38,7 +38,6 @@ vi.mock('@/config', () => ({
 vi.mock('../score-slider', () => ({
   default: ({ value, onChange }: { value: number, onChange: (value: number) => void }) => (
     <input
-      role="slider"
       type="range"
       min={80}
       max={100}

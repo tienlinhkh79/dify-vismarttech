@@ -56,7 +56,7 @@ const HeaderOptions: FC<Props> = ({
     },
   )
 
-  const JSONLOutput = () => {
+  const downloadJSONL = () => {
     const content = listTransformer(list).join('\n')
     const file = new Blob([content], { type: 'application/jsonl' })
     downloadBlob({ data: file, fileName: `annotations-${locale}.jsonl` })
@@ -92,9 +92,8 @@ const HeaderOptions: FC<Props> = ({
       setShowClearConfirm(false)
     }
   }
-  const Operations = () => {
-    return (
-      <div className="w-full py-1">
+  const operations = (
+    <div className="w-full py-1">
         <button
           type="button"
           className="mx-1 flex h-9 w-[calc(100%-8px)] cursor-pointer items-center space-x-2 rounded-lg px-3 py-2 hover:bg-components-panel-on-panel-item-bg-hover disabled:opacity-50"
@@ -138,7 +137,7 @@ const HeaderOptions: FC<Props> = ({
                   <span className="system-sm-regular grow text-left text-text-secondary">CSV</span>
                 </button>
               </CSVDownloader>
-              <button type="button" disabled={annotationUnavailable} className={cn('mx-1 flex h-9 w-[calc(100%-8px)] cursor-pointer items-center space-x-2 rounded-lg px-3 py-2 hover:bg-components-panel-on-panel-item-bg-hover disabled:opacity-50', 'border-0!')} onClick={JSONLOutput}>
+        <button type="button" disabled={annotationUnavailable} className={cn('mx-1 flex h-9 w-[calc(100%-8px)] cursor-pointer items-center space-x-2 rounded-lg px-3 py-2 hover:bg-components-panel-on-panel-item-bg-hover disabled:opacity-50', 'border-0!')} onClick={downloadJSONL}>
                 <span className="system-sm-regular grow text-left text-text-secondary">JSONL</span>
               </button>
             </MenuItems>
@@ -154,9 +153,8 @@ const HeaderOptions: FC<Props> = ({
             {t('table.header.clearAll', { ns: 'appAnnotation' })}
           </span>
         </button>
-      </div>
-    )
-  }
+    </div>
+  )
 
   const [showAddModal, setShowAddModal] = React.useState(false)
 
@@ -167,7 +165,7 @@ const HeaderOptions: FC<Props> = ({
         <div>{t('table.header.addAnnotation', { ns: 'appAnnotation' })}</div>
       </Button>
       <CustomPopover
-        htmlContent={<Operations />}
+        htmlContent={operations}
         position="br"
         trigger="click"
         btnElement={

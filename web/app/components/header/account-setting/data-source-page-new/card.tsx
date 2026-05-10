@@ -117,6 +117,7 @@ const Card = ({
       <div className="flex items-center p-3 pb-2">
         <img
           src={icon}
+          alt={renderI18nObject(label)}
           className="mr-3 flex h-10 w-10 shrink-0 items-center justify-center"
         />
         <div className="grow">

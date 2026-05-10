@@ -1,0 +1,80 @@
+identity:
+  name: sapo_customers
+  author: Dify Community
+  label:
+    en_US: Sapo Customers
+    vi_VN: Sapo Khach hang
+description:
+  human:
+    en_US: Query and manage customers from Sapo.
+    vi_VN: Truy van va quan ly khach hang tren Sapo.
+  llm: Manage Sapo customers with actions list, get, count, create, update, delete.
+parameters:
+  - name: action
+    type: select
+    required: true
+    label:
+      en_US: Action
+    llm_description: "Action: list, get, count, create, update, delete"
+    form: llm
+    options:
+      - value: list
+        label:
+          en_US: List Customers
+      - value: get
+        label:
+          en_US: Get Customer by ID
+      - value: count
+        label:
+          en_US: Count Customers
+      - value: create
+        label:
+          en_US: Create Customer
+      - value: update
+        label:
+          en_US: Update Customer
+      - value: delete
+        label:
+          en_US: Delete Customer
+  - name: customer_id
+    type: number
+    required: false
+    label:
+      en_US: Customer ID
+    llm_description: Customer ID for get action.
+    form: llm
+  - name: customer_payload
+    type: string
+    required: false
+    label:
+      en_US: Customer Payload (JSON)
+    llm_description: JSON object payload used for create action.
+    form: llm
+  - name: query
+    type: string
+    required: false
+    label:
+      en_US: Query
+    llm_description: Filter by customer keyword for list action.
+    form: llm
+  - name: fields
+    type: string
+    required: false
+    label:
+      en_US: Fields
+    llm_description: Comma-separated fields for list/get.
+    form: llm
+  - name: limit
+    type: number
+    required: false
+    label:
+      en_US: Limit
+    llm_description: Number of records per page.
+    form: llm
+  - name: page
+    type: number
+    required: false
+    label:
+      en_US: Page
+    llm_description: Page index for list action.
+    form: llm

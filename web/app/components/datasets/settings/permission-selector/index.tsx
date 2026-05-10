@@ -236,6 +236,7 @@ const PermissionSelector = ({
                   )}
                   {filteredMemberList.map(member => (
                     <MemberItem
+                      key={member.id}
                       leftIcon={
                         <Avatar avatar={member.avatar_url} name={member.name} className="shrink-0" size="sm" />
                       }

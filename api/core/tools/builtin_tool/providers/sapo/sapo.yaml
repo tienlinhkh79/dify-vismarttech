@@ -1,0 +1,37 @@
+identity:
+  author: Dify Community
+  name: sapo
+  label:
+    en_US: Sapo
+    vi_VN: Sapo
+  description:
+    en_US: Sapo e-commerce platform integration. Manage products, customers, and orders.
+    vi_VN: Tich hop nen tang Sapo. Quan ly san pham, khach hang, va don hang.
+  icon: icon.svg
+  tags:
+    - business
+credentials_for_provider:
+  store:
+    type: text-input
+    required: true
+    label:
+      en_US: Store Domain
+      vi_VN: Ten mien cua hang
+    placeholder:
+      en_US: your-shop.mysapo.net
+      vi_VN: your-shop.mysapo.net
+    help:
+      en_US: Your Sapo store domain, for example your-shop.mysapo.net.
+      vi_VN: Ten mien shop Sapo, vi du your-shop.mysapo.net.
+  access_token:
+    type: secret-input
+    required: true
+    label:
+      en_US: Access Token
+      vi_VN: Access Token
+    placeholder:
+      en_US: Enter your Sapo access token
+      vi_VN: Nhap access token Sapo
+    help:
+      en_US: Permanent token obtained from Sapo OAuth installation flow.
+      vi_VN: Token lay duoc tu quy trinh OAuth cua Sapo.

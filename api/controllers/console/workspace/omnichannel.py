@@ -248,8 +248,10 @@ class ChannelApi(Resource):
                 channel_id=channel_id,
                 payload=payload.model_dump(exclude_none=True),
             )
-        except ValueError:
-            raise NotFound("Channel not found")
+        except ValueError as e:
+            if str(e) == "Channel not found":
+                raise NotFound("Channel not found") from e
+            return {"error": str(e)}, 400
         return jsonable_encoder({"data": updated})
 
     @setup_required

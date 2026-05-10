@@ -11,6 +11,6 @@ export function showDifyOfficialChrome(brandingEnabled: boolean): boolean {
 }
 
 /** Login/signup copy that avoids “Community Edition” phrasing when official chrome is suppressed. */
-export function useEnterpriseStyleAuthChrome(brandingEnabled: boolean): boolean {
+export function shouldUseEnterpriseStyleAuthChrome(brandingEnabled: boolean): boolean {
   return brandingEnabled || env.NEXT_PUBLIC_HIDE_COMMUNITY_UI
 }

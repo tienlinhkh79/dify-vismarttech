@@ -9,7 +9,7 @@ import { useGlobalPublicStore } from '@/context/global-public-context'
 import Link from '@/next/link'
 import { LicenseStatus } from '@/types/feature'
 import { cn } from '@/utils/classnames'
-import { showDifyOfficialChrome, useEnterpriseStyleAuthChrome } from '@/utils/dify-official-chrome'
+import { shouldUseEnterpriseStyleAuthChrome, showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import MailAndCodeAuth from './components/mail-and-code-auth'
 import MailAndPasswordAuth from './components/mail-and-password-auth'
 import SSOAuth from './components/sso-auth'
@@ -105,7 +105,7 @@ const NormalForm = () => {
     <>
       <div className="mx-auto mt-8 w-full">
         <div className="mx-auto w-full">
-          <h2 className="title-4xl-semi-bold text-text-primary">{useEnterpriseStyleAuthChrome(systemFeatures.branding.enabled) ? t('pageTitleForE', { ns: 'login' }) : t('pageTitle', { ns: 'login' })}</h2>
+          <h2 className="title-4xl-semi-bold text-text-primary">{shouldUseEnterpriseStyleAuthChrome(systemFeatures.branding.enabled) ? t('pageTitleForE', { ns: 'login' }) : t('pageTitle', { ns: 'login' })}</h2>
           <p className="body-md-regular mt-2 text-text-tertiary">{t('welcome', { ns: 'login' })}</p>
         </div>
         <div className="relative">

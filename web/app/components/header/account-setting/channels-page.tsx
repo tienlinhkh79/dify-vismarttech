@@ -13,6 +13,7 @@ import { openOAuthPopup } from '@/hooks/use-oauth'
 import { useAppList } from '@/service/use-apps'
 import {
   createChannel,
+  deleteChannel,
   getMessengerOAuthAuthorizationUrl,
   listChannelProviders,
   listChannels,
@@ -30,6 +31,18 @@ import {
 } from './channels-ui'
 import { getProviderSetupConfig } from './channel-setup-config'
 import ZaloOAuthModal from './zalo-oauth-modal'
+import { API_PREFIX } from '@/config'
+
+const buildMessengerOAuthCallbackUrl = (): string => {
+  const suffix = '/workspaces/current/tool-provider/builtin/messenger/oauth/callback'
+  const prefix = API_PREFIX.replace(/\/$/, '')
+  if (prefix.startsWith('http://') || prefix.startsWith('https://'))
+    return `${prefix}${suffix}`
+  if (typeof window === 'undefined')
+    return ''
+  const path = prefix.startsWith('/') ? prefix : `/${prefix}`
+  return `${window.location.origin}${path}${suffix}`
+}
 
 const FieldGroup = ({ label, hint, children }: { label: string, hint?: string, children: ReactNode }) => (
   <div className="space-y-1">
@@ -38,6 +51,17 @@ const FieldGroup = ({ label, hint, children }: { label: string, hint?: string, c
     {hint && <div className="system-xs-regular text-text-tertiary">{hint}</div>}
   </div>
 )
+
+/** `post()` throws a cloned `Response` on HTTP errors (see `fetch.ts`). */
+async function toastChannelApiError(err: unknown, fallback: string) {
+  if (err instanceof Response) {
+    const data = (await err.json().catch(() => null)) as { error?: string, message?: string } | null
+    const msg = data?.message || data?.error
+    toast.error(msg || fallback)
+    return
+  }
+  toast.error(fallback)
+}
 
 const ChannelsPage = () => {
   const MESSENGER_OAUTH_APP_ID_STORAGE_KEY = 'dify_messenger_oauth_app_id'
@@ -54,6 +78,11 @@ const ChannelsPage = () => {
   const [isClientSecretVisible, setIsClientSecretVisible] = useState(false)
   const [isAccessTokenVisible, setIsAccessTokenVisible] = useState(false)
   const [oauthPages, setOauthPages] = useState<Array<{ id: string, name: string, access_token: string }>>([])
+  /** Page IDs selected after Facebook OAuth (create flow). Meta: one Page = one channel + one page access token. */
+  const [selectedMessengerPageIds, setSelectedMessengerPageIds] = useState<string[]>([])
+  /** When creating multiple Messenger channels at once, each Page can route to a different Studio app. */
+  const [messengerTargetAppByPageId, setMessengerTargetAppByPageId] = useState<Record<string, string>>({})
+  const [messengerApplyAllDraft, setMessengerApplyAllDraft] = useState('')
   const [messengerAuthAppId, setMessengerAuthAppId] = useState('')
   const [messengerAuthAppSecret, setMessengerAuthAppSecret] = useState('')
   const [appOrigin, setAppOrigin] = useState('')
@@ -62,6 +91,7 @@ const ChannelsPage = () => {
     client_secret?: string
     access_token?: string
   }>({})
+  const [isSavingChannel, setIsSavingChannel] = useState(false)
   const [formValue, setFormValue] = useState<Channel>({
     channel_type: 'facebook_messenger',
     channel_id: '',
@@ -168,6 +198,9 @@ const ChannelsPage = () => {
       platform: provider?.provider || 'messenger',
     })
     setOauthPages([])
+    setSelectedMessengerPageIds([])
+    setMessengerTargetAppByPageId({})
+    setMessengerApplyAllDraft('')
     if (typeof window !== 'undefined') {
       setMessengerAuthAppId(window.localStorage.getItem(MESSENGER_OAUTH_APP_ID_STORAGE_KEY) || '')
     }
@@ -200,6 +233,7 @@ const ChannelsPage = () => {
       name: channel.name || channel.channel_id,
       access_token: '',
     }] : [])
+    setSelectedMessengerPageIds(channel.external_resource_id ? [String(channel.external_resource_id)] : [])
     if (typeof window !== 'undefined') {
       setMessengerAuthAppId(window.localStorage.getItem(MESSENGER_OAUTH_APP_ID_STORAGE_KEY) || '')
     }
@@ -248,10 +282,31 @@ const ChannelsPage = () => {
     acc[channel.channel_type] = (acc[channel.channel_type] || 0) + 1
     return acc
   }, {})
+  const usePerPageMessengerStudioApps
+    = !isEditing && isMessengerProvider && selectedMessengerPageIds.length > 1 && oauthPages.length > 0
+
+  useEffect(() => {
+    if (!usePerPageMessengerStudioApps)
+      return
+    setMessengerTargetAppByPageId((prev) => {
+      const next = { ...prev }
+      const seed = formValue.app_id.trim()
+      for (const id of selectedMessengerPageIds) {
+        if (next[id] === undefined)
+          next[id] = seed
+      }
+      for (const k of Object.keys(next)) {
+        if (!selectedMessengerPageIds.includes(k))
+          delete next[k]
+      }
+      return next
+    })
+  }, [usePerPageMessengerStudioApps, selectedMessengerPageIds.join(','), formValue.app_id])
+
   const canGoStep2 = isEditing || !!formValue.channel_type
   const canGoStep3 = isEditing
     || (isMessengerProvider
-      ? !!formValue.external_resource_id
+      ? oauthPages.length > 0 && selectedMessengerPageIds.length > 0
       : isZaloProvider
         ? !!formValue.client_secret?.trim() && !!(formValue.oauth_application_id || '').trim()
         : !!formValue.client_secret?.trim() && (!providerSetupConfig.requiresAccessToken || !!formValue.access_token?.trim()))
@@ -260,6 +315,7 @@ const ChannelsPage = () => {
     ? `/triggers/${formValue.platform || 'messenger'}/webhook/${formValue.channel_id}`
     : ''
   const webhookUrlPreview = webhookPathPreview && appOrigin ? `${appOrigin}${webhookPathPreview}` : ''
+  const messengerOauthCallbackUrlPreview = useMemo(() => buildMessengerOAuthCallbackUrl(), [])
   const providerOptions = useMemo(
     () => providers.map(provider => ({
       value: provider.channel_type,
@@ -271,15 +327,26 @@ const ChannelsPage = () => {
     () => appOptions.map(app => ({ value: app.id, label: app.name })),
     [appOptions],
   )
-  const oauthPageOptions = useMemo(
-    () => oauthPages.map(page => ({ value: page.id, label: `${page.name} (${page.id})` })),
-    [oauthPages],
+  const buildMessengerWebhookUrlForPageId = useCallback(
+    (pageId: string) => {
+      const path = `/triggers/${formValue.platform || 'messenger'}/webhook/messenger-${pageId}`
+      return appOrigin ? `${appOrigin}${path}` : path
+    },
+    [appOrigin, formValue.platform],
   )
-
   const saveChannel = async () => {
-    if (!formValue.channel_id.trim() || !formValue.name.trim() || !formValue.app_id.trim() || !formValue.external_resource_id.trim()) {
+    if (isSavingChannel)
+      return
+    if (!usePerPageMessengerStudioApps && !formValue.app_id.trim()) {
       toast.error(t('settings.channelsRequiredError', { ns: 'common' }))
       return
+    }
+    const messengerBulkCreate = !isEditing && isMessengerProvider && oauthPages.length > 0 && selectedMessengerPageIds.length > 0
+    if (!messengerBulkCreate) {
+      if (!formValue.channel_id.trim() || !formValue.name.trim() || !formValue.external_resource_id.trim()) {
+        toast.error(t('settings.channelsRequiredError', { ns: 'common' }))
+        return
+      }
     }
     if (!isEditing && (!formValue.verify_token?.trim() || !formValue.client_secret?.trim())) {
       toast.error(t('settings.channelsSecretRequiredError', { ns: 'common' }))
@@ -293,7 +360,7 @@ const ChannelsPage = () => {
       toast.error(t('settings.channelsZaloOAuthAppIdRequired', { ns: 'common' }))
       return
     }
-    if (!isEditing && isMessengerProvider && (!oauthPages.length || !formValue.external_resource_id.trim())) {
+    if (!isEditing && isMessengerProvider && (!oauthPages.length || selectedMessengerPageIds.length === 0)) {
       toast.error(t('settings.channelsMessengerConnectRequired', { ns: 'common' }))
       return
     }
@@ -313,6 +380,67 @@ const ChannelsPage = () => {
       && !(isEditing && hasStoredAccessToken)
     ) {
       toast.error(t('settings.channelsProviderTokenRequiredError', { ns: 'common' }))
+      return
+    }
+    setIsSavingChannel(true)
+    try {
+    if (messengerBulkCreate) {
+      const idsToCreate = selectedMessengerPageIds.filter((id) => {
+        const cid = `messenger-${id}`
+        return !channels.some(c => c.channel_id === cid)
+      })
+      if (!idsToCreate.length) {
+        toast.error(t('settings.channelsMessengerAllPagesAlreadyConnected', { ns: 'common' }))
+        return
+      }
+      const skipped = selectedMessengerPageIds.length - idsToCreate.length
+      const apiVersion = formValue.api_version.trim() || 'v23.0'
+      const verifyTokenInput = formValue.verify_token!.trim()
+      const clientSecretInput = formValue.client_secret!.trim()
+      try {
+        for (const pageId of idsToCreate) {
+          const page = oauthPages.find(p => String(p.id) === String(pageId))
+          if (!page?.access_token?.trim()) {
+            toast.error(t('settings.channelsMessengerPageTokenMissing', { ns: 'common' }))
+            return
+          }
+          const pageName = (page.name || `Page ${page.id}`).trim() || `Page ${page.id}`
+          const targetApp = usePerPageMessengerStudioApps
+            ? (messengerTargetAppByPageId[String(pageId)] || '').trim()
+            : formValue.app_id.trim()
+          if (!targetApp) {
+            toast.error(
+              t('settings.channelsMessengerAppRequiredPerPage', { ns: 'common', page: pageName }),
+            )
+            return
+          }
+          await createChannel({
+            channel_type: 'facebook_messenger',
+            channel_id: `messenger-${page.id}`,
+            app_id: targetApp,
+            name: pageName,
+            external_resource_id: String(page.id),
+            verify_token: verifyTokenInput,
+            client_secret: clientSecretInput,
+            access_token: page.access_token,
+            api_version: apiVersion,
+            enabled: formValue.enabled,
+            platform: 'messenger',
+          } as Channel, { silent: true })
+        }
+      }
+      catch (err) {
+        await toastChannelApiError(err, t('settings.channelsMessengerBulkCreateError', { ns: 'common' }))
+        return
+      }
+      if (idsToCreate.length > 1)
+        toast.success(t('settings.channelsMessengerBulkCreated', { count: idsToCreate.length, ns: 'common' }))
+      else
+        toast.success(t('api.actionSuccess', { ns: 'common' }))
+      if (skipped > 0)
+        toast.error(t('settings.channelsMessengerSkippedExisting', { count: skipped, ns: 'common' }))
+      setIsDrawerOpen(false)
+      await loadChannels()
       return
     }
     const payload: Partial<Channel> = {
@@ -344,10 +472,24 @@ const ChannelsPage = () => {
 
     const openZaloOAuthAfterSave = !isEditing && isZaloProvider && !formValue.access_token?.trim()
 
-    if (isEditing)
-      await updateChannel(editingChannelId!, payload)
-    else
-      await createChannel(payload as Channel)
+    if (isEditing) {
+      try {
+        await updateChannel(editingChannelId!, payload, { silent: true })
+      }
+      catch (err) {
+        await toastChannelApiError(err, t('api.actionFailed', { ns: 'common' }))
+        return
+      }
+    }
+    else {
+      try {
+        await createChannel(payload as Channel, { silent: true })
+      }
+      catch (err) {
+        await toastChannelApiError(err, t('api.actionFailed', { ns: 'common' }))
+        return
+      }
+    }
 
     toast.success(t('api.actionSuccess', { ns: 'common' }))
     setIsDrawerOpen(false)
@@ -355,6 +497,10 @@ const ChannelsPage = () => {
     if (openZaloOAuthAfterSave) {
       setZaloOAuthChannelId(formValue.channel_id.trim())
       setZaloOAuthOpen(true)
+    }
+    }
+    finally {
+      setIsSavingChannel(false)
     }
   }
 
@@ -396,6 +542,7 @@ const ChannelsPage = () => {
           return
         }
         setOauthPages(pages)
+        setSelectedMessengerPageIds(pages.map((p: { id: string }) => String(p.id)))
         const firstPage = pages[0]
         setFormValue((prev: Channel) => ({
           ...prev,
@@ -415,17 +562,43 @@ const ChannelsPage = () => {
     }
   }
 
-  const handleSelectFacebookPage = (pageId: string) => {
-    const selected = oauthPages.find((page: { id: string, name: string, access_token: string }) => page.id === pageId)
-    if (!selected)
+  const syncMessengerFormToSelectedPageIds = (nextIds: string[]) => {
+    if (nextIds.length === 0 || !oauthPages.length) {
+      if (!editingChannelId) {
+        setFormValue((prev: Channel) => ({
+          ...prev,
+          channel_id: '',
+          external_resource_id: '',
+          name: '',
+          access_token: '',
+        }))
+      }
+      return
+    }
+    const first = oauthPages.find(p => String(p.id) === nextIds[0])
+    if (!first)
       return
     setFormValue((prev: Channel) => ({
       ...prev,
-      channel_id: isEditing ? prev.channel_id : `messenger-${selected.id}`,
-      name: isEditing ? prev.name : (selected.name || prev.name),
-      external_resource_id: selected.id,
-      access_token: selected.access_token,
+      channel_id: editingChannelId ? prev.channel_id : `messenger-${first.id}`,
+      name: editingChannelId ? prev.name : (first.name || prev.name),
+      external_resource_id: first.id,
+      access_token: first.access_token,
     }))
+  }
+
+  const applyMessengerPageSelection = (nextIds: string[]) => {
+    setSelectedMessengerPageIds(nextIds)
+    syncMessengerFormToSelectedPageIds(nextIds)
+  }
+
+  const toggleMessengerPage = (pageId: string) => {
+    const id = String(pageId)
+    setSelectedMessengerPageIds((prev) => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+      queueMicrotask(() => syncMessengerFormToSelectedPageIds(next))
+      return next
+    })
   }
 
   const handleCopyValue = async (value: string, successKey: string) => {
@@ -438,6 +611,17 @@ const ChannelsPage = () => {
     catch {
       toast.error(t('settings.channelsCopyFailed', { ns: 'common' }))
     }
+  }
+
+  const handleDeleteChannel = async (channel: Channel) => {
+    const confirmed = window.confirm(
+      t('settings.channelsDeleteConfirm', { ns: 'common', name: channel.name || channel.channel_id }),
+    )
+    if (!confirmed)
+      return
+    await deleteChannel(channel.channel_id)
+    toast.success(t('api.actionSuccess', { ns: 'common' }))
+    await loadChannels()
   }
 
   return (
@@ -470,7 +654,15 @@ const ChannelsPage = () => {
         )}
         {!!channels.length && (
           <div className="space-y-2">
-            {channels.map((channel: Channel) => <ChannelItem key={channel.channel_id} channel={channel} t={t} onEdit={openEdit} />)}
+            {channels.map((channel: Channel) => (
+              <ChannelItem
+                key={channel.channel_id}
+                channel={channel}
+                t={t}
+                onEdit={openEdit}
+                onDelete={handleDeleteChannel}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -495,6 +687,7 @@ const ChannelsPage = () => {
                   onSelect={(provider: ChannelProvider) => {
                     setFormValue((prev: Channel) => ({ ...prev, channel_type: provider.channel_type, platform: provider.provider }))
                     setOauthPages([])
+                    setSelectedMessengerPageIds([])
                   }}
                 />
               )}
@@ -530,13 +723,65 @@ const ChannelsPage = () => {
                   >
                     {t('settings.channelsConnectFacebookLoadPages', { ns: 'common' })}
                   </Button>
+                  <FieldGroup
+                    label={t('settings.channelsFacebookOAuthCallbackUrlLabel', { ns: 'common' })}
+                    hint={t('settings.channelsFacebookOAuthCallbackUrlHint', { ns: 'common' })}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Input disabled value={messengerOauthCallbackUrlPreview} onChange={() => {}} />
+                      <Button
+                        size="small"
+                        variant="secondary"
+                        onClick={() => handleCopyValue(messengerOauthCallbackUrlPreview, 'settings.channelsCopyOAuthCallbackUrlSuccess')}
+                      >
+                        {t('operation.copy', { ns: 'common' })}
+                      </Button>
+                    </div>
+                  </FieldGroup>
                   {!!oauthPages.length && (
-                    <PureSelect
-                      value={formValue.external_resource_id}
-                      options={oauthPageOptions}
-                      onChange={value => handleSelectFacebookPage(value)}
-                      triggerProps={{ className: 'h-10 rounded-lg border border-components-input-border px-2' }}
-                    />
+                    <FieldGroup
+                      label={t('settings.channelsMessengerFacebookPagesLabel', { ns: 'common' })}
+                      hint={t('settings.channelsMessengerFacebookPagesHint', { ns: 'common' })}
+                    >
+                      <div className="mb-2 flex flex-wrap gap-2">
+                        <Button
+                          size="small"
+                          variant="secondary"
+                          type="button"
+                          onClick={() => applyMessengerPageSelection(oauthPages.map(p => String(p.id)))}
+                        >
+                          {t('settings.channelsMessengerSelectAllPages', { ns: 'common' })}
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="secondary"
+                          type="button"
+                          onClick={() => applyMessengerPageSelection([])}
+                        >
+                          {t('settings.channelsMessengerClearPageSelection', { ns: 'common' })}
+                        </Button>
+                      </div>
+                      <div className="max-h-48 space-y-2 overflow-y-auto rounded-lg border border-divider-subtle p-2">
+                        {oauthPages.map(page => (
+                          <label
+                            key={String(page.id)}
+                            className="flex cursor-pointer items-start gap-2 text-sm text-text-primary"
+                          >
+                            <input
+                              type="checkbox"
+                              className="mt-0.5"
+                              checked={selectedMessengerPageIds.includes(String(page.id))}
+                              onChange={() => toggleMessengerPage(String(page.id))}
+                            />
+                            <span>
+                              {page.name || t('settings.channelsMessengerUnnamedPage', { ns: 'common' })}
+                              {' '}
+                              <span className="text-text-tertiary">({page.id})</span>
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </FieldGroup>
                   )}
                 </SetupSection>
               )}
@@ -643,17 +888,92 @@ const ChannelsPage = () => {
                   triggerProps={{ className: 'h-10 rounded-lg border border-components-input-border px-2' }}
                 />
               </FieldGroup>
-              <FieldGroup
-                label={t('settings.channelsTargetAppLabel', { ns: 'common' })}
-                hint={t('settings.channelsTargetAppHint', { ns: 'common' })}
-              >
-                <PureSelect
-                  value={formValue.app_id}
-                  options={[{ value: '', label: t('settings.channelsSelectTargetApp', { ns: 'common' }) }, ...appOptionsForSelect]}
-                  onChange={(value) => setFormValue((prev: Channel) => ({ ...prev, app_id: value }))}
-                  triggerProps={{ className: 'h-10 rounded-lg border border-components-input-border px-2' }}
-                />
-              </FieldGroup>
+              {usePerPageMessengerStudioApps ? (
+                <div className="rounded-xl border border-components-panel-border bg-components-panel-bg p-3 shadow-sm">
+                  <div className="mb-3">
+                    <div className="system-sm-semibold text-text-primary">
+                      {t('settings.channelsMessengerRouteTitle', { ns: 'common' })}
+                    </div>
+                    <div className="mt-1 system-xs-regular text-text-tertiary">
+                      {t('settings.channelsMessengerPerPageTargetAppHint', { ns: 'common' })}
+                    </div>
+                  </div>
+                  <div className="mb-4 flex flex-col gap-2 rounded-lg bg-background-default/80 px-3 py-2 sm:flex-row sm:items-center sm:gap-3">
+                    <span className="system-2xs-semibold uppercase tracking-wide text-text-tertiary">
+                      {t('settings.channelsMessengerQuickApplyLabel', { ns: 'common' })}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <PureSelect
+                        value={messengerApplyAllDraft}
+                        options={[{ value: '', label: t('settings.channelsSelectTargetApp', { ns: 'common' }) }, ...appOptionsForSelect]}
+                        onChange={(value) => setMessengerApplyAllDraft(value)}
+                        triggerProps={{ className: 'h-9 w-full rounded-lg border border-components-input-border px-2' }}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="h-9 shrink-0 whitespace-nowrap px-3"
+                      onClick={() => {
+                        if (!messengerApplyAllDraft.trim()) {
+                          toast.error(t('settings.channelsRequiredError', { ns: 'common' }))
+                          return
+                        }
+                        setMessengerTargetAppByPageId((prev) => {
+                          const next = { ...prev }
+                          for (const id of selectedMessengerPageIds)
+                            next[id] = messengerApplyAllDraft
+                          return next
+                        })
+                        toast.success(t('settings.channelsMessengerAppliedAppToAll', { ns: 'common' }))
+                      }}
+                    >
+                      {t('settings.channelsMessengerApplyAppToAllButton', { ns: 'common' })}
+                    </Button>
+                  </div>
+                  <div className="max-h-[min(360px,50vh)] divide-y divide-divider-subtle overflow-y-auto rounded-lg border border-divider-subtle">
+                    {selectedMessengerPageIds.map(pid => (
+                      <div
+                        key={pid}
+                        className="flex flex-col gap-2 px-3 py-3 sm:flex-row sm:items-center sm:gap-4"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="system-sm-medium text-text-primary">
+                            {(oauthPages.find(p => String(p.id) === String(pid))?.name
+                              || t('settings.channelsMessengerUnnamedPage', { ns: 'common' }))}
+                          </div>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 system-2xs-regular text-text-tertiary">
+                            <span>ID {pid}</span>
+                            <span className="text-text-quaternary">·</span>
+                            <span className="font-mono text-text-secondary">{`messenger-${pid}`}</span>
+                          </div>
+                        </div>
+                        <div className="w-full sm:w-[min(100%,260px)] sm:shrink-0">
+                          <PureSelect
+                            value={messengerTargetAppByPageId[pid] ?? ''}
+                            options={[{ value: '', label: t('settings.channelsSelectTargetApp', { ns: 'common' }) }, ...appOptionsForSelect]}
+                            onChange={value =>
+                              setMessengerTargetAppByPageId(prev => ({ ...prev, [pid]: value }))}
+                            triggerProps={{ className: 'h-10 w-full rounded-lg border border-components-input-border px-2' }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <FieldGroup
+                  label={t('settings.channelsTargetAppLabel', { ns: 'common' })}
+                  hint={t('settings.channelsTargetAppHint', { ns: 'common' })}
+                >
+                  <PureSelect
+                    value={formValue.app_id}
+                    options={[{ value: '', label: t('settings.channelsSelectTargetApp', { ns: 'common' }) }, ...appOptionsForSelect]}
+                    onChange={(value) => setFormValue((prev: Channel) => ({ ...prev, app_id: value }))}
+                    triggerProps={{ className: 'h-10 rounded-lg border border-components-input-border px-2' }}
+                  />
+                </FieldGroup>
+              )}
               {!isMessengerProvider && (
                 <FieldGroup
                   label={t('settings.channelsFieldChannelId', { ns: 'common' })}
@@ -667,7 +987,7 @@ const ChannelsPage = () => {
                   />
                 </FieldGroup>
               )}
-              {isMessengerProvider && (
+              {isMessengerProvider && !usePerPageMessengerStudioApps && (
                 <FieldGroup
                   label={t('settings.channelsFieldChannelId', { ns: 'common' })}
                   hint={t('settings.channelsFieldChannelIdAuto', { ns: 'common' })}
@@ -680,28 +1000,36 @@ const ChannelsPage = () => {
                   />
                 </FieldGroup>
               )}
-              <FieldGroup label={t('settings.channelsNameLabel', { ns: 'common' })}>
-                <Input
-                  value={formValue.name}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setFormValue((prev: Channel) => ({ ...prev, name: e.target.value }))}
-                  placeholder={t('settings.channelsFieldName', { ns: 'common' })}
-                />
-              </FieldGroup>
-              <FieldGroup
-                label={formValue.channel_type === 'facebook_messenger' ? t('settings.channelsFieldFacebookPageId', { ns: 'common' }) : t('settings.channelsFieldExternalResourceId', { ns: 'common' })}
-                hint={isMessengerProvider
-                  ? t('settings.channelsFacebookPageIdHint', { ns: 'common' })
-                  : providerSetupConfig.resourceHintKey
-                    ? t(providerSetupConfig.resourceHintKey, { ns: 'common' })
-                    : undefined}
-              >
-                <Input
-                  disabled={isMessengerProvider && !!oauthPages.length}
-                  value={formValue.external_resource_id}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setFormValue((prev: Channel) => ({ ...prev, external_resource_id: e.target.value }))}
-                  placeholder={formValue.channel_type === 'facebook_messenger' ? t('settings.channelsFieldFacebookPageId', { ns: 'common' }) : t('settings.channelsFieldExternalResourceId', { ns: 'common' })}
-                />
-              </FieldGroup>
+              {!(isMessengerProvider && usePerPageMessengerStudioApps) && (
+                <FieldGroup label={t('settings.channelsNameLabel', { ns: 'common' })}>
+                  <Input
+                    disabled={!isEditing && isMessengerProvider && selectedMessengerPageIds.length > 1}
+                    value={formValue.name}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setFormValue((prev: Channel) => ({ ...prev, name: e.target.value }))}
+                    placeholder={t('settings.channelsFieldName', { ns: 'common' })}
+                  />
+                  {!isEditing && isMessengerProvider && selectedMessengerPageIds.length > 1 && (
+                    <div className="system-xs-regular text-text-tertiary">{t('settings.channelsMessengerBulkNameHint', { ns: 'common' })}</div>
+                  )}
+                </FieldGroup>
+              )}
+              {!(isMessengerProvider && usePerPageMessengerStudioApps) && (
+                <FieldGroup
+                  label={formValue.channel_type === 'facebook_messenger' ? t('settings.channelsFieldFacebookPageId', { ns: 'common' }) : t('settings.channelsFieldExternalResourceId', { ns: 'common' })}
+                  hint={isMessengerProvider
+                    ? t('settings.channelsFacebookPageIdHint', { ns: 'common' })
+                    : providerSetupConfig.resourceHintKey
+                      ? t(providerSetupConfig.resourceHintKey, { ns: 'common' })
+                      : undefined}
+                >
+                  <Input
+                    disabled={isMessengerProvider && !!oauthPages.length}
+                    value={formValue.external_resource_id}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setFormValue((prev: Channel) => ({ ...prev, external_resource_id: e.target.value }))}
+                    placeholder={formValue.channel_type === 'facebook_messenger' ? t('settings.channelsFieldFacebookPageId', { ns: 'common' }) : t('settings.channelsFieldExternalResourceId', { ns: 'common' })}
+                  />
+                </FieldGroup>
+              )}
               <FieldGroup
                 label={t('settings.channelsVerifyTokenLabel', { ns: 'common' })}
                 hint={t('settings.channelsVerifyTokenHint', { ns: 'common' })}
@@ -733,12 +1061,39 @@ const ChannelsPage = () => {
                       label={t('settings.channelsWebhookUrlLabel', { ns: 'common' })}
                       hint={t('settings.channelsWebhookUrlHint', { ns: 'common' })}
                     >
-                      <div className="flex items-center gap-2">
-                        <Input disabled value={webhookUrlPreview} onChange={() => {}} />
-                        <Button size="small" variant="secondary" onClick={() => handleCopyValue(webhookUrlPreview, 'settings.channelsCopyWebhookUrlSuccess')}>
-                          {t('operation.copy', { ns: 'common' })}
-                        </Button>
-                      </div>
+                      {usePerPageMessengerStudioApps ? (
+                        <div className="max-h-52 space-y-2 overflow-y-auto">
+                          <div className="system-2xs-regular text-text-tertiary">
+                            {t('settings.channelsMessengerBulkWebhookHint', { ns: 'common' })}
+                          </div>
+                          {selectedMessengerPageIds.map(pid => (
+                            <div key={pid} className="flex min-w-0 items-center gap-2">
+                              <Input
+                                className="min-w-0 shrink"
+                                disabled
+                                value={buildMessengerWebhookUrlForPageId(pid)}
+                                onChange={() => {}}
+                              />
+                              <Button
+                                size="small"
+                                variant="secondary"
+                                className="shrink-0"
+                                onClick={() =>
+                                  handleCopyValue(buildMessengerWebhookUrlForPageId(pid), 'settings.channelsCopyWebhookUrlSuccess')}
+                              >
+                                {t('operation.copy', { ns: 'common' })}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Input disabled value={webhookUrlPreview} onChange={() => {}} />
+                          <Button size="small" variant="secondary" onClick={() => handleCopyValue(webhookUrlPreview, 'settings.channelsCopyWebhookUrlSuccess')}>
+                            {t('operation.copy', { ns: 'common' })}
+                          </Button>
+                        </div>
+                      )}
                     </FieldGroup>
                     <FieldGroup
                       label={t('settings.channelsWebhookVerifyTokenLabel', { ns: 'common' })}
@@ -747,6 +1102,21 @@ const ChannelsPage = () => {
                       <div className="flex items-center gap-2">
                         <Input disabled value={formValue.verify_token || ''} onChange={() => {}} />
                         <Button size="small" variant="secondary" onClick={() => handleCopyValue(formValue.verify_token || '', 'settings.channelsCopyVerifyTokenSuccess')}>
+                          {t('operation.copy', { ns: 'common' })}
+                        </Button>
+                      </div>
+                    </FieldGroup>
+                    <FieldGroup
+                      label={t('settings.channelsFacebookOAuthCallbackUrlLabel', { ns: 'common' })}
+                      hint={t('settings.channelsFacebookOAuthCallbackUrlHint', { ns: 'common' })}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Input disabled value={messengerOauthCallbackUrlPreview} onChange={() => {}} />
+                        <Button
+                          size="small"
+                          variant="secondary"
+                          onClick={() => handleCopyValue(messengerOauthCallbackUrlPreview, 'settings.channelsCopyOAuthCallbackUrlSuccess')}
+                        >
                           {t('operation.copy', { ns: 'common' })}
                         </Button>
                       </div>
@@ -887,11 +1257,11 @@ const ChannelsPage = () => {
               )}
               <div className="flex justify-end gap-2 pt-2">
                 <Button onClick={() => setIsDrawerOpen(false)}>{t('operation.cancel', { ns: 'common' })}</Button>
-                <Button variant="primary" onClick={saveChannel}>{t('operation.save', { ns: 'common' })}</Button>
+                <Button variant="primary" loading={isSavingChannel} disabled={isSavingChannel} onClick={saveChannel}>{t('operation.save', { ns: 'common' })}</Button>
               </div>
                 </>
               )}
-              {!isEditing && (
+              {!isEditing && setupStep < 3 && (
                 <SetupNavigation
                   setupStep={setupStep}
                   canGoNext={!((setupStep === 1 && !canGoStep2) || (setupStep === 2 && !canGoStep3))}

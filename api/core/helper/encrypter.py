@@ -21,7 +21,10 @@ def encrypt_token(tenant_id: str, token: str):
 
     if not (tenant := db.session.get(Tenant, tenant_id)):
         raise ValueError(f"Tenant with id {tenant_id} not found")
-    assert tenant.encrypt_public_key is not None
+    if tenant.encrypt_public_key is None:
+        raise ValueError(
+            "Workspace encryption key is not initialized; open Workspace settings or contact an admin."
+        )
     encrypted_token = rsa.encrypt(token, tenant.encrypt_public_key)
     return base64.b64encode(encrypted_token).decode()
 
