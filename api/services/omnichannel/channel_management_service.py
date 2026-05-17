@@ -97,7 +97,42 @@ class ChannelManagementService:
         return encrypter.obfuscated_token(plain) if plain else ""
 
     @classmethod
-    def _to_masked_dict(cls, config: OmniChannelConfig) -> dict[str, Any]:
+    def _resolve_branding_picture(cls, config: OmniChannelConfig) -> str | None:
+        """Best-effort Page / OA avatar URL for inbox UI (requires stored access tokens)."""
+        from services.omnichannel.messenger_graph_profile import fetch_page_profile
+        from services.omnichannel.zalo_oauth_service import ZaloOAuthService
+        from services.omnichannel.zalo_oa_profile import fetch_zalo_oa_display
+
+        try:
+            if config.channel_type in (
+                OmniChannelType.FACEBOOK_MESSENGER,
+                OmniChannelType.INSTAGRAM_DM,
+                OmniChannelType.TIKTOK_MESSAGING,
+            ):
+                token = (config.decrypt_page_access_token() or "").strip()
+                if not token:
+                    return None
+                prof = fetch_page_profile(
+                    page_id=config.page_id,
+                    access_token=token,
+                    graph_version=config.graph_api_version,
+                )
+                pic = str(prof.get("picture_url") or "").strip()
+                return pic or None
+            if config.channel_type == OmniChannelType.ZALO_OA:
+                ZaloOAuthService.refresh_tokens_for_channel(config.channel_id, leeway_seconds=3600)
+                token = (config.decrypt_page_access_token() or "").strip()
+                if not token:
+                    return None
+                disp = fetch_zalo_oa_display(access_token=token)
+                pic = str(disp.get("avatar_url") or "").strip()
+                return pic or None
+        except Exception:
+            return None
+        return None
+
+    @classmethod
+    def _to_masked_dict(cls, config: OmniChannelConfig, *, include_branding: bool = False) -> dict[str, Any]:
         from services.omnichannel.zalo_oauth_service import ZaloOAuthService
 
         platform = cls._TYPE_TO_PLATFORM.get(config.channel_type, "messenger")
@@ -119,6 +154,7 @@ class ChannelManagementService:
             "access_token_masked": cls._secret_fingerprint(config.decrypt_page_access_token),
             "created_at": config.created_at,
             "updated_at": config.updated_at,
+            "external_resource_picture_url": cls._resolve_branding_picture(config) if include_branding else None,
         }
         if config.channel_type == OmniChannelType.ZALO_OA:
             row["oauth_status"] = _zalo_oauth_status(config)
@@ -127,17 +163,19 @@ class ChannelManagementService:
         return row
 
     @classmethod
-    def list_channels(cls, tenant_id: str, channel_type: str | None = None) -> list[dict[str, Any]]:
+    def list_channels(
+        cls, tenant_id: str, channel_type: str | None = None, *, include_branding: bool = False
+    ) -> list[dict[str, Any]]:
         channel_type_enum = cls._to_channel_type(channel_type) if channel_type else None
         with Session(db.engine, expire_on_commit=False) as session:
             query = session.query(OmniChannelConfig).where(OmniChannelConfig.tenant_id == tenant_id)
             if channel_type_enum:
                 query = query.where(OmniChannelConfig.channel_type == channel_type_enum)
             rows = query.order_by(OmniChannelConfig.created_at.desc()).all()
-        return [cls._to_masked_dict(row) for row in rows]
+        return [cls._to_masked_dict(row, include_branding=include_branding) for row in rows]
 
     @classmethod
-    def get_channel(cls, tenant_id: str, channel_id: str) -> dict[str, Any] | None:
+    def get_channel(cls, tenant_id: str, channel_id: str, *, include_branding: bool = False) -> dict[str, Any] | None:
         with Session(db.engine, expire_on_commit=False) as session:
             row = session.scalar(
                 select(OmniChannelConfig).where(
@@ -147,7 +185,7 @@ class ChannelManagementService:
             )
         if not row:
             return None
-        return cls._to_masked_dict(row)
+        return cls._to_masked_dict(row, include_branding=include_branding)
 
     @staticmethod
     def create_channel(tenant_id: str, user_id: str, payload: ChannelInput) -> dict[str, Any]:

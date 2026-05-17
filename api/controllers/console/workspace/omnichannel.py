@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
+from typing import Literal
 
 from flask import Response, request
 from flask_restx import Resource
@@ -17,6 +18,7 @@ from libs.login import current_account_with_tenant, login_required
 from models.account import AccountStatus
 from services.omnichannel.channel_management_service import ChannelInput, ChannelManagementService
 from services.omnichannel.kiotviet_connection_service import KiotVietConnectionInput, KiotVietConnectionService
+from services.omnichannel.omnichannel_agent_reply_service import OmnichannelAgentReplyService
 from services.omnichannel.omnichannel_ops_service import OmnichannelOpsService
 from services.omnichannel.omnichannel_realtime import omnichannel_pubsub_topic
 from services.omnichannel.providers.registry import ChannelProviderRegistry
@@ -137,6 +139,25 @@ class ChannelTimeFilterPayload(BaseModel):
     limit: int | None = Field(default=None, ge=1, le=100)
 
 
+class OmnichannelConversationCreatePayload(BaseModel):
+    external_user_id: str = Field(min_length=1, max_length=255)
+
+
+class OmnichannelAgentMessagePayload(BaseModel):
+    text: str = Field(default="", max_length=8000)
+    attachment_url: str | None = Field(default=None, max_length=2048)
+    attachment_type: Literal["image", "video", "audio", "file"] | None = None
+
+    @model_validator(mode="after")
+    def validate_body(self) -> OmnichannelAgentMessagePayload:
+        if not self.text.strip() and not (self.attachment_url or "").strip():
+            raise ValueError("text or attachment_url is required")
+        url = (self.attachment_url or "").strip()
+        if url and self.attachment_type is None:
+            raise ValueError("attachment_type is required when attachment_url is set")
+        return self
+
+
 register_schema_models(
     console_ns,
     MessengerChannelCreatePayload,
@@ -147,6 +168,8 @@ register_schema_models(
     KiotVietConnectionUpdatePayload,
     ChannelSyncHistoryPayload,
     ChannelTimeFilterPayload,
+    OmnichannelAgentMessagePayload,
+    OmnichannelConversationCreatePayload,
 )
 
 
@@ -201,7 +224,9 @@ class ChannelCollectionApi(Resource):
     @account_initialization_required
     def get(self):
         _, tenant_id = current_account_with_tenant()
-        return jsonable_encoder({"data": ChannelManagementService.list_channels(tenant_id)})
+        raw_flag = (request.args.get("include_branding") or "").strip().lower()
+        include_branding = raw_flag in {"1", "true", "yes", "on"}
+        return jsonable_encoder({"data": ChannelManagementService.list_channels(tenant_id, include_branding=include_branding)})
 
     @console_ns.expect(console_ns.models[ChannelCreatePayload.__name__])
     @setup_required
@@ -329,6 +354,26 @@ class ChannelConversationCollectionApi(Resource):
         )
         return jsonable_encoder(result)
 
+    @console_ns.expect(console_ns.models[OmnichannelConversationCreatePayload.__name__])
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def post(self, channel_id: str):
+        _, tenant_id = current_account_with_tenant()
+        payload = OmnichannelConversationCreatePayload.model_validate(console_ns.payload or {})
+        try:
+            data = OmnichannelOpsService.create_or_get_conversation(
+                tenant_id=tenant_id,
+                channel_id=channel_id,
+                external_user_id=payload.external_user_id,
+            )
+        except ValueError as exc:
+            msg = str(exc)
+            if "not found" in msg.lower():
+                raise NotFound(msg) from exc
+            raise BadRequest(msg) from exc
+        return jsonable_encoder({"data": data}), 201
+
 
 @console_ns.route(
     "/workspaces/current/channels/<string:channel_id>/conversations/<string:conversation_id>/refresh-participant"
@@ -371,6 +416,26 @@ class ChannelConversationMessageCollectionApi(Resource):
             limit=filter_payload.limit,
         )
         return jsonable_encoder(result)
+
+    @console_ns.expect(console_ns.models[OmnichannelAgentMessagePayload.__name__])
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def post(self, channel_id: str, conversation_id: str):
+        _, tenant_id = current_account_with_tenant()
+        payload = OmnichannelAgentMessagePayload.model_validate(console_ns.payload or {})
+        try:
+            data = OmnichannelAgentReplyService.send_reply(
+                tenant_id=tenant_id,
+                channel_id=channel_id,
+                conversation_id=conversation_id,
+                text=payload.text,
+                attachment_url=payload.attachment_url,
+                attachment_type=payload.attachment_type,
+            )
+        except ValueError as exc:
+            raise BadRequest(str(exc)) from exc
+        return jsonable_encoder({"data": data}), 201
 
 
 @console_ns.route("/workspaces/current/channels/<string:channel_id>/sync-history")

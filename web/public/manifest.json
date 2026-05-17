@@ -4,29 +4,29 @@
   "description": "Build Production Ready Agentic AI Solutions",
   "icons": [
     {
-      "src": "/logo/logo.png",
+      "src": "/logo/brand-logo-square.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/logo/logo.png",
+      "src": "/logo/brand-logo-square.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/logo/logo.png",
+      "src": "/logo/brand-logo-square.png",
       "sizes": "256x256",
       "type": "image/png"
     },
     {
-      "src": "/logo/logo.png",
+      "src": "/logo/brand-logo-square.png",
       "sizes": "384x384",
       "type": "image/png"
     },
     {
-      "src": "/logo/logo.png",
+      "src": "/logo/brand-logo-square.png",
       "sizes": "512x512",
       "type": "image/png"
     }
@@ -46,13 +46,13 @@
       "name": "Apps",
       "short_name": "Apps",
       "url": "/apps",
-      "icons": [{ "src": "/logo/logo.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/logo/brand-logo-square.png", "sizes": "96x96" }]
     },
     {
       "name": "Datasets",
       "short_name": "Datasets",
       "url": "/datasets",
-      "icons": [{ "src": "/logo/logo.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/logo/brand-logo-square.png", "sizes": "96x96" }]
     }
   ]
 }

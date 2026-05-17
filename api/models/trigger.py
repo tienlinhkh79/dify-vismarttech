@@ -260,6 +260,7 @@ class OmniChannelConversation(TypeBase, kw_only=True):
     channel_type: Mapped[OmniChannelType] = mapped_column(EnumText(OmniChannelType, length=60), nullable=False)
     external_user_id: Mapped[str] = mapped_column(String(255), nullable=False)
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_message_preview: Mapped[str | None] = mapped_column(String(512), nullable=True, default=None)
     participant_display_name: Mapped[str | None] = mapped_column(String(512), nullable=True)
     participant_profile_pic_url: Mapped[str | None] = mapped_column(LongText, nullable=True)
     created_at: Mapped[datetime] = mapped_column(

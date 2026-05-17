@@ -64,6 +64,8 @@ export type Channel = {
   webhook_path?: string
   created_at?: string
   updated_at?: string
+  /** Populated when listing with ``include_branding`` (Graph / Zalo OA). */
+  external_resource_picture_url?: string | null
 }
 
 type MessengerChannelListResponse = {
@@ -92,6 +94,7 @@ export type OmnichannelConversation = {
   participant_display_name?: string | null
   participant_profile_pic_url?: string | null
   last_message_at?: string
+  last_message_preview?: string | null
   channel_id: string
   channel_type: string
   created_at?: string
@@ -227,8 +230,10 @@ export const listChannelProviders = () => {
   return get<ChannelProviderResponse>('/workspaces/current/channels/providers')
 }
 
-export const listChannels = () => {
-  return get<ChannelListResponse>('/workspaces/current/channels')
+export const listChannels = (params?: { include_branding?: boolean }) => {
+  return get<ChannelListResponse>('/workspaces/current/channels', {
+    params: params?.include_branding ? { include_branding: 'true' } : {},
+  })
 }
 
 export const createChannel = (payload: Channel, options?: { silent?: boolean }) => {
@@ -332,6 +337,7 @@ export const patchMiniCrmLead = (conversationId: string, body: {
   stage?: string
   owner_account_id?: string | null
   notes?: string | null
+  notes_append?: string | null
   source_override?: string | null
 }) => {
   return patch<{ data: MiniCrmLeadRow }>(`/workspaces/current/mini-crm/leads/${encodeURIComponent(conversationId)}`, {
@@ -348,6 +354,24 @@ export const listOmnichannelConversations = (channelId: string, params?: {
   return get<OmnichannelListResponse<OmnichannelConversation>>(`/workspaces/current/channels/${channelId}/conversations`, {
     params,
   })
+}
+
+export const createOmnichannelConversation = (channelId: string, body: { external_user_id: string }) => {
+  return post<OmnichannelItemResponse<OmnichannelConversation>>(
+    `/workspaces/current/channels/${encodeURIComponent(channelId)}/conversations`,
+    { body },
+  )
+}
+
+export const sendOmnichannelAgentMessage = (
+  channelId: string,
+  conversationId: string,
+  body: { text: string; attachment_url?: string; attachment_type?: 'image' | 'video' | 'audio' | 'file' },
+) => {
+  return post<OmnichannelItemResponse<{ id: string; conversation_id: string; channel_type: string }>>(
+    `/workspaces/current/channels/${encodeURIComponent(channelId)}/conversations/${encodeURIComponent(conversationId)}/messages`,
+    { body },
+  )
 }
 
 export const listOmnichannelMessages = (channelId: string, conversationId: string, params?: {

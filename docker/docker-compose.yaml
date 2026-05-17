@@ -792,6 +792,7 @@ services:
       - ../api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py:/app/api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py
       - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
       - ../api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py
+      - ../api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py
       - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
       - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
@@ -858,6 +859,7 @@ services:
       - ../api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py:/app/api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py
       - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
       - ../api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py
+      - ../api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py
       - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
       - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
@@ -917,6 +919,7 @@ services:
       - ../api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py:/app/api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py
       - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
       - ../api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py
+      - ../api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py
       - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
       - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py

@@ -17,6 +17,7 @@ import Loading from '@/app/components/base/loading'
 import { useAppContext } from '@/context/app-context'
 import { useRouter } from '@/next/navigation'
 import { cn } from '@/utils/classnames'
+import { useConsoleNavLayout } from '../../console-nav-layout-context'
 
 export type NavItem = {
   id: string
@@ -40,6 +41,8 @@ export type INavSelectorProps = {
 
 const NavSelector = ({ curNav, navigationItems, createText, isApp, onCreate, onLoadMore, isLoadingMore }: INavSelectorProps) => {
   const { t } = useTranslation()
+  const { orientation } = useConsoleNavLayout()
+  const isVertical = orientation === 'vertical'
   const router = useRouter()
   const { isCurrentWorkspaceEditor } = useAppContext()
   const setAppDetail = useAppStore(state => state.setAppDetail)
@@ -58,22 +61,31 @@ const NavSelector = ({ curNav, navigationItems, createText, isApp, onCreate, onL
       {({ open }) => (
         <>
           <MenuButton className={cn(
-            'hover:hover:bg-components-main-nav-nav-button-bg-active-hover group inline-flex h-7 w-full items-center justify-center radius-lg pl-2 pr-2.5 text-[14px] font-semibold text-components-main-nav-nav-button-text-active',
-            open && 'bg-components-main-nav-nav-button-bg-active',
+            'group inline-flex w-full items-center text-[14px] font-semibold text-components-main-nav-nav-button-text-active',
+            isVertical
+              ? cn(
+                  'min-h-9 justify-between rounded-none bg-transparent px-3 py-0 hover:bg-state-base-hover',
+                  open && 'bg-state-base-hover',
+                )
+              : cn(
+                  'h-7 justify-center radius-lg pl-2 pr-2.5 hover:hover:bg-components-main-nav-nav-button-bg-active-hover',
+                  open && 'bg-components-main-nav-nav-button-bg-active',
+                ),
           )}
           >
-            <div className="max-w-[157px] truncate" title={curNav?.name}>{curNav?.name}</div>
+            <div className={cn('truncate', isVertical ? 'min-w-0 max-w-full flex-1 text-left' : 'max-w-[157px]')} title={curNav?.name}>{curNav?.name}</div>
             <RiArrowDownSLine
               className={cn('ml-1 h-3 w-3 shrink-0 opacity-50 group-hover:opacity-100', open && 'opacity-100!')}
               aria-hidden="true"
             />
           </MenuButton>
           <MenuItems
-            className="
-              absolute -left-11 right-0 mt-1.5 w-60 max-w-80
-              origin-top-right divide-y divide-divider-regular rounded-lg bg-components-panel-bg-blur
-              shadow-lg
-            "
+            className={cn(
+              'absolute z-50 w-60 divide-y divide-divider-regular rounded-lg bg-components-panel-bg-blur shadow-lg',
+              isVertical
+                ? 'left-full top-0 ml-1.5 mt-0 max-w-[min(20rem,calc(100vw-19rem))] origin-top-left'
+                : '-left-11 right-0 mt-1.5 max-w-80 origin-top-right',
+            )}
           >
             <div className="overflow-auto px-1 py-1" style={{ maxHeight: '50vh' }} onScroll={handleScroll}>
               {
@@ -156,7 +168,8 @@ const NavSelector = ({ curNav, navigationItems, createText, isApp, onCreate, onL
                       leaveTo="transform opacity-0 scale-95"
                     >
                       <MenuItems className={cn(
-                        'absolute right-[-198px] top-[3px] z-10 min-w-[200px] rounded-lg bg-components-panel-bg-blur shadow-lg',
+                        'absolute z-10 min-w-[200px] rounded-lg bg-components-panel-bg-blur shadow-lg',
+                        isVertical ? 'left-full top-0 ml-1.5' : 'right-[-198px] top-[3px]',
                       )}
                       >
                         <div className="p-1">

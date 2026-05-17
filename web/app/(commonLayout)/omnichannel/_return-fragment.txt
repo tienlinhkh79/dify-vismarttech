@@ -1,0 +1,180 @@
+  return (
+    <OmnichannelInboxLayout
+      errorBanner={error
+        ? (
+            <div className='shrink-0 border-b border-state-destructive-border bg-state-destructive-hover-alt px-4 py-2 text-sm text-text-destructive'>
+              {error}
+            </div>
+          )
+        : null}
+      toolbar={(
+        <div className='flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-divider-regular bg-components-panel-bg px-4 py-3'>
+          <div className='min-w-0'>
+            <h1 className='system-lg-semibold text-text-primary'>{t('settings.omnichannelChatTitle')}</h1>
+            <p className='system-xs-regular mt-0.5 text-text-tertiary'>{t('settings.omnichannelPageSubtitle')}</p>
+          </div>
+          <div className='flex shrink-0 flex-wrap items-center justify-end gap-2'>
+            <select
+              title={t('settings.omnichannelSectionChannel')}
+              className='h-9 max-w-[240px] truncate rounded-lg border border-components-input-border bg-components-input-bg px-2.5 text-sm text-text-primary'
+              value={selectedChannelId}
+              onChange={e => setSelectedChannelId(e.target.value)}
+            >
+              {!channelOptions.length && <option value="">{t('settings.omnichannelNoChannelsOption')}</option>}
+              {channelOptions.map(option => (
+                <option key={option.id} value={option.id}>{option.label}</option>
+              ))}
+            </select>
+            <Button
+              type='button'
+              size='small'
+              variant='secondary'
+              title={t('settings.omnichannelDownloadReportHint')}
+              disabled
+            >
+              <RiDownloadLine className='h-4 w-4' />
+            </Button>
+            <Button
+              type='button'
+              size='small'
+              variant='secondary'
+              title={t('settings.omnichannelStartNewChatHint')}
+              onClick={() => setSelectedConversationId(conversations[0]?.id || '')}
+            >
+              <RiAddLine className='mr-1 h-4 w-4' />
+              <span className='hidden sm:inline'>{t('settings.omnichannelStartNewChat')}</span>
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={cn('btn btn-secondary btn-small flex items-center justify-center !px-2')}
+                title={t('settings.omnichannelMoreMenu')}
+              >
+                <RiMore2Fill className='h-4 w-4' />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end' className='w-56'>
+                <DropdownMenuItem disabled={!selectedChannelId || isTestingWebhook} onClick={() => void onWebhookTest()}>
+                  {t('settings.omnichannelTestWebhook')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      )}
+      conversationRail={(
+        <aside className='flex max-h-[46vh] min-h-0 w-full flex-col overflow-hidden border-b border-divider-regular bg-background-body xl:max-h-none xl:w-[min(100%,320px)] xl:shrink-0 xl:border-b-0 xl:border-r'>
+          <div className='shrink-0 border-b border-divider-regular px-2 py-2'>
+            <div className='relative'>
+              <RiSearchLine className='pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-text-quaternary' aria-hidden />
+              <input
+                type='search'
+                value={conversationSearchQuery}
+                onChange={e => setConversationSearchQuery(e.target.value)}
+                placeholder={t('settings.omnichannelSearchChatsPlaceholder')}
+                className='system-sm-regular h-9 w-full rounded-lg border border-divider-regular bg-components-input-bg-normal py-2 pl-9 pr-3 text-text-primary outline-none placeholder:text-text-quaternary focus:border-state-accent-solid'
+              />
+            </div>
+          </div>
+          <div className='flex shrink-0 gap-1 overflow-x-auto border-b border-divider-regular px-2 pt-1'>
+            {OMNICHANNEL_TAB_DEFS.map((def) => {
+              const n = def.countKey ? tabCounts[def.countKey] : 0
+              const active = conversationTab === def.id
+              return (
+                <button
+                  key={def.id}
+                  type='button'
+                  className={cn(
+                    'relative shrink-0 whitespace-nowrap rounded-t-lg px-3 py-2.5 text-xs font-medium transition-colors',
+                    active
+                      ? 'text-text-accent after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-text-accent'
+                      : 'text-text-tertiary hover:text-text-secondary',
+                  )}
+                  onClick={() => setConversationTab(def.id)}
+                >
+                  <span>{t(def.labelKey)}</span>
+                  {def.id === 'new' && n > 0 && (
+                    <span className='ml-1 align-middle text-[10px] font-semibold text-text-accent'>({n})</span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+          <div className='min-h-0 flex-1 space-y-1 overflow-y-auto px-2 pb-2 pt-1'>
+            {isPageLoading && <div className='px-2 py-4 text-sm text-text-tertiary'>{t('settings.omnichannelLoadingConversations')}</div>}
+            {!isPageLoading && !filteredConversations.length && (
+              <div className='px-2 py-4 text-sm text-text-tertiary'>{t('settings.omnichannelNoConversations')}</div>
+            )}
+            {!isPageLoading && filteredConversations.map(item => (
+              <button
+                key={item.id}
+                type='button'
+                className={cn(
+                  'flex w-full gap-2 rounded-xl border px-2.5 py-2.5 text-left transition-colors',
+                  selectedConversationId === item.id
+                    ? 'border-divider-regular bg-state-base-hover shadow-sm'
+                    : 'border-transparent hover:bg-state-base-hover',
+                )}
+                onClick={() => setSelectedConversationId(item.id)}
+              >
+                <div className='relative shrink-0'>
+                  <OmnichannelAvatar
+                    size={40}
+                    imageUrl={item.participant_profile_pic_url}
+                    initials={omnichannelInitialsSeed(
+                      (item.participant_display_name && item.participant_display_name.trim()) || item.external_user_id,
+                    )}
+                  />
+                  <div className='absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full border border-divider-subtle bg-components-panel-bg p-0.5 shadow-sm'>
+                    <ProviderLogo provider={item.channel_type || 'facebook_messenger'} className='size-3.5 rounded-sm' />
+                  </div>
+                </div>
+                <div className='min-w-0 flex-1'>
+                  <div className='flex items-start justify-between gap-2'>
+                    <div className='truncate system-sm-medium text-text-primary'>
+                      {(item.participant_display_name && item.participant_display_name.trim()) || item.external_user_id}
+                    </div>
+                    <span className='shrink-0 whitespace-nowrap text-[11px] text-text-quaternary tabular-nums'>
+                      {formatListTime(item.last_message_at)}
+                    </span>
+                  </div>
+                  <div className='mt-0.5 line-clamp-2 text-xs leading-snug text-text-tertiary'>
+                    {selectedConversationId === item.id && lastMessagePreview
+                      ? lastMessagePreview
+                      : t('settings.omnichannelListSnippetFallback')}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </aside>
+      )}
+      conversationMain={(
+        <section className='flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-t border-divider-regular bg-components-panel-bg xl:border-t-0'>
+          {selectedConversation && (
+            <div className='flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-divider-regular px-4 py-3'>
+              <div className='flex min-w-0 items-center gap-2'>
+                <div className='min-w-0'>
+                  <div className='flex items-center gap-2'>
+                    <span className='truncate system-md-semibold text-text-primary'>
+                      {(selectedConversation.participant_display_name && selectedConversation.participant_display_name.trim()) || selectedConversation.external_user_id}
+                    </span>
+                    <span className='h-2 w-2 shrink-0 rounded-full bg-text-success' title={t('settings.omnichannelOnline')} />
+                  </div>
+                  <div className='system-xs-regular mt-0.5 truncate text-text-tertiary'>
+                    {lastMessagePreview || t('settings.omnichannelConversationWith', {
+                      id: (selectedConversation.participant_display_name && String(selectedConversation.participant_display_name).trim())
+                        || selectedConversation.external_user_id,
+                    })}
+                  </div>
+                </div>
+              </div>
+              <div className='flex shrink-0 flex-wrap items-center gap-2'>
+                <span className='system-2xs-medium-uppercase rounded-lg border border-divider-regular bg-background-default px-2 py-1 text-text-secondary'>
+                  {t('settings.omnichannelConversationStatus')}: {t('settings.omnichannelStatusInProgress')}
+                </span>
+                <span className='system-2xs-medium-uppercase rounded-lg border border-divider-regular bg-background-default px-2 py-1 text-text-secondary'>
+                  {t('settings.omnichannelConversationPriority')}: {t('settings.omnichannelPriorityMedium')}
+                </span>
+              </div>
+            </div>
+          )}
+          <div className='flex min-h-0 flex-1 flex-col overflow-hidden p-3'>

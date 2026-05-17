@@ -91,12 +91,12 @@ describe('New Dataset Card Integration', () => {
 
       it('should render the create from pipeline option', () => {
         render(<CreateAppCard />)
-        expect(screen.getByText(/createFromPipeline/)).toBeInTheDocument()
+        expect(screen.getByText(/cornerLabel.pipeline/)).toBeInTheDocument()
       })
 
       it('should render the connect dataset option', () => {
         render(<CreateAppCard />)
-        expect(screen.getByText(/connectDataset/)).toBeInTheDocument()
+        expect(screen.getByText(/externalTag/)).toBeInTheDocument()
       })
     })
 
@@ -127,7 +127,7 @@ describe('New Dataset Card Integration', () => {
       it('should have correct container styling', () => {
         const { container } = render(<CreateAppCard />)
         const wrapper = container.firstChild as HTMLElement
-        expect(wrapper).toHaveClass('flex', 'flex-col', 'rounded-xl')
+        expect(wrapper).toHaveClass('flex', 'flex-col', 'rounded-xl', 'border-dashed')
       })
     })
   })

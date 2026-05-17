@@ -18,7 +18,7 @@ import { basePath } from '@/utils/var'
 import './styles/globals.css'
 import './styles/markdown.css'
 
-const appIconHref = `${basePath}/logo/logo.png`
+const appIconHref = `${basePath}/logo/brand-logo-square.png`
 
 export const viewport: Viewport = {
   width: 'device-width',

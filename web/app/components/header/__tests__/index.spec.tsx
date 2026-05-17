@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { vi } from 'vitest'
-import Header from '../index'
+import ConsoleChrome from '../index'
 
 function createMockComponent(testId: string) {
   return () => <div data-testid={testId} />
@@ -8,6 +8,36 @@ function createMockComponent(testId: string) {
 
 vi.mock('@/app/components/header/account-dropdown/workplace-selector', () => ({
   default: createMockComponent('workplace-selector'),
+}))
+
+vi.mock('../console-hero-menu', () => ({
+  default: function MockConsoleHeroMenu() {
+    const { useProviderContext } = require('@/context/provider-context') as typeof import('@/context/provider-context')
+    const { useModalContext } = require('@/context/modal-context') as typeof import('@/context/modal-context')
+    const { Plan } = require('@/app/components/billing/type') as typeof import('@/app/components/billing/type')
+    const { ACCOUNT_SETTING_TAB } = require('@/app/components/header/account-setting/constants') as typeof import('@/app/components/header/account-setting/constants')
+    const { enableBilling, plan } = useProviderContext()
+    const { setShowPricingModal, setShowAccountSettingModal } = useModalContext()
+    return (
+      <div data-testid="console-hero-menu">
+        <div data-testid="workplace-selector" />
+        {enableBilling
+          ? (
+              <button
+                type="button"
+                data-testid="plan-badge"
+                onClick={() =>
+                  plan.type === Plan.sandbox
+                    ? setShowPricingModal()
+                    : setShowAccountSettingModal({ payload: ACCOUNT_SETTING_TAB.BILLING })}
+              />
+            )
+          : <div data-testid="license-nav" />}
+        <div data-testid="plugins-nav" />
+        <div data-testid="account-dropdown" />
+      </div>
+    )
+  },
 }))
 
 vi.mock('@/app/components/header/account-dropdown', () => ({
@@ -71,6 +101,15 @@ vi.mock('@/context/app-context', () => ({
   useAppContext: () => ({
     isCurrentWorkspaceEditor: mockIsWorkspaceEditor,
     isCurrentWorkspaceDatasetOperator: mockIsDatasetOperator,
+    langGeniusVersionInfo: {
+      current_version: '0.0.0',
+      latest_version: '0.0.0',
+      version: '0.0.0',
+      release_date: '',
+      release_notes: '',
+      can_auto_update: false,
+      current_env: 'PRODUCTION',
+    },
   }),
 }))
 
@@ -109,7 +148,7 @@ vi.mock('@/context/global-public-context', () => {
   }
 })
 
-describe('Header', () => {
+describe('ConsoleChrome', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockIsWorkspaceEditor = false
@@ -123,9 +162,10 @@ describe('Header', () => {
   })
 
   it('should render header with main nav components', () => {
-    render(<Header />)
+    render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
     expect(screen.getByRole('img', { name: /dify logo/i })).toBeInTheDocument()
+    expect(screen.getByTestId('console-hero-menu')).toBeInTheDocument()
     expect(screen.getByTestId('workplace-selector')).toBeInTheDocument()
     expect(screen.getByTestId('app-nav')).toBeInTheDocument()
     expect(screen.getByTestId('account-dropdown')).toBeInTheDocument()
@@ -133,19 +173,19 @@ describe('Header', () => {
 
   it('should show license nav when billing disabled, plan badge when enabled', () => {
     mockEnableBilling = false
-    const { rerender } = render(<Header />)
+    const { rerender } = render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
     expect(screen.getByTestId('license-nav')).toBeInTheDocument()
     expect(screen.queryByTestId('plan-badge')).not.toBeInTheDocument()
 
     mockEnableBilling = true
-    rerender(<Header />)
+    rerender(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
     expect(screen.queryByTestId('license-nav')).not.toBeInTheDocument()
     expect(screen.getByTestId('plan-badge')).toBeInTheDocument()
   })
 
   it('should hide explore nav when user is dataset operator', () => {
     mockIsDatasetOperator = true
-    render(<Header />)
+    render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
     expect(screen.queryByTestId('explore-nav')).not.toBeInTheDocument()
     expect(screen.getByTestId('dataset-nav')).toBeInTheDocument()
@@ -154,20 +194,20 @@ describe('Header', () => {
   it('should call pricing modal for free plan, settings modal for paid plan', () => {
     mockEnableBilling = true
     mockPlanType = 'sandbox'
-    const { rerender } = render(<Header />)
+    const { rerender } = render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
     fireEvent.click(screen.getByTestId('plan-badge'))
     expect(mockSetShowPricingModal).toHaveBeenCalledTimes(1)
 
     mockPlanType = 'professional'
-    rerender(<Header />)
+    rerender(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
     fireEvent.click(screen.getByTestId('plan-badge'))
     expect(mockSetShowAccountSettingModal).toHaveBeenCalledTimes(1)
   })
 
   it('should render mobile layout without env nav', () => {
     mockMedia = 'mobile'
-    render(<Header />)
+    render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
     expect(screen.getByRole('img', { name: /dify logo/i })).toBeInTheDocument()
     expect(screen.queryByTestId('env-nav')).not.toBeInTheDocument()
@@ -178,7 +218,7 @@ describe('Header', () => {
     mockBrandingTitle = 'Acme Workspace'
     mockBrandingLogo = '/logo.png'
 
-    render(<Header />)
+    render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
     expect(screen.getByText('Acme Workspace')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: /dify logo/i })).toBeInTheDocument()
@@ -189,7 +229,7 @@ describe('Header', () => {
     mockBrandingTitle = 'Custom Title'
     mockBrandingLogo = null
 
-    render(<Header />)
+    render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
     expect(screen.getByText('Custom Title')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: /dify logo/i })).toBeInTheDocument()
@@ -200,7 +240,7 @@ describe('Header', () => {
     mockBrandingTitle = null
     mockBrandingLogo = null
 
-    render(<Header />)
+    render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
     expect(screen.getByText('Vismarttech')).toBeInTheDocument()
   })
@@ -209,7 +249,7 @@ describe('Header', () => {
     mockIsWorkspaceEditor = true
     mockIsDatasetOperator = false
 
-    render(<Header />)
+    render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
     expect(screen.getByTestId('dataset-nav')).toBeInTheDocument()
     expect(screen.getByTestId('explore-nav')).toBeInTheDocument()
@@ -220,7 +260,7 @@ describe('Header', () => {
     mockIsWorkspaceEditor = false
     mockIsDatasetOperator = false
 
-    render(<Header />)
+    render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
     expect(screen.queryByTestId('dataset-nav')).not.toBeInTheDocument()
   })
@@ -229,7 +269,7 @@ describe('Header', () => {
     mockMedia = 'mobile'
     mockIsDatasetOperator = true
 
-    render(<Header />)
+    render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
     expect(screen.queryByTestId('explore-nav')).not.toBeInTheDocument()
     expect(screen.queryByTestId('app-nav')).not.toBeInTheDocument()
@@ -242,7 +282,7 @@ describe('Header', () => {
     mockEnableBilling = true
     mockPlanType = 'sandbox'
 
-    render(<Header />)
+    render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
     expect(screen.getByTestId('plan-badge')).toBeInTheDocument()
     expect(screen.queryByTestId('license-nav')).not.toBeInTheDocument()

@@ -6,9 +6,7 @@ import AmplitudeProvider from '@/app/components/base/amplitude'
 import GA, { GaType } from '@/app/components/base/ga'
 import Zendesk from '@/app/components/base/zendesk'
 import GotoAnything from '@/app/components/goto-anything'
-import Header from '@/app/components/header'
-import HeaderWrapper from '@/app/components/header/header-wrapper'
-import ZaloOAuthReturnHandler from '@/app/components/header/zalo-oauth-return-handler'
+import ConsoleChrome from '@/app/components/header'
 import ReadmePanel from '@/app/components/plugins/readme-panel'
 import { AppContextProvider } from '@/context/app-context-provider'
 import { EventEmitterContextProvider } from '@/context/event-emitter-provider'
@@ -28,13 +26,11 @@ const Layout = ({ children }: { children: ReactNode }) => {
           <EventEmitterContextProvider>
             <ProviderContextProvider>
               <ModalContextProvider>
-                <HeaderWrapper>
-                  <Header />
-                  <ZaloOAuthReturnHandler />
-                </HeaderWrapper>
-                <RoleRouteGuard>
-                  {children}
-                </RoleRouteGuard>
+                <ConsoleChrome>
+                  <RoleRouteGuard>
+                    {children}
+                  </RoleRouteGuard>
+                </ConsoleChrome>
                 <InSiteMessageNotification />
                 <PartnerStack />
                 <ReadmePanel />

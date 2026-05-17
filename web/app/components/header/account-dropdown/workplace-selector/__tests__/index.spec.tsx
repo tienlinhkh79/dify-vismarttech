@@ -89,6 +89,21 @@ describe('WorkplaceSelector', () => {
       expect(screen.getByText('pro')).toBeInTheDocument()
       expect(screen.getByText('sandbox')).toBeInTheDocument()
     })
+
+    it('when billing is enabled, hides plan badge on the current workspace row only', () => {
+      vi.mocked(useProviderContext).mockReturnValue({
+        ...baseProviderContextValue,
+        enableBilling: true,
+        isFetchedPlan: true,
+        isEducationWorkspace: false,
+      } as ProviderContextState)
+
+      renderComponent()
+      fireEvent.click(screen.getByRole('button'))
+
+      expect(screen.getByText('sandbox')).toBeInTheDocument()
+      expect(screen.queryByText('pro')).not.toBeInTheDocument()
+    })
   })
 
   describe('Workspace Switching', () => {

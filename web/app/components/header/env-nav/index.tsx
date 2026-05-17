@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { TerminalSquare } from '@/app/components/base/icons/src/vender/solid/development'
 import { Beaker02 } from '@/app/components/base/icons/src/vender/solid/education'
 import { useAppContext } from '@/context/app-context'
+import { cn } from '@/utils/classnames'
+import { useConsoleNavLayout } from '../console-nav-layout-context'
 
 const headerEnvClassName: { [k: string]: string } = {
   DEVELOPMENT: 'bg-[#FEC84B] border-[#FDB022] text-[#93370D]',
@@ -12,6 +14,7 @@ const headerEnvClassName: { [k: string]: string } = {
 
 const EnvNav = () => {
   const { t } = useTranslation()
+  const { orientation } = useConsoleNavLayout()
   const { langGeniusVersionInfo } = useAppContext()
   const showEnvTag = langGeniusVersionInfo.current_env === 'TESTING' || langGeniusVersionInfo.current_env === 'DEVELOPMENT'
 
@@ -28,7 +31,7 @@ const EnvNav = () => {
         langGeniusVersionInfo.current_env === 'TESTING' && (
           <>
             <Beaker02 className="h-3 w-3" />
-            <div className="ml-1 max-[1280px]:hidden">{t('environment.testing', { ns: 'common' })}</div>
+            <div className={cn('ml-1', orientation !== 'vertical' && 'max-[1280px]:hidden')}>{t('environment.testing', { ns: 'common' })}</div>
           </>
         )
       }
@@ -36,7 +39,7 @@ const EnvNav = () => {
         langGeniusVersionInfo.current_env === 'DEVELOPMENT' && (
           <>
             <TerminalSquare className="h-3 w-3" />
-            <div className="ml-1 max-[1280px]:hidden">{t('environment.development', { ns: 'common' })}</div>
+            <div className={cn('ml-1', orientation !== 'vertical' && 'max-[1280px]:hidden')}>{t('environment.development', { ns: 'common' })}</div>
           </>
         )
       }

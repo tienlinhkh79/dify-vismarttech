@@ -32,13 +32,13 @@ describe('DatasetFooter', () => {
     it('should have correct footer styling', () => {
       render(<DatasetFooter />)
       const footer = screen.getByRole('contentinfo')
-      expect(footer).toHaveClass('shrink-0', 'px-12', 'py-6')
+      expect(footer).toHaveClass('shrink-0', 'px-6', 'pb-8', 'pt-2', 'md:px-12')
     })
 
-    it('should have gradient text on heading', () => {
+    it('should style the heading for emphasis', () => {
       render(<DatasetFooter />)
       const heading = screen.getByRole('heading', { level: 3 })
-      expect(heading).toHaveClass('text-gradient')
+      expect(heading).toHaveClass('system-md-semibold', 'text-text-primary')
     })
   })
 

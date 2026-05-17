@@ -71,6 +71,18 @@ class TestMessengerChannelApi:
 class TestOmnichannelOpsApis:
     @patch.object(module, "request")
     @patch.object(module, "current_account_with_tenant", return_value=(SimpleNamespace(id="user-1"), "tenant-1"))
+    @patch.object(module.ChannelManagementService, "list_channels", return_value=[{"channel_id": "ch-1"}])
+    def test_list_channels_include_branding_flag(self, _mock_current, mock_request):
+        from unittest.mock import MagicMock
+
+        mock_request.args = MagicMock()
+        mock_request.args.get = lambda k, default=None: "true" if k == "include_branding" else default
+        result = module.ChannelCollectionApi().get()
+        assert result["data"][0]["channel_id"] == "ch-1"
+        module.ChannelManagementService.list_channels.assert_called_once_with("tenant-1", include_branding=True)
+
+    @patch.object(module, "request")
+    @patch.object(module, "current_account_with_tenant", return_value=(SimpleNamespace(id="user-1"), "tenant-1"))
     @patch.object(module.OmnichannelOpsService, "list_conversations", return_value={"data": [{"id": "conv-1"}]})
     def test_list_conversations(self, _mock_list, _mock_current, mock_request):
         mock_request.args.to_dict.return_value = {}
@@ -94,4 +106,22 @@ class TestOmnichannelOpsApis:
         result, status = module.ChannelSyncHistoryApi().post("ch-1")
         assert status == 202
         assert result["data"]["id"] == "job-1"
+
+    @patch.object(module, "current_account_with_tenant", return_value=(SimpleNamespace(id="user-1"), "tenant-1"))
+    @patch.object(module.OmnichannelOpsService, "create_or_get_conversation", return_value={"id": "conv-new"})
+    @patch.object(module, "console_ns")
+    def test_create_conversation(self, mock_ns, _mock_create, _mock_current):
+        mock_ns.payload = {"external_user_id": "u-1"}
+        result, status = module.ChannelConversationCollectionApi().post("ch-1")
+        assert status == 201
+        assert result["data"]["id"] == "conv-new"
+
+    @patch.object(module, "current_account_with_tenant", return_value=(SimpleNamespace(id="user-1"), "tenant-1"))
+    @patch.object(module.OmnichannelAgentReplyService, "send_reply", return_value={"id": "m1"})
+    @patch.object(module, "console_ns")
+    def test_send_agent_message(self, mock_ns, _mock_send, _mock_current):
+        mock_ns.payload = {"text": "hi"}
+        result, status = module.ChannelConversationMessageCollectionApi().post("ch-1", "conv-1")
+        assert status == 201
+        assert result["data"]["id"] == "m1"
 

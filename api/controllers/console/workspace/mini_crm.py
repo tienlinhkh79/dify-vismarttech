@@ -3,7 +3,7 @@ from __future__ import annotations
 from flask import request
 from flask_restx import Resource
 from graphon.model_runtime.utils.encoders import jsonable_encoder
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from werkzeug.exceptions import BadRequest, NotFound
 
 from controllers.common.schema import register_schema_models
@@ -18,7 +18,14 @@ class MiniCrmLeadPatchPayload(BaseModel):
     stage: str | None = Field(default=None, max_length=32)
     owner_account_id: str | None = Field(default=None, max_length=36)
     notes: str | None = Field(default=None, max_length=65535)
+    notes_append: str | None = Field(default=None, max_length=4000)
     source_override: str | None = Field(default=None, max_length=512)
+
+    @model_validator(mode="after")
+    def notes_exclusive(self) -> MiniCrmLeadPatchPayload:
+        if self.notes is not None and self.notes_append is not None:
+            raise ValueError("Provide either notes or notes_append, not both")
+        return self
 
     @field_validator("stage")
     @classmethod
@@ -86,6 +93,8 @@ class MiniCrmLeadApi(Resource):
             lead_patch_call_kwargs["owner_account_id"] = body["owner_account_id"]
         if "notes" in body:
             lead_patch_call_kwargs["notes"] = body["notes"]
+        if "notes_append" in body:
+            lead_patch_call_kwargs["notes_append"] = body["notes_append"]
         if "source_override" in body:
             lead_patch_call_kwargs["source_override"] = body["source_override"]
         try:

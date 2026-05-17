@@ -1,19 +1,39 @@
 'use client'
 
+import {
+  RiAddLine,
+  RiDownloadLine,
+  RiMore2Fill,
+  RiSearchLine,
+} from '@remixicon/react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from '#i18n'
 import { useSearchParams } from '@/next/navigation'
+import Link from '@/next/link'
 import Button from '@/app/components/base/button'
 import Input from '@/app/components/base/input'
-import { ProviderLogo } from '@/app/components/header/account-setting/channels-ui'
+import Modal from '@/app/components/base/modal'
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/app/components/base/ui/dropdown-menu'
+import { toast } from '@/app/components/base/ui/toast'
+import { ProviderLogo } from '@/app/components/header/account-setting/channels-ui'
+import { ACCOUNT_SETTING_TAB } from '@/app/components/header/account-setting/constants'
+import {
+  createOmnichannelConversation,
   getOmnichannelHealth,
   getOmnichannelStats,
   getOmnichannelSyncJob,
   listChannels,
   listOmnichannelConversations,
   listOmnichannelMessages,
+  patchMiniCrmLead,
   refreshOmnichannelConversationParticipant,
+  sendOmnichannelAgentMessage,
   startOmnichannelHistorySync,
   testOmnichannelWebhook,
   type Channel,
@@ -23,6 +43,9 @@ import {
 } from '@/service/tools'
 import { API_PREFIX } from '@/config'
 import { getBaseURL } from '@/service/client'
+import { useAccountSettingModal } from '@/hooks/use-query-params'
+import { cn } from '@/utils/classnames'
+import { OmnichannelInboxLayout } from './omnichannel-inbox-layout'
 
 function omnichannelSseUrl(channelId: string): string {
   const segment = `workspaces/current/channels/${encodeURIComponent(channelId)}/stream`
@@ -165,11 +188,54 @@ const messageMatchesSearch = (message: OmnichannelMessage, q: string) => {
   return parts.join('\n').toLowerCase().includes(needle)
 }
 
+type ConversationTab = 'all' | 'new' | 'progress' | 'waiting' | 'completed'
+
+const conversationLastMs = (iso?: string) => {
+  const n = new Date(iso || '').getTime()
+  return Number.isNaN(n) ? null : n
+}
+
+const formatOmnichannelListSnippet = (raw: string | undefined | null) => {
+  const text = (raw || '').trim().replace(/\s+/g, ' ')
+  if (!text)
+    return ''
+  return text.length > 72 ? `${text.slice(0, 72)}…` : text
+}
+
+const conversationMatchesTab = (tab: ConversationTab, c: OmnichannelConversation) => {
+  const now = Date.now()
+  const last = conversationLastMs(c.last_message_at)
+  if (tab === 'all')
+    return true
+  if (tab === 'new')
+    return last != null && now - last < 86400000
+  if (tab === 'progress')
+    return last != null && now - last >= 86400000 && now - last < 7 * 86400000
+  if (tab === 'waiting')
+    return last == null || (now - last >= 7 * 86400000 && now - last < 30 * 86400000)
+  if (tab === 'completed')
+    return last != null && now - last >= 30 * 86400000
+  return true
+}
+
+const OMNICHANNEL_TAB_DEFS: {
+  id: ConversationTab
+  labelKey: string
+  countKey?: keyof { all: number, new: number, progress: number, waiting: number, completed: number }
+}[] = [
+  { id: 'all', labelKey: 'settings.omnichannelTabAll', countKey: 'all' },
+  { id: 'new', labelKey: 'settings.omnichannelTabNew', countKey: 'new' },
+  { id: 'progress', labelKey: 'settings.omnichannelTabInProgress', countKey: 'progress' },
+  { id: 'waiting', labelKey: 'settings.omnichannelTabWaiting', countKey: 'waiting' },
+  { id: 'completed', labelKey: 'settings.omnichannelTabCompleted', countKey: 'completed' },
+]
+
 const OmnichannelPage = () => {
   const searchParams = useSearchParams()
   const urlChannelId = searchParams.get('channel_id') ?? ''
   const urlConversationId = searchParams.get('conversation_id') ?? ''
   const { t, i18n } = useTranslation('common')
+  const [, setAccountSettings] = useAccountSettingModal()
   const dateLocale = i18n.language?.replace('_', '-') || undefined
   const toLocaleText = (value?: string) => {
     if (!value)
@@ -179,6 +245,29 @@ const OmnichannelPage = () => {
       return value
     return date.toLocaleString(dateLocale)
   }
+
+  const formatListTime = useCallback((iso?: string) => {
+    if (!iso)
+      return ''
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime()))
+      return ''
+    const diff = Date.now() - d.getTime()
+    const mins = Math.floor(diff / 60000)
+    if (mins < 1)
+      return t('settings.omnichannelRelJustNow')
+    if (mins < 60)
+      return t('settings.omnichannelRelMins', { count: mins })
+    const hours = Math.floor(mins / 60)
+    if (hours < 24)
+      return t('settings.omnichannelRelHours', { count: hours })
+    const days = Math.floor(hours / 24)
+    if (days === 1)
+      return t('settings.omnichannelDateYesterday')
+    if (days < 7)
+      return t('settings.omnichannelRelDays', { count: days })
+    return d.toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })
+  }, [t, dateLocale])
   const [channels, setChannels] = useState<Channel[]>([])
   const [selectedChannelId, setSelectedChannelId] = useState('')
   const [conversations, setConversations] = useState<OmnichannelConversation[]>([])
@@ -190,10 +279,20 @@ const OmnichannelPage = () => {
   const [syncSince, setSyncSince] = useState('')
   const [syncUntil, setSyncUntil] = useState('')
   const [isPageLoading, setIsPageLoading] = useState(false)
+  const [error, setError] = useState('')
   const [isMessagesLoading, setIsMessagesLoading] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
-  const [isTestingWebhook, setIsTestingWebhook] = useState(false)
-  const [error, setError] = useState('')
+  const [isSendingMessage, setIsSendingMessage] = useState(false)
+  const [composerText, setComposerText] = useState('')
+  const [composerAttachmentUrl, setComposerAttachmentUrl] = useState('')
+  const [composerAttachmentType, setComposerAttachmentType] = useState<'image' | 'video' | 'audio' | 'file'>('image')
+  const [newChatOpen, setNewChatOpen] = useState(false)
+  const [newChatUserId, setNewChatUserId] = useState('')
+  const [isCreatingChat, setIsCreatingChat] = useState(false)
+  const [taskModalOpen, setTaskModalOpen] = useState(false)
+  const [taskNote, setTaskNote] = useState('')
+  const [isSavingTask, setIsSavingTask] = useState(false)
+  const [taskLogLines, setTaskLogLines] = useState<{ at: string; text: string }[]>([])
   const syncPollingRef = useRef<number | null>(null)
   const messagesScrollRef = useRef<HTMLDivElement | null>(null)
   const initialScrollToBottomRef = useRef(false)
@@ -207,6 +306,8 @@ const OmnichannelPage = () => {
   const [isLoadingOlderMessages, setIsLoadingOlderMessages] = useState(false)
   const [showJumpToLatest, setShowJumpToLatest] = useState(false)
   const [messageSearchQuery, setMessageSearchQuery] = useState('')
+  const [conversationSearchQuery, setConversationSearchQuery] = useState('')
+  const [conversationTab, setConversationTab] = useState<ConversationTab>('all')
   const messengerParticipantRefreshAttemptedRef = useRef('')
   const selectedChannelIdRef = useRef('')
   const selectedConversationIdRef = useRef('')
@@ -232,7 +333,7 @@ const OmnichannelPage = () => {
   }, [isLoadingOlderMessages])
 
   useEffect(() => {
-    messengerParticipantRefreshAttemptedRef.current = ''
+    setTaskLogLines([])
   }, [selectedConversationId])
 
   useEffect(() => {
@@ -272,7 +373,7 @@ const OmnichannelPage = () => {
 
   useEffect(() => {
     (async () => {
-      const response = await listChannels()
+      const response = await listChannels({ include_branding: true })
       const nextChannels = response.data || []
       setChannels(nextChannels)
       const deepChannel = urlChannelId.trim()
@@ -621,10 +722,13 @@ const OmnichannelPage = () => {
     return key ? t(key) : status
   }
 
-  const messageDirectionAndSource = (direction: string, source: string) => {
+  const messageDirectionAndSource = (direction: string, source: string, metadata?: Record<string, unknown>) => {
     const dir = direction === 'inbound'
       ? t('settings.omnichannelDirectionInbound')
       : t('settings.omnichannelDirectionOutbound')
+    const inboxConsole = Boolean(metadata && typeof metadata === 'object' && metadata.inbox_console)
+    if (inboxConsole && direction === 'outbound')
+      return `${dir} · ${t('settings.omnichannelSourceInbox')}`
     const srcMap: Record<string, string> = {
       webhook: 'settings.omnichannelSourceWebhook',
       sync: 'settings.omnichannelSourceSync',
@@ -680,15 +784,15 @@ const OmnichannelPage = () => {
     return out
   }, [messages, messageSearchQuery, formatDayDividerLabel])
 
-  const channelOptions = useMemo(() => channels.map(channel => ({
-    id: channel.channel_id,
-    label: `${channel.name} (${channelTypeLabel(channel.channel_type)})`,
-  })), [channels, t, i18n.language])
-
   const selectedChannel = useMemo(
     () => channels.find(item => item.channel_id === selectedChannelId),
     [channels, selectedChannelId],
   )
+
+  const supportsComposerAttachments = useMemo(() => {
+    const ct = selectedChannel?.channel_type
+    return ct === 'facebook_messenger' || ct === 'instagram_dm'
+  }, [selectedChannel?.channel_type])
 
   const isMetaHistorySyncSupported = useMemo(() => {
     const ct = selectedChannel?.channel_type
@@ -699,6 +803,37 @@ const OmnichannelPage = () => {
     () => conversations.find(item => item.id === selectedConversationId),
     [conversations, selectedConversationId],
   )
+
+  const filteredConversations = useMemo(() => {
+    const q = conversationSearchQuery.trim().toLowerCase()
+    return conversations.filter((c) => {
+      if (!conversationMatchesTab(conversationTab, c))
+        return false
+      if (!q)
+        return true
+      const name = (c.participant_display_name || '').trim().toLowerCase()
+      const ext = (c.external_user_id || '').toLowerCase()
+      return name.includes(q) || ext.includes(q)
+    })
+  }, [conversations, conversationSearchQuery, conversationTab])
+
+  const tabCounts = useMemo(() => ({
+    all: conversations.length,
+    new: conversations.filter(c => conversationMatchesTab('new', c)).length,
+    progress: conversations.filter(c => conversationMatchesTab('progress', c)).length,
+    waiting: conversations.filter(c => conversationMatchesTab('waiting', c)).length,
+    completed: conversations.filter(c => conversationMatchesTab('completed', c)).length,
+  }), [conversations])
+
+  const lastMessagePreview = useMemo(() => {
+    if (!messages.length)
+      return ''
+    const last = messages[messages.length - 1]
+    const text = (last.content || '').trim().replace(/\s+/g, ' ')
+    if (!text)
+      return ''
+    return text.length > 72 ? `${text.slice(0, 72)}…` : text
+  }, [messages])
 
   const imageAttachments = useMemo(() => {
     return messages
@@ -777,146 +912,423 @@ const OmnichannelPage = () => {
     }
   }
 
+  const downloadConversationTranscript = useCallback(() => {
+    if (!selectedConversationId || !selectedChannelId)
+      return
+    const payload = {
+      exported_at: new Date().toISOString(),
+      channel_id: selectedChannelId,
+      conversation_id: selectedConversationId,
+      conversation: selectedConversation,
+      messages,
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `omnichannel-${selectedChannelId}-${selectedConversationId}.json`
+    a.rel = 'noopener'
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success(t('settings.omnichannelDownloadSuccess'))
+  }, [messages, selectedChannelId, selectedConversation, selectedConversationId, t])
+
+  const copyConversationLink = useCallback(async () => {
+    if (!selectedChannelId || !selectedConversationId)
+      return
+    const path = `/omnichannel?channel_id=${encodeURIComponent(selectedChannelId)}&conversation_id=${encodeURIComponent(selectedConversationId)}`
+    const absolute = `${window.location.origin}${path}`
+    try {
+      await navigator.clipboard.writeText(absolute)
+      toast.success(t('settings.omnichannelCopyConversationLinkSuccess'))
+    }
+    catch {
+      toast.error(t('settings.omnichannelCopyConversationLinkError'))
+    }
+  }, [selectedChannelId, selectedConversationId, t])
+
+  const onSendComposer = async () => {
+    if (!selectedChannelId || !selectedConversationId)
+      return
+    const text = composerText.trim()
+    const attUrl = composerAttachmentUrl.trim()
+    if (!text && !attUrl) {
+      toast.error(t('settings.omnichannelComposerValidationEmpty'))
+      return
+    }
+    if (attUrl && !supportsComposerAttachments) {
+      toast.error(t('settings.omnichannelComposerAttachmentUnsupported'))
+      return
+    }
+    setIsSendingMessage(true)
+    setError('')
+    try {
+      await sendOmnichannelAgentMessage(selectedChannelId, selectedConversationId, {
+        text,
+        ...(attUrl
+          ? { attachment_url: attUrl, attachment_type: composerAttachmentType }
+          : {}),
+      })
+      setComposerText('')
+      setComposerAttachmentUrl('')
+      const res = await listOmnichannelMessages(selectedChannelId, selectedConversationId, {
+        limit: OMNICHANNEL_MESSAGES_PAGE_SIZE,
+      })
+      setMessages(sortMessagesChronological(res.data || []))
+      setMessagesHasMore(!!res.has_more)
+      messagesPaginationRef.current = {
+        hasMore: !!res.has_more,
+        nextCursor: res.next_cursor ?? null,
+      }
+      void refreshChannelData({ includeMessages: false })
+      toast.success(t('settings.omnichannelSendSuccess'))
+    }
+    catch {
+      setError(t('settings.omnichannelSendError'))
+      toast.error(t('settings.omnichannelSendError'))
+    }
+    finally {
+      setIsSendingMessage(false)
+    }
+  }
+
+  const submitNewChat = async () => {
+    if (!selectedChannelId) {
+      toast.error(t('settings.omnichannelErrorLoadChannels'))
+      return
+    }
+    const ext = newChatUserId.trim()
+    if (!ext) {
+      toast.error(t('settings.omnichannelNewChatUserIdRequired'))
+      return
+    }
+    setIsCreatingChat(true)
+    setError('')
+    try {
+      const res = await createOmnichannelConversation(selectedChannelId, { external_user_id: ext })
+      const created = res.data
+      setNewChatOpen(false)
+      setNewChatUserId('')
+      const conversationRes = await listOmnichannelConversations(selectedChannelId, { limit: 50 })
+      const next = conversationRes.data || []
+      setConversations(next)
+      if (created?.id)
+        setSelectedConversationId(created.id)
+      else if (next[0]?.id)
+        setSelectedConversationId(next[0].id)
+      toast.success(t('settings.omnichannelNewChatCreated'))
+    }
+    catch {
+      toast.error(t('settings.omnichannelNewChatError'))
+    }
+    finally {
+      setIsCreatingChat(false)
+    }
+  }
+
+  const submitTaskNote = async () => {
+    if (!selectedConversationId) {
+      toast.error(t('settings.omnichannelTaskNoConversation'))
+      return
+    }
+    const line = taskNote.trim()
+    if (!line) {
+      toast.error(t('settings.omnichannelTaskEmpty'))
+      return
+    }
+    setIsSavingTask(true)
+    try {
+      await patchMiniCrmLead(selectedConversationId, { notes_append: line })
+      setTaskLogLines(prev => [...prev, { at: new Date().toISOString(), text: line }])
+      setTaskModalOpen(false)
+      setTaskNote('')
+      toast.success(t('settings.omnichannelTaskSaved'))
+    }
+    catch {
+      toast.error(t('settings.omnichannelTaskSaveError'))
+    }
+    finally {
+      setIsSavingTask(false)
+    }
+  }
+
   return (
-    <div className='mx-auto w-full max-w-[1600px] px-6 py-6'>
-      <div className='mb-4 rounded-2xl border border-components-panel-border bg-gradient-to-r from-background-gradient-bg-fill-chat-bg-2 to-background-gradient-bg-fill-chat-bg-1 p-5'>
-        <div className='flex items-center justify-between gap-4'>
-          <div>
-            <h2 className='text-xl font-semibold text-text-primary'>{t('settings.omnichannelPageTitle')}</h2>
-            <p className='mt-1 text-sm text-text-secondary'>
-              {t('settings.omnichannelPageSubtitle')}
-            </p>
-          </div>
-          <div className='hidden items-center gap-3 rounded-xl border border-divider-regular bg-background-default/80 px-3 py-2 backdrop-blur-sm md:flex'>
-            <ProviderLogo provider={selectedChannel?.channel_type || 'facebook_messenger'} className='size-8 rounded-lg' />
-            <div>
-              <div className='text-xs text-text-tertiary'>{t('settings.omnichannelActiveChannel')}</div>
-              <div className='text-sm font-medium text-text-primary'>{selectedChannel?.name || t('settings.omnichannelNoChannelSelected')}</div>
+    <>
+      <OmnichannelInboxLayout
+      errorBanner={error
+        ? (
+            <div className='shrink-0 border-b border-state-destructive-border/60 bg-state-destructive-hover-alt px-5 py-2.5 text-sm leading-snug text-text-destructive'>
+              {error}
             </div>
+          )
+        : null}
+      toolbar={(
+        <div className='flex shrink-0 flex-wrap items-end justify-between gap-x-6 gap-y-4 border-b border-divider-subtle bg-background-default px-5 py-5 md:px-6'>
+          <div className='min-w-0 space-y-1'>
+            <h1 className='text-lg font-semibold tracking-tight text-text-primary md:text-xl'>{t('settings.omnichannelChatTitle')}</h1>
+            <p className='max-w-2xl text-sm leading-relaxed text-text-tertiary'>{t('settings.omnichannelPageSubtitle')}</p>
+          </div>
+          <div className='flex shrink-0 flex-wrap items-center justify-end gap-3'>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                type='button'
+                title={t('settings.omnichannelSectionChannel')}
+                className={cn(
+                  'inline-flex h-10 max-w-[min(100vw,280px)] items-center gap-2 rounded-lg px-2.5 py-1.5',
+                  'bg-components-input-bg-normal text-text-primary shadow-sm ring-1 ring-divider-subtle ring-inset',
+                  'hover:bg-state-base-hover-alt focus:outline-none focus:ring-2 focus:ring-state-accent-solid',
+                )}
+              >
+                <OmnichannelAvatar
+                  size={28}
+                  imageUrl={selectedChannel?.external_resource_picture_url}
+                  initials={omnichannelInitialsSeed(selectedChannel?.name)}
+                />
+                <span className='min-w-0 flex-1 truncate text-left system-sm-regular'>
+                  {selectedChannel
+                    ? `${selectedChannel.name} (${channelTypeLabel(selectedChannel.channel_type)})`
+                    : t('settings.omnichannelNoChannelsOption')}
+                </span>
+                {selectedChannel && (
+                  <ProviderLogo
+                    provider={selectedChannel.channel_type}
+                    className='size-5 shrink-0 rounded-sm'
+                  />
+                )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end' className='w-[min(100vw,300px)] p-1'>
+                {!channels.length && (
+                  <div className='px-2 py-2 text-xs text-text-tertiary'>{t('settings.omnichannelNoChannelsOption')}</div>
+                )}
+                {channels.map(ch => (
+                  <DropdownMenuItem
+                    key={ch.channel_id}
+                    className='cursor-pointer gap-2 py-2'
+                    onClick={() => setSelectedChannelId(ch.channel_id)}
+                  >
+                    <OmnichannelAvatar
+                      size={32}
+                      imageUrl={ch.external_resource_picture_url}
+                      initials={omnichannelInitialsSeed(ch.name)}
+                    />
+                    <div className='min-w-0 flex-1'>
+                      <div className='truncate system-sm-medium text-text-primary'>{ch.name}</div>
+                      <div className='truncate text-xs text-text-tertiary'>{channelTypeLabel(ch.channel_type)}</div>
+                    </div>
+                    <ProviderLogo provider={ch.channel_type} className='size-5 shrink-0 rounded-sm' />
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              type='button'
+              size='small'
+              variant='secondary'
+              title={t('settings.omnichannelDownloadReportHint')}
+              disabled={!selectedConversationId}
+              onClick={downloadConversationTranscript}
+              className='h-10 min-w-10 px-3'
+            >
+              <RiDownloadLine className='h-4 w-4' />
+            </Button>
+            <Button
+              type='button'
+              size='small'
+              variant='secondary'
+              title={t('settings.omnichannelStartNewChatHint')}
+              disabled={!selectedChannelId}
+              onClick={() => setNewChatOpen(true)}
+              className='h-10 gap-1.5 px-3'
+            >
+              <RiAddLine className='h-4 w-4' />
+              <span className='hidden sm:inline'>{t('settings.omnichannelStartNewChat')}</span>
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={cn(
+                  'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+                  'bg-components-button-secondary-bg text-components-button-secondary-text shadow-sm ring-1 ring-divider-subtle ring-inset',
+                  'hover:bg-state-base-hover-alt',
+                )}
+                title={t('settings.omnichannelMoreMenu')}
+              >
+                <RiMore2Fill className='h-4 w-4' />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end' className='w-56'>
+                <DropdownMenuItem disabled={!selectedChannelId || isTestingWebhook} onClick={() => void onWebhookTest()}>
+                  {t('settings.omnichannelTestWebhook')}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={!selectedChannelId || !selectedConversationId}
+                  onClick={() => void copyConversationLink()}
+                >
+                  {t('settings.omnichannelCopyConversationLink')}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setAccountSettings({ payload: ACCOUNT_SETTING_TAB.CHANNELS })}
+                >
+                  {t('settings.omnichannelManageChannels')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-      </div>
-
-      <div className='grid grid-cols-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)_360px]'>
-        <div className='space-y-4'>
-          <div className='rounded-xl border border-components-panel-border bg-components-panel-bg p-4'>
-            <div className='system-xs-semibold-uppercase mb-2 text-text-tertiary'>{t('settings.omnichannelSectionChannel')}</div>
-            <select
-              className='h-10 w-full rounded-lg border border-components-input-border bg-components-input-bg px-3 text-sm text-text-primary'
-              value={selectedChannelId}
-              onChange={e => setSelectedChannelId(e.target.value)}
-            >
-              {!channelOptions.length && <option value="">{t('settings.omnichannelNoChannelsOption')}</option>}
-              {channelOptions.map(option => (
-                <option key={option.id} value={option.id}>{option.label}</option>
-              ))}
-            </select>
-            <div className='mt-3 space-y-2 rounded-lg border border-divider-subtle bg-background-default p-3 text-xs text-text-secondary'>
-              <div className='flex items-center justify-between'>
-                <span>{t('settings.omnichannelStatus')}</span>
-                <span className={health?.enabled ? 'text-text-success' : 'text-text-warning'}>
-                  {health?.enabled ? t('settings.omnichannelStatusEnabled') : t('settings.omnichannelStatusDisabled')}
-                </span>
-              </div>
-              <div className='flex items-center justify-between'>
-                <span>{t('settings.omnichannelLastInbound')}</span>
-                <span>{toLocaleText(health?.last_inbound_at)}</span>
-              </div>
-              <div className='flex items-center justify-between'>
-                <span>{t('settings.omnichannelLastOutbound')}</span>
-                <span>{toLocaleText(health?.last_outbound_at)}</span>
-              </div>
+      )}
+      conversationRail={(
+        <aside className='flex max-h-[42vh] min-h-0 w-full flex-col overflow-hidden border-b border-divider-subtle bg-components-panel-bg xl:max-h-none xl:w-[min(100%,300px)] xl:shrink-0 xl:border-b-0 xl:border-r xl:border-divider-subtle'>
+          <div className='shrink-0 px-4 pb-3 pt-4'>
+            <div className='relative'>
+              <RiSearchLine className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-quaternary' aria-hidden />
+              <input
+                type='search'
+                value={conversationSearchQuery}
+                onChange={e => setConversationSearchQuery(e.target.value)}
+                placeholder={t('settings.omnichannelSearchChatsPlaceholder')}
+                className='system-sm-regular h-10 w-full rounded-lg border-0 bg-background-default py-2 pl-10 pr-3 text-text-primary shadow-sm ring-1 ring-divider-subtle ring-inset outline-none placeholder:text-text-quaternary focus:ring-2 focus:ring-state-accent-solid'
+              />
             </div>
-            <Button
-              className='mt-3'
-              size='small'
-              loading={isTestingWebhook}
-              disabled={!selectedChannelId || isTestingWebhook}
-              onClick={onWebhookTest}
-            >
-              {t('settings.omnichannelTestWebhook')}
-            </Button>
           </div>
-
-          <div className='rounded-xl border border-components-panel-border bg-components-panel-bg p-4'>
-            <div className='mb-2 text-sm font-medium text-text-primary'>{t('settings.omnichannelConversations')}</div>
-            {isPageLoading && <div className='text-sm text-text-tertiary'>{t('settings.omnichannelLoadingConversations')}</div>}
-            {!isPageLoading && !conversations.length && <div className='text-sm text-text-tertiary'>{t('settings.omnichannelNoConversations')}</div>}
-            <div className='max-h-[520px] space-y-2 overflow-auto pr-1'>
-              {!isPageLoading && conversations.map(item => (
+          <div className='shrink-0 px-4 pb-3'>
+            <div className='flex gap-1 rounded-lg bg-background-default p-1 ring-1 ring-divider-subtle'>
+              {OMNICHANNEL_TAB_DEFS.map((def) => {
+                const n = def.countKey ? tabCounts[def.countKey] : 0
+                const active = conversationTab === def.id
+                return (
+                  <button
+                    key={def.id}
+                    type='button'
+                    className={cn(
+                      'relative min-h-8 shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                      active
+                        ? 'bg-components-panel-bg text-text-primary shadow-sm'
+                        : 'text-text-tertiary hover:bg-state-base-hover hover:text-text-secondary',
+                    )}
+                    onClick={() => setConversationTab(def.id)}
+                  >
+                    <span>{t(def.labelKey)}</span>
+                    {def.id === 'new' && n > 0 && (
+                      <span className='ml-1 tabular-nums text-[11px] font-semibold text-text-accent'>({n})</span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+          <div className='min-h-0 flex-1 space-y-1 overflow-y-auto px-3 pb-4 pt-1'>
+            {isPageLoading && <div className='px-2 py-6 text-sm text-text-tertiary'>{t('settings.omnichannelLoadingConversations')}</div>}
+            {!isPageLoading && !filteredConversations.length && (
+              <div className='px-2 py-6 text-sm text-text-tertiary'>{t('settings.omnichannelNoConversations')}</div>
+            )}
+            {!isPageLoading && filteredConversations.map((item) => {
+              const rowSnippet = (selectedConversationId === item.id && lastMessagePreview)
+                || formatOmnichannelListSnippet(item.last_message_preview)
+              return (
                 <button
                   key={item.id}
-                  className={`block w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
+                  type='button'
+                  className={cn(
+                    'flex w-full gap-3 rounded-lg px-3 py-3 text-left transition-colors',
                     selectedConversationId === item.id
-                      ? 'border-state-accent-solid bg-state-accent-hover'
-                      : 'border-divider-subtle hover:bg-components-button-secondary-bg'
-                  }`}
+                      ? 'bg-state-base-hover'
+                      : 'hover:bg-state-base-hover/80',
+                  )}
                   onClick={() => setSelectedConversationId(item.id)}
                 >
-                  <div className='flex items-start gap-2'>
+                  <div className='relative shrink-0'>
                     <OmnichannelAvatar
-                      size={36}
+                      size={40}
                       imageUrl={item.participant_profile_pic_url}
                       initials={omnichannelInitialsSeed(
                         (item.participant_display_name && item.participant_display_name.trim()) || item.external_user_id,
                       )}
                     />
-                    <div className='min-w-0 flex-1'>
-                      <div className='flex items-center justify-between gap-2'>
-                        <div className='truncate font-medium text-text-primary'>
-                          {(item.participant_display_name && item.participant_display_name.trim()) || item.external_user_id}
-                        </div>
-                        <span className='shrink-0 text-[10px] uppercase text-text-tertiary'>{channelTypeLabel(item.channel_type)}</span>
+                    <div className='absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-components-panel-bg p-0.5 shadow-sm ring-1 ring-divider-subtle'>
+                      <ProviderLogo provider={item.channel_type || 'facebook_messenger'} className='size-3.5 rounded-sm' />
+                    </div>
+                  </div>
+                  <div className='min-w-0 flex-1'>
+                    <div className='flex items-start justify-between gap-2'>
+                      <div className='truncate system-sm-medium text-text-primary'>
+                        {(item.participant_display_name && item.participant_display_name.trim()) || item.external_user_id}
                       </div>
-                      <div className='truncate text-[11px] text-text-quaternary'>{item.external_user_id}</div>
-                      <div className='text-xs text-text-tertiary'>{t('settings.omnichannelLastMessage', { time: toLocaleText(item.last_message_at) })}</div>
+                      <span className='shrink-0 whitespace-nowrap text-xs text-text-quaternary tabular-nums'>
+                        {formatListTime(item.last_message_at)}
+                      </span>
+                    </div>
+                    <div className='mt-1 line-clamp-2 text-xs leading-relaxed text-text-tertiary'>
+                      {rowSnippet || t('settings.omnichannelListSnippetFallback')}
                     </div>
                   </div>
                 </button>
-              ))}
-            </div>
+              )
+            })}
           </div>
-        </div>
-
-        <div className='rounded-xl border border-components-panel-border bg-components-panel-bg p-4'>
-          <div className='mb-3 flex flex-wrap items-start justify-between gap-2'>
-            <div className='min-w-0 flex-1'>
-              <div className='text-sm font-medium text-text-primary'>{t('settings.omnichannelMessages')}</div>
-              <div className='text-xs text-text-tertiary'>
-                {selectedConversation
-                  ? t('settings.omnichannelConversationWith', {
-                      id: (selectedConversation.participant_display_name && String(selectedConversation.participant_display_name).trim())
-                        || selectedConversation.external_user_id,
-                    })
-                  : t('settings.omnichannelSelectConversationHint')}
-              </div>
-              {!!selectedConversationId && messagesHasMore && !isMessagesLoading && (
-                <div className='mt-1 text-[11px] leading-snug text-text-quaternary'>
-                  {t('settings.omnichannelLoadOlderHint')}
+        </aside>
+      )}
+      conversationMain={(
+        <section className='flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background-default xl:border-t-0'>
+          {selectedConversation && (
+            <div className='flex shrink-0 flex-wrap items-start justify-between gap-4 border-b border-divider-subtle px-5 py-4 md:px-6'>
+              <div className='flex min-w-0 items-start gap-3'>
+                <div className='min-w-0'>
+                  <div className='flex items-center gap-2'>
+                    <span className='truncate text-base font-semibold tracking-tight text-text-primary md:text-lg'>
+                      {(selectedConversation.participant_display_name && selectedConversation.participant_display_name.trim()) || selectedConversation.external_user_id}
+                    </span>
+                    <span className='h-2 w-2 shrink-0 rounded-full bg-text-success' title={t('settings.omnichannelOnline')} />
+                  </div>
+                  <div className='mt-1 truncate text-sm text-text-tertiary'>
+                    {lastMessagePreview
+                      || formatOmnichannelListSnippet(selectedConversation.last_message_preview)
+                      || t('settings.omnichannelConversationWith', {
+                        id: (selectedConversation.participant_display_name && String(selectedConversation.participant_display_name).trim())
+                          || selectedConversation.external_user_id,
+                      })}
+                  </div>
                 </div>
-              )}
+              </div>
+              <div className='flex shrink-0 flex-wrap items-center gap-2'>
+                <span className='rounded-md bg-state-base-hover px-2.5 py-1 text-xs font-medium text-text-secondary'>
+                  {t('settings.omnichannelConversationStatus')}
+                  :
+                  {' '}
+                  {t('settings.omnichannelStatusInProgress')}
+                </span>
+                <span className='rounded-md bg-state-base-hover px-2.5 py-1 text-xs font-medium text-text-secondary'>
+                  {t('settings.omnichannelConversationPriority')}
+                  :
+                  {' '}
+                  {t('settings.omnichannelPriorityMedium')}
+                </span>
+              </div>
             </div>
-            <div className='shrink-0 text-right text-xs text-text-tertiary'>
-              {!!selectedConversationId && !isMessagesLoading && (
-                <span>{t('settings.omnichannelMessageCount', { count: messages.length })}</span>
-              )}
-            </div>
-          </div>
+          )}
+          <div className='flex min-h-0 flex-1 flex-col overflow-hidden px-4 py-4 md:px-6 md:py-5'>
 
-          {!selectedConversationId && <div className='text-sm text-text-tertiary'>{t('settings.omnichannelSelectConversationHint')}</div>}
-          {selectedConversationId && isMessagesLoading && <div className='text-sm text-text-tertiary'>{t('settings.omnichannelLoadingMessages')}</div>}
-          {selectedConversationId && !isMessagesLoading && !messages.length && <div className='text-sm text-text-tertiary'>{t('settings.omnichannelNoMessages')}</div>}
+          {!!selectedConversationId && messagesHasMore && !isMessagesLoading && (
+            <div className='mb-2 text-[11px] leading-snug text-text-quaternary'>
+              {t('settings.omnichannelLoadOlderHint')}
+            </div>
+          )}
+          {!selectedConversationId && (
+            <div className='flex flex-1 flex-col items-center justify-center px-4 py-16 text-center'>
+              <p className='max-w-sm text-sm leading-relaxed text-text-tertiary'>{t('settings.omnichannelSelectConversationHint')}</p>
+            </div>
+          )}
+          {selectedConversationId && isMessagesLoading && <div className='py-8 text-sm text-text-tertiary'>{t('settings.omnichannelLoadingMessages')}</div>}
+          {selectedConversationId && !isMessagesLoading && !messages.length && <div className='py-8 text-sm text-text-tertiary'>{t('settings.omnichannelNoMessages')}</div>}
 
           {selectedConversationId && !isMessagesLoading && !!messages.length && (
-            <div className='mt-2 space-y-2'>
+            <div className='flex min-h-0 flex-1 flex-col gap-4'>
               <input
                 type='search'
                 value={messageSearchQuery}
                 onChange={e => setMessageSearchQuery(e.target.value)}
                 placeholder={t('settings.omnichannelSearchMessagesPlaceholder')}
-                className='system-sm-regular w-full rounded-lg border border-divider-regular bg-components-input-bg-normal px-3 py-2 text-text-primary outline-none placeholder:text-text-quaternary focus:border-state-accent-solid'
+                className='system-sm-regular h-10 w-full max-w-md shrink-0 rounded-lg border-0 bg-components-input-bg-normal px-3 py-2 text-text-primary shadow-sm ring-1 ring-divider-subtle ring-inset outline-none placeholder:text-text-quaternary focus:ring-2 focus:ring-state-accent-solid'
               />
-              <div className='relative min-h-[360px]'>
+              <div className='relative flex min-h-0 flex-1 flex-col'>
                 {showJumpToLatest && (
                   <Button
                     type='button'
@@ -931,7 +1343,7 @@ const OmnichannelPage = () => {
                 <div
                   ref={messagesScrollRef}
                   onScroll={onMessagesScroll}
-                  className='max-h-[min(760px,70vh)] min-h-[320px] space-y-3 overflow-y-auto overscroll-y-contain rounded-lg border border-divider-subtle bg-background-default/40 px-2 py-3'
+                  className='min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-y-contain px-1 py-2 md:px-2'
                 >
                   {isLoadingOlderMessages && (
                     <div className='mb-2 flex justify-center'>
@@ -986,20 +1398,22 @@ const OmnichannelPage = () => {
                         {!isOutbound && (
                           <OmnichannelAvatar imageUrl={inboundAvatar} initials={inboundInitialsSeed} size={36} />
                         )}
-                        <div className={`max-w-[min(85%,520px)] rounded-2xl border px-3 py-2 text-sm shadow-sm ${
-                          isOutbound
-                            ? 'border-state-accent-hover-alt bg-state-accent-hover'
-                            : 'border-divider-subtle bg-components-panel-bg'
-                        }`}
+                        <div
+                          className={cn(
+                            'max-w-[min(88%,560px)] rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed shadow-sm',
+                            isOutbound
+                              ? 'bg-text-accent text-text-primary-on-surface'
+                              : 'bg-components-panel-bg text-text-primary ring-1 ring-divider-subtle',
+                          )}
                         >
                           <div className='mb-1 space-y-0.5'>
-                            <div className='text-xs font-medium text-text-secondary'>{actorLabel}</div>
-                            <div className='flex flex-wrap items-center justify-between gap-x-2 text-[10px] text-text-tertiary'>
-                              <span>{messageDirectionAndSource(message.direction, message.source)}</span>
+                            <div className={cn('text-xs font-medium', isOutbound ? 'text-text-primary-on-surface/90' : 'text-text-secondary')}>{actorLabel}</div>
+                            <div className={cn('flex flex-wrap items-center justify-between gap-x-2 text-[10px]', isOutbound ? 'text-text-primary-on-surface/75' : 'text-text-tertiary')}>
+                              <span>{messageDirectionAndSource(message.direction, message.source, message.metadata)}</span>
                               <span className='shrink-0 tabular-nums'>{toLocaleText(message.created_at)}</span>
                             </div>
                           </div>
-                          <div className='whitespace-pre-wrap break-words text-text-primary'>{message.content || t('settings.omnichannelMessageEmpty')}</div>
+                          <div className={cn('whitespace-pre-wrap break-words', isOutbound ? 'text-text-primary-on-surface' : 'text-text-primary')}>{message.content || t('settings.omnichannelMessageEmpty')}</div>
                           {!!message.attachments?.length && (
                             <div className='mt-2 grid grid-cols-2 gap-2'>
                               {message.attachments.slice(0, 4).map((attachment, idx) => {
@@ -1034,95 +1448,320 @@ const OmnichannelPage = () => {
               </div>
             </div>
           )}
-        </div>
+          </div>
+          <div className='shrink-0 border-t border-divider-subtle bg-background-default px-4 py-4 md:px-6'>
+            <textarea
+              rows={3}
+              value={composerText}
+              onChange={e => setComposerText(e.target.value)}
+              disabled={!selectedConversationId || isSendingMessage}
+              className='system-sm-regular w-full resize-none rounded-xl border-0 bg-components-input-bg-normal px-4 py-3 text-text-primary shadow-sm ring-1 ring-divider-subtle ring-inset outline-none placeholder:text-text-quaternary disabled:cursor-not-allowed disabled:opacity-60'
+              placeholder={t('settings.omnichannelComposerPlaceholder')}
+            />
+            {supportsComposerAttachments && (
+              <div className='mt-3 flex flex-col gap-2 sm:flex-row sm:items-end'>
+                <div className='min-w-0 flex-1'>
+                  <label className='mb-1 block text-[10px] font-medium uppercase tracking-wide text-text-quaternary'>
+                    {t('settings.omnichannelComposerAttachmentUrlLabel')}
+                  </label>
+                  <Input
+                    value={composerAttachmentUrl}
+                    onChange={e => setComposerAttachmentUrl(e.target.value)}
+                    disabled={!selectedConversationId || isSendingMessage}
+                    placeholder='https://'
+                  />
+                </div>
+                <div className='w-full shrink-0 sm:w-40'>
+                  <label className='mb-1 block text-[10px] font-medium uppercase tracking-wide text-text-quaternary'>
+                    {t('settings.omnichannelComposerAttachmentTypeLabel')}
+                  </label>
+                  <select
+                    className='system-sm-regular h-9 w-full rounded-lg border-0 bg-components-input-bg-normal px-2 text-text-primary shadow-sm ring-1 ring-divider-subtle ring-inset'
+                    value={composerAttachmentType}
+                    onChange={e => setComposerAttachmentType(e.target.value as typeof composerAttachmentType)}
+                    disabled={!selectedConversationId || isSendingMessage}
+                  >
+                    <option value='image'>image</option>
+                    <option value='video'>video</option>
+                    <option value='audio'>audio</option>
+                    <option value='file'>file</option>
+                  </select>
+                </div>
+              </div>
+            )}
+            <div className='mt-3 flex items-center justify-end'>
+              <Button
+                type='button'
+                variant='primary'
+                size='small'
+                loading={isSendingMessage}
+                disabled={!selectedConversationId || isSendingMessage}
+                className='min-w-[96px] rounded-lg'
+                onClick={() => void onSendComposer()}
+              >
+                {t('settings.omnichannelSend')}
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+      insightRail={(
+        <div className='flex min-h-0 flex-col gap-8 px-4 py-6'>
+          {selectedConversation && (
+            <section>
+              <div className='mb-4 flex items-center justify-between gap-2'>
+                <h2 className='text-xs font-semibold uppercase tracking-wide text-text-quaternary'>{t('settings.omnichannelProfileTitle')}</h2>
+                <Link
+                  href='/mini-crm'
+                  className='text-xs font-medium text-text-accent-secondary hover:opacity-80'
+                >
+                  {t('settings.omnichannelViewDetails')}
+                </Link>
+              </div>
+              <div className='flex flex-col items-center text-center'>
+                <OmnichannelAvatar
+                  size={64}
+                  imageUrl={selectedConversation.participant_profile_pic_url}
+                  initials={omnichannelInitialsSeed(
+                    (selectedConversation.participant_display_name && selectedConversation.participant_display_name.trim()) || selectedConversation.external_user_id,
+                  )}
+                />
+                <div className='mt-4 text-sm font-semibold text-text-primary'>
+                  {(selectedConversation.participant_display_name && selectedConversation.participant_display_name.trim()) || selectedConversation.external_user_id}
+                </div>
+                <div className='mt-1 max-w-full text-xs leading-relaxed text-text-tertiary'>
+                  {t('settings.omnichannelProfileSubtitle', { channel: channelTypeLabel(selectedConversation.channel_type) })}
+                </div>
+              </div>
+            </section>
+          )}
 
-        <div className='space-y-4'>
-          <div className='rounded-xl border border-components-panel-border bg-components-panel-bg p-4'>
-            <div className='system-xs-semibold-uppercase mb-2 text-text-tertiary'>{t('settings.omnichannelSyncHistory')}</div>
-            <div className='space-y-2'>
+          <section className='border-t border-divider-subtle pt-8'>
+            <div className='mb-3 flex items-center justify-between gap-2'>
+              <h2 className='text-sm font-semibold text-text-primary'>{t('settings.omnichannelTasksTitle')}</h2>
+              <button
+                type='button'
+                className='text-xs font-medium text-text-accent-secondary hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40'
+                disabled={!selectedConversationId}
+                onClick={() => setTaskModalOpen(true)}
+              >
+                {t('settings.omnichannelTasksAdd')}
+              </button>
+            </div>
+            {!!taskLogLines.length && (
+              <ul className='mb-3 space-y-2 text-xs text-text-secondary'>
+                {taskLogLines.map((item, idx) => (
+                  <li key={`${item.at}-${idx}`} className='rounded-lg bg-background-default px-3 py-2 ring-1 ring-divider-subtle'>
+                    <div className='text-[10px] text-text-quaternary tabular-nums'>{toLocaleText(item.at)}</div>
+                    <div className='mt-1 whitespace-pre-wrap text-text-primary'>{item.text}</div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {!taskLogLines.length && (
+              <p className='text-xs leading-relaxed text-text-tertiary'>{t('settings.omnichannelTasksEmpty')}</p>
+            )}
+          </section>
+
+          <details className='group border-t border-divider-subtle pt-8 [&_summary::-webkit-details-marker]:hidden'>
+            <summary className='flex cursor-pointer list-none items-center justify-between text-xs font-semibold uppercase tracking-wide text-text-quaternary'>
+              <span>{t('settings.omnichannelChannelOperations')}</span>
+              <span className='text-text-quaternary transition-transform group-open:rotate-180'>▾</span>
+            </summary>
+            <div className='mt-4 space-y-4'>
+              <div className='space-y-2 rounded-lg bg-background-default px-3 py-3 text-xs text-text-secondary ring-1 ring-divider-subtle'>
+                <div className='flex items-center justify-between gap-2'>
+                  <span>{t('settings.omnichannelStatus')}</span>
+                  <span className={health?.enabled ? 'font-medium text-text-success' : 'font-medium text-text-warning'}>
+                    {health?.enabled ? t('settings.omnichannelStatusEnabled') : t('settings.omnichannelStatusDisabled')}
+                  </span>
+                </div>
+                <div className='flex items-center justify-between gap-2'>
+                  <span>{t('settings.omnichannelLastInbound')}</span>
+                  <span className='tabular-nums text-text-primary'>{toLocaleText(health?.last_inbound_at)}</span>
+                </div>
+                <div className='flex items-center justify-between gap-2'>
+                  <span>{t('settings.omnichannelLastOutbound')}</span>
+                  <span className='tabular-nums text-text-primary'>{toLocaleText(health?.last_outbound_at)}</span>
+                </div>
+              </div>
+              <Button
+                className='w-full rounded-lg'
+                size='small'
+                loading={isTestingWebhook}
+                disabled={!selectedChannelId || isTestingWebhook}
+                onClick={() => void onWebhookTest()}
+              >
+                {t('settings.omnichannelTestWebhook')}
+              </Button>
+            </div>
+          </details>
+
+          <section className='border-t border-divider-subtle pt-8'>
+            <h2 className='mb-3 text-xs font-semibold uppercase tracking-wide text-text-quaternary'>{t('settings.omnichannelSyncHistory')}</h2>
+            <div className='space-y-3'>
               <Input type='datetime-local' value={syncSince} onChange={e => setSyncSince(e.target.value)} disabled={!isMetaHistorySyncSupported} />
               <Input type='datetime-local' value={syncUntil} onChange={e => setSyncUntil(e.target.value)} disabled={!isMetaHistorySyncSupported} />
             </div>
-            <p className='mt-2 text-xs leading-snug text-text-quaternary'>
+            <p className='mt-3 text-xs leading-relaxed text-text-quaternary'>
               {isMetaHistorySyncSupported
                 ? t('settings.omnichannelSyncNoDatesMessengerHint')
                 : t('settings.omnichannelSyncHistoryNotSupportedHint')}
             </p>
             <Button
-              className='mt-3'
+              className='mt-4 w-full rounded-lg'
               size='small'
               loading={isSyncing}
               disabled={!selectedChannelId || isSyncing || !isMetaHistorySyncSupported}
-              onClick={onStartSync}
+              onClick={() => void onStartSync()}
             >
               {t('settings.omnichannelStartSync')}
             </Button>
             {syncJob && (
-              <div className='mt-3 rounded-lg border border-divider-subtle bg-background-default p-3 text-xs text-text-secondary'>
-                <div className='flex items-center justify-between'>
+              <div className='mt-4 space-y-2 rounded-lg bg-background-default px-3 py-3 text-xs text-text-secondary ring-1 ring-divider-subtle'>
+                <div className='flex items-center justify-between gap-2'>
                   <span>{t('settings.omnichannelJobStatus')}</span>
                   <span className='font-medium text-text-primary'>{syncJobStatusLabel(syncJob.status)}</span>
                 </div>
-                <div className='mt-1 flex items-center justify-between'>
+                <div className='flex items-center justify-between gap-2'>
                   <span>{t('settings.omnichannelProgress')}</span>
-                  <span>{Math.round(syncJob.progress)}%</span>
+                  <span className='tabular-nums'>{Math.round(syncJob.progress)}%</span>
                 </div>
-                <div className='mt-1 flex items-center justify-between'>
+                <div className='flex items-center justify-between gap-2'>
                   <span>{t('settings.omnichannelSyncedMessages')}</span>
-                  <span>{syncJob.synced_messages}/{syncJob.total_messages}</span>
+                  <span className='tabular-nums'>{syncJob.synced_messages}/{syncJob.total_messages}</span>
                 </div>
               </div>
             )}
-          </div>
+          </section>
 
-          <div className='rounded-xl border border-components-panel-border bg-components-panel-bg p-4'>
-            <div className='system-xs-semibold-uppercase mb-2 text-text-tertiary'>{t('settings.omnichannelStats')}</div>
-            <div className='grid grid-cols-2 gap-2'>
-              <div className='rounded-lg border border-divider-subtle bg-background-default p-3'>
+          <section className='border-t border-divider-subtle pt-8'>
+            <h2 className='mb-3 text-xs font-semibold uppercase tracking-wide text-text-quaternary'>{t('settings.omnichannelStats')}</h2>
+            <div className='grid grid-cols-2 gap-3'>
+              <div className='rounded-lg bg-background-default px-3 py-3 ring-1 ring-divider-subtle'>
                 <div className='text-xs text-text-tertiary'>{t('settings.omnichannelStatTotal')}</div>
-                <div className='mt-1 text-lg font-semibold text-text-primary'>{stats?.total_messages ?? 0}</div>
+                <div className='mt-1 text-lg font-semibold tabular-nums text-text-primary'>{stats?.total_messages ?? 0}</div>
               </div>
-              <div className='rounded-lg border border-divider-subtle bg-background-default p-3'>
+              <div className='rounded-lg bg-background-default px-3 py-3 ring-1 ring-divider-subtle'>
                 <div className='text-xs text-text-tertiary'>{t('settings.omnichannelStatConversations')}</div>
-                <div className='mt-1 text-lg font-semibold text-text-primary'>{stats?.active_conversations ?? 0}</div>
+                <div className='mt-1 text-lg font-semibold tabular-nums text-text-primary'>{stats?.active_conversations ?? 0}</div>
               </div>
-              <div className='rounded-lg border border-divider-subtle bg-background-default p-3'>
+              <div className='rounded-lg bg-background-default px-3 py-3 ring-1 ring-divider-subtle'>
                 <div className='text-xs text-text-tertiary'>{t('settings.omnichannelStatInbound')}</div>
-                <div className='mt-1 text-lg font-semibold text-text-primary'>{stats?.inbound_messages ?? 0}</div>
+                <div className='mt-1 text-lg font-semibold tabular-nums text-text-primary'>{stats?.inbound_messages ?? 0}</div>
               </div>
-              <div className='rounded-lg border border-divider-subtle bg-background-default p-3'>
+              <div className='rounded-lg bg-background-default px-3 py-3 ring-1 ring-divider-subtle'>
                 <div className='text-xs text-text-tertiary'>{t('settings.omnichannelStatOutbound')}</div>
-                <div className='mt-1 text-lg font-semibold text-text-primary'>{stats?.outbound_messages ?? 0}</div>
+                <div className='mt-1 text-lg font-semibold tabular-nums text-text-primary'>{stats?.outbound_messages ?? 0}</div>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className='rounded-xl border border-components-panel-border bg-components-panel-bg p-4'>
-            <div className='mb-2 text-sm font-medium text-text-primary'>{t('settings.omnichannelMediaPreview')}</div>
+          <section className='border-t border-divider-subtle pb-2 pt-8'>
+            <h2 className='mb-3 text-sm font-semibold text-text-primary'>{t('settings.omnichannelMediaPreview')}</h2>
             {!imageAttachments.length && (
-              <div className='rounded-lg border border-divider-subtle bg-background-default p-3 text-xs text-text-tertiary'>
+              <div className='rounded-lg bg-background-default px-3 py-4 text-xs text-text-tertiary ring-1 ring-divider-subtle'>
                 {t('settings.omnichannelMediaPreviewEmpty')}
               </div>
             )}
             {!!imageAttachments.length && (
               <div className='grid grid-cols-3 gap-2'>
                 {imageAttachments.map(item => (
-                  <a key={`${item.id}-${item.url}`} href={item.url} target='_blank' rel='noreferrer' className='block'>
-                    <img src={item.url} alt={t('settings.omnichannelMediaAlt')} className='h-16 w-full rounded-md border border-divider-subtle object-cover' />
+                  <a key={`${item.id}-${item.url}`} href={item.url} target='_blank' rel='noreferrer' className='block overflow-hidden rounded-md ring-1 ring-divider-subtle'>
+                    <img src={item.url} alt={t('settings.omnichannelMediaAlt')} className='h-16 w-full object-cover' />
                   </a>
                 ))}
               </div>
             )}
-          </div>
-        </div>
-      </div>
-
-      {error && (
-        <div className='mt-4 rounded-lg border border-state-destructive-border bg-state-destructive-hover-alt px-3 py-2 text-sm text-text-destructive'>
-          {error}
+          </section>
         </div>
       )}
-    </div>
+    />
+      <Modal
+        isShow={newChatOpen}
+        onClose={() => {
+          setNewChatOpen(false)
+          setNewChatUserId('')
+        }}
+        title={t('settings.omnichannelNewChatModalTitle')}
+        description={t('settings.omnichannelNewChatModalDescription')}
+        closable
+        highPriority
+      >
+        <div className='mt-4 space-y-4'>
+          <Input
+            value={newChatUserId}
+            onChange={e => setNewChatUserId(e.target.value)}
+            placeholder={t('settings.omnichannelNewChatUserIdPlaceholder')}
+          />
+          <div className='flex justify-end gap-2 pt-2'>
+            <Button
+              type='button'
+              size='small'
+              variant='secondary'
+              onClick={() => {
+                setNewChatOpen(false)
+                setNewChatUserId('')
+              }}
+            >
+              {t('operation.cancel')}
+            </Button>
+            <Button
+              type='button'
+              size='small'
+              variant='primary'
+              loading={isCreatingChat}
+              onClick={() => void submitNewChat()}
+            >
+              {t('settings.omnichannelNewChatConfirm')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isShow={taskModalOpen}
+        onClose={() => {
+          setTaskModalOpen(false)
+          setTaskNote('')
+        }}
+        title={t('settings.omnichannelTaskModalTitle')}
+        description={t('settings.omnichannelTaskModalDescription')}
+        closable
+        highPriority
+      >
+        <div className='mt-4 space-y-4'>
+          <textarea
+            rows={4}
+            value={taskNote}
+            onChange={e => setTaskNote(e.target.value)}
+            className='system-sm-regular w-full resize-none rounded-xl border-0 bg-components-input-bg-normal px-3 py-2 text-text-primary shadow-sm ring-1 ring-divider-subtle ring-inset outline-none'
+            placeholder={t('settings.omnichannelTaskModalPlaceholder')}
+          />
+          <div className='flex justify-end gap-2 pt-2'>
+            <Button
+              type='button'
+              size='small'
+              variant='secondary'
+              onClick={() => {
+                setTaskModalOpen(false)
+                setTaskNote('')
+              }}
+            >
+              {t('operation.cancel')}
+            </Button>
+            <Button
+              type='button'
+              size='small'
+              variant='primary'
+              loading={isSavingTask}
+              onClick={() => void submitTaskNote()}
+            >
+              {t('settings.omnichannelTaskModalSave')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </>
   )
 }
 

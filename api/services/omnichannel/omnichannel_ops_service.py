@@ -80,6 +80,20 @@ class OmnichannelOpsService:
             return value.astimezone(UTC).replace(tzinfo=None)
         return value
 
+    @staticmethod
+    def _build_last_message_preview(content: Any, attachments: Any) -> str | None:
+        """Plain-text snippet for conversation list rows (denormalized)."""
+        text = str(content or "").strip()
+        if text:
+            collapsed = " ".join(text.split())
+            return collapsed[:512] if collapsed else None
+        try:
+            if attachments and len(attachments) > 0:
+                return None
+        except TypeError:
+            pass
+        return None
+
     @classmethod
     def _conversation_query(
         cls,
@@ -117,6 +131,12 @@ class OmnichannelOpsService:
         with Session(db.engine, expire_on_commit=False) as session:
             query = cls._conversation_query(tenant_id, channel_id, since, until).offset(cursor_value).limit(page_size + 1)
             rows = session.scalars(query).all()
+            preview_fallbacks = cls._load_preview_fallbacks(
+                session=session,
+                tenant_id=tenant_id,
+                channel_id=channel_id,
+                conversations=rows,
+            )
 
         has_more = len(rows) > page_size
         data = rows[:page_size]
@@ -129,6 +149,7 @@ class OmnichannelOpsService:
                     "participant_display_name": item.participant_display_name,
                     "participant_profile_pic_url": item.participant_profile_pic_url,
                     "last_message_at": item.last_message_at,
+                    "last_message_preview": item.last_message_preview or preview_fallbacks.get(str(item.id)),
                     "channel_id": item.channel_id,
                     "channel_type": item.channel_type.value,
                     "created_at": item.created_at,
@@ -139,6 +160,111 @@ class OmnichannelOpsService:
             "has_more": has_more,
             "next_cursor": next_cursor,
         }
+
+    @classmethod
+    def create_or_get_conversation(
+        cls,
+        *,
+        tenant_id: str,
+        channel_id: str,
+        external_user_id: str,
+    ) -> dict[str, Any]:
+        """Create an empty conversation row for ``external_user_id`` or return the existing one."""
+        ext = (external_user_id or "").strip()
+        if not ext:
+            raise ValueError("external_user_id is required")
+
+        with Session(db.engine, expire_on_commit=False) as session:
+            channel_type = cls._get_channel_type(session, tenant_id, channel_id)
+            existing = session.scalar(
+                select(OmniChannelConversation).where(
+                    OmniChannelConversation.tenant_id == tenant_id,
+                    OmniChannelConversation.channel_id == channel_id,
+                    OmniChannelConversation.external_user_id == ext,
+                )
+            )
+            created = False
+            if existing:
+                row = existing
+            else:
+                row = OmniChannelConversation(
+                    tenant_id=tenant_id,
+                    channel_id=channel_id,
+                    channel_type=channel_type,
+                    external_user_id=ext,
+                    last_message_at=None,
+                )
+                session.add(row)
+                session.commit()
+                session.refresh(row)
+                created = True
+
+            out = {
+                "id": row.id,
+                "external_user_id": row.external_user_id,
+                "participant_display_name": row.participant_display_name,
+                "participant_profile_pic_url": row.participant_profile_pic_url,
+                "last_message_at": row.last_message_at,
+                "last_message_preview": row.last_message_preview,
+                "channel_id": row.channel_id,
+                "channel_type": row.channel_type.value,
+                "created_at": row.created_at,
+                "updated_at": row.updated_at,
+            }
+
+        from services.omnichannel.mini_crm_service import MiniCrmService
+
+        MiniCrmService.ensure_lead_for_conversation(tenant_id=tenant_id, conversation_id=str(out["id"]))
+        if created:
+            publish_omnichannel_change(
+                tenant_id=tenant_id,
+                channel_id=channel_id,
+                conversation_id=str(out["id"]),
+                kind="conversations",
+            )
+        return out
+
+    @classmethod
+    def _load_preview_fallbacks(
+        cls,
+        *,
+        session: Session,
+        tenant_id: str,
+        channel_id: str,
+        conversations: list[OmniChannelConversation],
+    ) -> dict[str, str]:
+        """Derive missing list previews from latest message content without requiring a conversation-open."""
+        missing_ids = [str(conv.id) for conv in conversations if not (conv.last_message_preview or "").strip()]
+        if not missing_ids:
+            return {}
+
+        message_rows = session.execute(
+            select(
+                OmniChannelMessage.conversation_id,
+                OmniChannelMessage.content,
+                OmniChannelMessage.attachments,
+            )
+            .where(
+                OmniChannelMessage.tenant_id == tenant_id,
+                OmniChannelMessage.channel_id == channel_id,
+                OmniChannelMessage.conversation_id.in_(missing_ids),
+            )
+            .order_by(
+                OmniChannelMessage.conversation_id.asc(),
+                OmniChannelMessage.created_at.desc(),
+                OmniChannelMessage.id.desc(),
+            )
+        ).all()
+
+        previews: dict[str, str] = {}
+        for conversation_id, content, attachments in message_rows:
+            conv_id = str(conversation_id)
+            if conv_id in previews:
+                continue
+            preview = cls._build_last_message_preview(content, attachments)
+            if preview:
+                previews[conv_id] = preview
+        return previews
 
     @classmethod
     def refresh_messenger_conversation_participant(
@@ -213,6 +339,7 @@ class OmnichannelOpsService:
                 "participant_display_name": conv.participant_display_name,
                 "participant_profile_pic_url": conv.participant_profile_pic_url,
                 "last_message_at": conv.last_message_at,
+                "last_message_preview": conv.last_message_preview,
                 "channel_id": conv.channel_id,
                 "channel_type": conv.channel_type.value,
                 "created_at": conv.created_at,
@@ -376,6 +503,9 @@ class OmnichannelOpsService:
             )
             message.created_at = created_at
             session.add(message)
+            conversation.last_message_preview = cls._build_last_message_preview(
+                payload.get("content"), payload.get("attachments")
+            )
             session.commit()
             session.refresh(message)
             conv_row_id = str(message.conversation_id)
@@ -595,8 +725,10 @@ class OmnichannelOpsService:
             )
         )
         if conversation:
-            if not conversation.last_message_at or conversation.last_message_at < created_at:
+            bump_last = not conversation.last_message_at or conversation.last_message_at < created_at
+            if bump_last:
                 conversation.last_message_at = created_at
+                conversation.last_message_preview = OmnichannelOpsService._build_last_message_preview(content, [])
             hint_n = (conversation_hint_name or "").strip()
             hint_p = (conversation_hint_pic or "").strip()
             if hint_n and not (conversation.participant_display_name or "").strip():
@@ -615,6 +747,7 @@ class OmnichannelOpsService:
             )
             session.add(conversation)
             session.flush()
+            conversation.last_message_preview = OmnichannelOpsService._build_last_message_preview(content, [])
 
         message = OmniChannelMessage(
             tenant_id=tenant_id,

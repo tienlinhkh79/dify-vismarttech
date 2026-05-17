@@ -14,11 +14,11 @@ export default function useDocumentTitle(title: string) {
   if (isPending === false) {
     if (systemFeatures.branding.enabled) {
       titleStr = `${prefix}${systemFeatures.branding.application_title}`
-      favicon = systemFeatures.branding.favicon?.trim() || `${basePath}/logo/logo.png`
+      favicon = systemFeatures.branding.favicon?.trim() || `${basePath}/logo/brand-logo-square.png`
     }
     else {
       titleStr = `${prefix}${APP_DISPLAY_NAME}`
-      favicon = `${basePath}/logo/logo.png`
+      favicon = `${basePath}/logo/brand-logo-square.png`
     }
   }
   useTitle(titleStr)

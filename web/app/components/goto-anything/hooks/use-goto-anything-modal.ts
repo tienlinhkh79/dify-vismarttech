@@ -50,6 +50,12 @@ export const useGotoAnythingModal = (): UseGotoAnythingModalReturn => {
     }
   }, [show])
 
+  useEffect(() => {
+    const onOpen = () => setShow(true)
+    window.addEventListener('dify:open-goto-anything', onOpen)
+    return () => window.removeEventListener('dify:open-goto-anything', onOpen)
+  }, [setShow])
+
   return {
     show,
     setShow,

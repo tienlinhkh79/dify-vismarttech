@@ -1,11 +1,43 @@
+.consoleTopBar {
+  background-color: #063e91;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.consoleTopBarMobile {
+  background-color: #063e91;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 .header-DEVELOPMENT {
-  background: linear-gradient(180deg, rgba(253, 176, 34, 0.08) 0%, rgba(253, 176, 34, 0) 100%);
-  border-top: 4px solid #FDB022;
+  position: relative;
+  background-image: linear-gradient(180deg, rgba(253, 176, 34, 0.14) 0%, rgba(253, 176, 34, 0) 55%);
+}
+
+.header-DEVELOPMENT::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 4px;
+  background: #fdb022;
+  pointer-events: none;
 }
 
 .header-TESTING {
-  background: linear-gradient(180deg, rgba(6, 174, 212, 0.08) 0%, rgba(6, 174, 212, 0) 100%);
-  border-top: 4px solid #06AED4;
+  position: relative;
+  background-image: linear-gradient(180deg, rgba(6, 174, 212, 0.14) 0%, rgba(6, 174, 212, 0) 55%);
+}
+
+.header-TESTING::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 4px;
+  background: #06aed4;
+  pointer-events: none;
 }
 
 .alpha {

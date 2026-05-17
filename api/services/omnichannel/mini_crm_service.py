@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import UTC, datetime
 from typing import Any
 
 import sqlalchemy as sa
@@ -196,6 +197,7 @@ class MiniCrmService:
         stage: object = _MISSING_FIELD,
         owner_account_id: object = _MISSING_FIELD,
         notes: object = _MISSING_FIELD,
+        notes_append: object = _MISSING_FIELD,
         source_override: object = _MISSING_FIELD,
     ) -> dict[str, Any]:
         with Session(db.engine, expire_on_commit=False) as session:
@@ -229,6 +231,13 @@ class MiniCrmService:
                 crm_lead_row.owner_account_id = (str(owner_account_id) if owner_account_id else None)
             if notes is not _MISSING_FIELD:
                 crm_lead_row.notes = str(notes) if notes is not None else None
+            if notes_append is not _MISSING_FIELD and notes_append:
+                snippet = str(notes_append).strip()
+                if snippet:
+                    prev = (crm_lead_row.notes or "").strip()
+                    stamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
+                    line = f"[{stamp}] {snippet}"
+                    crm_lead_row.notes = f"{prev}\n{line}".strip() if prev else line
             if source_override is not _MISSING_FIELD:
                 crm_lead_row.source_override = str(source_override) if source_override else None
 
