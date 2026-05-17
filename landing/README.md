@@ -1,6 +1,6 @@
-# Dify Landing
+# Vismarttech Landing
 
-Marketing landing page app for Dify, built with Next.js App Router and Tailwind CSS v4.
+Marketing landing page, built with Next.js App Router and Tailwind CSS v4.
 
 ## Scripts
 
@@ -14,13 +14,12 @@ Marketing landing page app for Dify, built with Next.js App Router and Tailwind 
 - Default host port: `3001`
 - Open `http://localhost:3001`
 
-## Branding Setup
+## Branding
 
-- Primary branding content is centralized at `content/site.ts`
-- To update business copy, plans, and contacts, edit this file first
-- Design baseline is documented at `design-system/MASTER.md`
+- Primary copy and site config: `content/site.ts`
+- Design baseline: `design-system/MASTER.md`
 
 ## Notes
 
-- This app is intentionally separate from `web/` so marketing and product deployment can evolve independently.
-- Update `NEXT_PUBLIC_DIFY_APP_URL` in Docker env to point CTA to your actual app domain.
+- Deployed separately from `web/` so marketing and the console can ship independently.
+- Set `NEXT_PUBLIC_DIFY_APP_URL` in Docker env to the console URL for CTA links.

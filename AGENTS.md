@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Dify is an open-source platform for developing LLM applications with an intuitive interface combining agentic AI workflows, RAG pipelines, agent capabilities, and model management.
+**Vismarttech** is our AI application platform (forked from [Dify](https://github.com/langgenius/dify)) for building LLM apps with agentic workflows, RAG pipelines, agents, and model management.
 
 The codebase is split into:
 
