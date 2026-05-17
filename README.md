@@ -8,9 +8,20 @@
   Build production-ready agentic AI solutions — workflows, RAG, agents, and model management in one platform.
 </p>
 
+## Tài liệu
+
+**Mới vào dự án → đọc ngay:** [docs/bat-dau-nhanh.md](./docs/bat-dau-nhanh.md) (Docker, cài đặt lần đầu, URL, xử lý sự cố).
+
+| Tài liệu | Mô tả |
+| --- | --- |
+| [Bắt đầu nhanh](./docs/bat-dau-nhanh.md) | Clone → `docker compose up` → http://localhost/install |
+| [Hướng dẫn sử dụng](./docs/huong-dan-su-dung.md) | Apps, datasets, omnichannel, model |
+| [Phát triển local](./docs/phat-trien-local.md) | Chạy API/web từ source |
+| [Mục lục docs](./docs/README.md) | Danh sách đầy đủ |
+
 ## Overview
 
-**Vismarttech** is our self-hosted AI application platform. This repository extends the open-source [Dify](https://github.com/langgenius/dify) codebase with custom branding, omnichannel inbox, and CRM integrations tailored to our product.
+**Vismarttech** là nền tảng AI self-hosted, fork từ [Dify](https://github.com/langgenius/dify), có branding, omnichannel inbox và tích hợp CRM.
 
 | Area | Path | Stack |
 | --- | --- | --- |
@@ -18,43 +29,22 @@
 | Frontend | `web/` | Next.js, TypeScript, React |
 | Deployment | `docker/` | Docker Compose |
 
-For day-to-day development conventions, see [AGENTS.md](./AGENTS.md).
+Quy ước phát triển: [AGENTS.md](./AGENTS.md).
 
 ## Quick start (Docker)
 
-Minimum requirements: **2 CPU cores**, **4 GiB RAM**. Install [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/).
+Yêu cầu: **2 CPU**, **4 GiB RAM**, [Docker](https://docs.docker.com/get-docker/) + Docker Compose.
 
 ```bash
 cd docker
-cp .env.example .env
+cp .env.example .env    # Windows: Copy-Item .env.example .env
 docker compose up -d
 ```
 
-Open [http://localhost/install](http://localhost/install) to finish setup.
+Mở **http://localhost/install** để tạo tài khoản admin.
 
-## Local development
-
-From the repository root:
-
-```bash
-./dev/setup
-./dev/start-docker-compose   # PostgreSQL, Redis, vector DB
-./dev/start-api
-./dev/start-web
-./dev/start-worker           # optional: async tasks
-```
-
-- Backend details: [api/README.md](./api/README.md)
-- Frontend details: [web/README.md](./web/README.md)
-
-## Configuration
-
-Copy and edit environment files as needed:
-
-- `docker/.env` — deployment
-- `api/.env` — API service
-- `web/.env.local` — console UI (from `web/.env.example`)
+Chi tiết, biến môi trường và troubleshooting: **[docs/bat-dau-nhanh.md](./docs/bat-dau-nhanh.md)**.
 
 ## License
 
-This project inherits the [Dify Open Source License](./LICENSE) (Apache 2.0 with additional conditions). Upstream Dify is © LangGenius, Inc.
+[Dify Open Source License](./LICENSE) (Apache 2.0 with additional conditions). Upstream Dify © LangGenius, Inc.
