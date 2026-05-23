@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start --port 3001",
     "lint": "eslint --cache --concurrency=auto",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "scrape:preny-en": "node ./scripts/scrape-preny-en.mjs"
   },
   "dependencies": {
     "next": "catalog:",

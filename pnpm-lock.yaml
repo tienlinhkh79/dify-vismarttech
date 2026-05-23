@@ -624,6 +624,46 @@ importers:
         specifier: 'catalog:'
         version: 0.1.15(@types/node@25.5.0)(esbuild@0.27.2)(happy-dom@20.8.9)(jiti@2.6.1)(sass@1.98.0)(terser@5.46.1)(tsx@4.21.0)(typescript@6.0.2)(vite@8.0.3(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.1)(@types/node@25.5.0)(esbuild@0.27.2)(jiti@2.6.1)(sass@1.98.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))(yaml@2.8.3)
 
+  landing:
+    dependencies:
+      next:
+        specifier: 'catalog:'
+        version: 16.2.2(@babel/core@7.29.0)(@playwright/test@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.98.0)
+      react:
+        specifier: 'catalog:'
+        version: 19.2.4
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.4(react@19.2.4)
+      reactflow:
+        specifier: 'catalog:'
+        version: 11.11.4(@types/react@19.2.14)(immer@11.1.4)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+    devDependencies:
+      '@next/eslint-plugin-next':
+        specifier: 'catalog:'
+        version: 16.2.2
+      '@tailwindcss/postcss':
+        specifier: 'catalog:'
+        version: 4.2.2
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.5.0
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.3(@types/react@19.2.14)
+      eslint:
+        specifier: 'catalog:'
+        version: 10.1.0(jiti@2.6.1)
+      tailwindcss:
+        specifier: 'catalog:'
+        version: 4.2.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.2
+
   packages/iconify-collections:
     devDependencies:
       iconify-import-svg:
@@ -4484,6 +4524,7 @@ packages:
 
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
+    deprecated: Potential CWE-502 - Update to 1.3.1 or higher
 
   '@unpic/core@1.0.3':
     resolution: {integrity: sha512-aum9YNVUGso7MjGLD0Rp/08kywCGLqZ03/q6VQBFFakDBOXWEc8D4kPGcZ8v5wEnGRex3lE+++bOuucBp3KJ/w==}
@@ -7574,6 +7615,7 @@ packages:
   react-server-dom-webpack@19.2.4:
     resolution: {integrity: sha512-zEhkWv6RhXDctC2N7yEUHg3751nvFg81ydHj8LTTZuukF/IF1gcOKqqAL6Ds+kS5HtDVACYPik0IvzkgYXPhlQ==}
     engines: {node: '>=0.10.0'}
+    deprecated: High Security Vulnerability in React Server Components
     peerDependencies:
       react: ^19.2.4
       react-dom: ^19.2.4

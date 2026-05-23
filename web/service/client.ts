@@ -14,6 +14,7 @@ import {
   marketplaceRouterContract,
 } from '@/contract/router'
 import { isClient } from '@/utils/client'
+import { resolveConsoleApiBaseHref } from '@/utils/console-api-base'
 import { request } from './base'
 
 const getMarketplaceHeaders = () => new Headers({
@@ -65,7 +66,7 @@ export const marketplaceClient: JsonifiedClient<ContractRouterClient<typeof mark
 export const marketplaceQuery = createTanstackQueryUtils(marketplaceClient, { path: ['marketplace'] })
 
 const consoleLink = new OpenAPILink(consoleRouterContract, {
-  url: getBaseURL(API_PREFIX),
+  url: resolveConsoleApiBaseHref(API_PREFIX).replace(/\/$/, ''),
   fetch: (input, init) => {
     return request(
       input.url,

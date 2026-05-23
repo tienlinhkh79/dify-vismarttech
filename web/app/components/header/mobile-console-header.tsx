@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback } from 'react'
-import DifyLogo from '@/app/components/base/logo/dify-logo'
+import ConsoleBrandedLogo from '@/app/components/header/console-branded-logo'
 import { APP_DISPLAY_NAME } from '@/config/app-display-name'
 import WorkplaceSelector from '@/app/components/header/account-dropdown/workplace-selector'
 import { ACCOUNT_SETTING_TAB } from '@/app/components/header/account-setting/constants'
@@ -55,7 +55,7 @@ const MobileConsoleHeader = () => {
         <span className="sr-only">
           {isBrandingEnabled && systemFeatures.branding.application_title ? systemFeatures.branding.application_title : APP_DISPLAY_NAME}
         </span>
-        <DifyLogo size="large" style="monochromeWhite" />
+        <ConsoleBrandedLogo size="large" />
       </Link>
     </h1>
   )

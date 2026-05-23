@@ -164,7 +164,7 @@ describe('ConsoleChrome', () => {
   it('should render header with main nav components', () => {
     render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
-    expect(screen.getByRole('img', { name: /dify logo/i })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /vismarttech logo/i })).toBeInTheDocument()
     expect(screen.getByTestId('console-hero-menu')).toBeInTheDocument()
     expect(screen.getByTestId('workplace-selector')).toBeInTheDocument()
     expect(screen.getByTestId('app-nav')).toBeInTheDocument()
@@ -209,11 +209,11 @@ describe('ConsoleChrome', () => {
     mockMedia = 'mobile'
     render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
-    expect(screen.getByRole('img', { name: /dify logo/i })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /vismarttech logo/i })).toBeInTheDocument()
     expect(screen.queryByTestId('env-nav')).not.toBeInTheDocument()
   })
 
-  it('should render branded title and repo product logo when branding is enabled', () => {
+  it('should render branded title and custom workspace logo when branding is enabled', () => {
     mockBrandingEnabled = true
     mockBrandingTitle = 'Acme Workspace'
     mockBrandingLogo = '/logo.png'
@@ -221,7 +221,8 @@ describe('ConsoleChrome', () => {
     render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
     expect(screen.getByText('Acme Workspace')).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: /dify logo/i })).toBeInTheDocument()
+    const logo = screen.getByRole('img', { name: /vismarttech logo/i })
+    expect(logo).toHaveAttribute('src', '/logo.png')
   })
 
   it('should show default Vismarttech logo when branding is enabled but no workspace_logo', () => {
@@ -232,7 +233,7 @@ describe('ConsoleChrome', () => {
     render(<ConsoleChrome><div data-testid="main" /></ConsoleChrome>)
 
     expect(screen.getByText('Custom Title')).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: /dify logo/i })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /vismarttech logo/i })).toBeInTheDocument()
   })
 
   it('should show default Vismarttech text when branding enabled but no application_title', () => {

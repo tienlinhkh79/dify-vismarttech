@@ -3,7 +3,7 @@
 import { useCallback } from 'react'
 import { RiSearchLine } from '@remixicon/react'
 import { useTranslation } from 'react-i18next'
-import DifyLogo from '@/app/components/base/logo/dify-logo'
+import ConsoleBrandedLogo from '@/app/components/header/console-branded-logo'
 import { APP_DISPLAY_NAME } from '@/config/app-display-name'
 import { useAppContext } from '@/context/app-context'
 import { useGlobalPublicStore } from '@/context/global-public-context'
@@ -47,7 +47,7 @@ const ConsoleTopBar = () => {
             <span className="sr-only">
               {isBrandingEnabled && systemFeatures.branding.application_title ? systemFeatures.branding.application_title : APP_DISPLAY_NAME}
             </span>
-            <DifyLogo size="large" style="monochromeWhite" />
+            <ConsoleBrandedLogo size="large" />
           </Link>
         </h1>
         <div className="flex min-w-0 flex-1 items-center justify-end gap-3">

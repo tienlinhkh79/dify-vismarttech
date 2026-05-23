@@ -14,7 +14,7 @@
 
 ## Color Tokens
 
-- Primary: `#0B57F0`
+- Primary: `#155AEF` (Dify `components-button-primary-bg`)
 - Background: `#F8FAFF`
 - Surface: `#FFFFFF`
 - Border: `#D5DEF5`

@@ -20,11 +20,13 @@ const Layout = ({ children }: { children: ReactNode }) => {
           <EventEmitterContextProvider>
             <ProviderContextProvider>
               <ModalContextProvider>
-                <HeaderWrapper>
-                  <Header />
-                </HeaderWrapper>
-                <div className="relative flex h-0 shrink-0 grow flex-col overflow-y-auto bg-components-panel-bg">
-                  {children}
+                <div className="flex min-h-screen w-full flex-col bg-background-body md:h-screen md:flex-row md:overflow-hidden">
+                  <HeaderWrapper>
+                    <Header />
+                  </HeaderWrapper>
+                  <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-components-panel-bg">
+                    {children}
+                  </div>
                 </div>
               </ModalContextProvider>
             </ProviderContextProvider>

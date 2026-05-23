@@ -4,6 +4,7 @@ import Cookies from 'js-cookie'
 import ky, { HTTPError } from 'ky'
 import { toast } from '@/app/components/base/ui/toast'
 import { API_PREFIX, APP_VERSION, CSRF_COOKIE_NAME, CSRF_HEADER_NAME, IS_MARKETPLACE, MARKETPLACE_API_PREFIX, PASSPORT_HEADER_NAME, PUBLIC_API_PREFIX, WEB_APP_SHARE_CODE_HEADER_NAME } from '@/config'
+import { resolveConsoleApiBaseHref } from '@/utils/console-api-base'
 import { getWebAppAccessToken, getWebAppPassport } from './webapp-auth'
 
 const TIME_OUT = 100000
@@ -151,7 +152,7 @@ async function base<T>(url: string, options: FetchOptionType = {}, otherOptions:
   else if (isPublicAPI)
     base = PUBLIC_API_PREFIX
   else
-    base = API_PREFIX
+    base = resolveConsoleApiBaseHref(API_PREFIX).replace(/\/$/, '')
 
   if (getAbortController) {
     const abortController = new AbortController()

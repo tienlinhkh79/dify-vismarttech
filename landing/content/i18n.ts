@@ -1,3 +1,5 @@
+import { homeContentEn, homeContentVi } from './home-content'
+
 export type Lang = 'vi' | 'en'
 
 export const copy = {
@@ -9,6 +11,7 @@ export const copy = {
       contact: 'Liên hệ',
       login: 'Đăng nhập',
       register: 'Đăng ký',
+      careers: 'Tuyển dụng',
       app: 'Tham gia ngay',
       menu: 'Menu',
       dark: 'Dark',
@@ -55,6 +58,7 @@ export const copy = {
       privacy: 'Bảo mật',
       terms: 'Điều khoản',
     },
+    homeContent: homeContentVi,
   },
   en: {
     nav: {
@@ -64,6 +68,7 @@ export const copy = {
       contact: 'Contact',
       login: 'Login',
       register: 'Register',
+      careers: 'Careers',
       app: 'Join now',
       menu: 'Menu',
       dark: 'Dark',
@@ -110,5 +115,6 @@ export const copy = {
       privacy: 'Privacy',
       terms: 'Terms',
     },
+    homeContent: homeContentEn,
   },
 } as const

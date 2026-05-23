@@ -11,6 +11,7 @@ import {
 import { usePathname, useRouter, useSearchParams } from '@/next/navigation'
 import { sendGAEvent } from '@/utils/gtag'
 import { fetchSetupStatusWithCache } from '@/utils/setup-status'
+import { clearChunkLoadRecoveryFlag, installChunkLoadRecovery } from '@/utils/chunk-load-recovery'
 import { resolvePostLoginRedirect } from '../signin/utils/post-login-redirect'
 import { trackEvent } from './base/amplitude'
 
@@ -30,6 +31,15 @@ export const AppInitializer = ({
     'oauth_new_user',
     parseAsBoolean.withOptions({ history: 'replace' }),
   )
+  useEffect(() => {
+    installChunkLoadRecovery()
+  }, [])
+
+  useEffect(() => {
+    if (init)
+      clearChunkLoadRecoveryFlag()
+  }, [init])
+
   const isSetupFinished = useCallback(async () => {
     try {
       const setUpStatus = await fetchSetupStatusWithCache()

@@ -31,6 +31,7 @@ import Cookies from 'js-cookie'
 import { toast } from '@/app/components/base/ui/toast'
 import { API_PREFIX, CSRF_COOKIE_NAME, CSRF_HEADER_NAME, IS_CE_EDITION, PASSPORT_HEADER_NAME, PUBLIC_API_PREFIX, WEB_APP_SHARE_CODE_HEADER_NAME } from '@/config'
 import { asyncRunSafe } from '@/utils'
+import { resolveConsoleApiBaseHref } from '@/utils/console-api-base'
 import { basePath } from '@/utils/var'
 import { base, ContentType, getBaseOptions } from './fetch'
 import { refreshAccessTokenOrReLogin } from './refresh-token'
@@ -165,7 +166,7 @@ function requiredWebSSOLogin(message?: string, code?: number) {
 }
 
 function formatURL(url: string, isPublicAPI: boolean) {
-  const urlPrefix = isPublicAPI ? PUBLIC_API_PREFIX : API_PREFIX
+  const urlPrefix = isPublicAPI ? PUBLIC_API_PREFIX : resolveConsoleApiBaseHref(API_PREFIX).replace(/\/$/, '')
   if (url.startsWith('http://') || url.startsWith('https://'))
     return url
   const urlWithoutProtocol = url.startsWith('/') ? url : `/${url}`
@@ -396,7 +397,7 @@ type UploadResponse = {
 }
 
 export const upload = async (options: UploadOptions, isPublicAPI?: boolean, url?: string, searchParams?: string): Promise<UploadResponse> => {
-  const urlPrefix = isPublicAPI ? PUBLIC_API_PREFIX : API_PREFIX
+  const urlPrefix = isPublicAPI ? PUBLIC_API_PREFIX : resolveConsoleApiBaseHref(API_PREFIX).replace(/\/$/, '')
   const shareCode = globalThis.location.pathname.split('/').slice(-1)[0]
   const defaultOptions = {
     method: 'POST',

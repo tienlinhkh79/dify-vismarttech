@@ -104,6 +104,8 @@ export default function SiteShell({ children }: SiteShellProps) {
               ))}
             </div>
             <div className="utility-dock justify-self-end" aria-label="Quick actions">
+              <a className="nav-link auth-link" href="/signin">{t.nav.login}</a>
+              <a className="btn btn-secondary auth-cta" href="/signup">{t.nav.register}</a>
               <button
                 aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
                 aria-pressed={theme === 'dark'}
@@ -154,6 +156,8 @@ export default function SiteShell({ children }: SiteShellProps) {
                   <span>{lang === 'vi' ? 'EN' : 'VI'}</span>
                 </button>
               </div>
+              <a className="btn btn-secondary w-full" href="/signin">{t.nav.login}</a>
+              <a className="btn btn-secondary w-full" href="/signup">{t.nav.register}</a>
               <a className="btn btn-primary w-full" href="/apps">{t.nav.app}</a>
             </nav>
           </div>
@@ -228,3 +232,5 @@ export default function SiteShell({ children }: SiteShellProps) {
     </main>
   )
 }
+
+

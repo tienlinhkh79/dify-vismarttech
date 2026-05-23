@@ -5,8 +5,8 @@ server {
     server_name ${NGINX_SERVER_NAME};
     resolver 127.0.0.11 valid=10s ipv6=off;
 
-    # Canonicalize host + protocol so auth cookies stay on one domain.
-    if ($host != ${NGINX_SERVER_NAME}) {
+    # Redirect unknown hosts to canonical console domain; allow chatbot + chatbotai.
+    if ($is_console_host = 0) {
       return 301 https://${NGINX_SERVER_NAME}$request_uri;
     }
     if ($scheme = http) {
@@ -52,6 +52,7 @@ server {
     }
 
     location /explore {
+      add_header Set-Cookie "_next_app=web; Path=/; Max-Age=86400; SameSite=Lax" always;
       proxy_pass $web_upstream;
       include proxy.conf;
     }
@@ -62,51 +63,57 @@ server {
       include proxy.conf;
     }
 
+    # Console Next chunks must never be served from the landing app (chunk 404 on /omnichannel).
+    location ~* ^/_next/.*omnichannel {
+      proxy_pass $web_upstream;
+      include proxy.conf;
+    }
+
+    location ~* ^/_next/.*\(commonLayout\) {
+      proxy_pass $web_upstream;
+      include proxy.conf;
+    }
+
     # Resolve Next.js static asset conflict between landing and web apps.
-    # Default to web console assets to avoid chunk 404 on app routes
-    # (e.g. /omnichannel, /datasets, /plugins). Route to landing only
-    # when the request clearly comes from marketing pages.
     location ^~ /_next/ {
-      set $next_upstream $web_upstream;
-      # Landing routes: root and marketing pages.
-      if ($http_referer ~* "https?://[^/]+/?(\\?|$)") {
-        set $next_upstream http://landing:3001;
-      }
-      if ($http_referer ~* "/(features|pricing|contact|privacy|terms)(\\?|/|$)") {
-        set $next_upstream http://landing:3001;
-      }
       proxy_pass $next_upstream;
       include proxy.conf;
     }
 
     # Serve landing page on root without exposing port 3001.
     location = / {
+      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=3600; SameSite=Lax" always;
       proxy_pass http://landing:3001;
       include proxy.conf;
     }
 
     # Serve landing subpages from the same domain root.
     location ^~ /features {
+      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=3600; SameSite=Lax" always;
       proxy_pass http://landing:3001;
       include proxy.conf;
     }
 
     location ^~ /pricing {
+      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=3600; SameSite=Lax" always;
       proxy_pass http://landing:3001;
       include proxy.conf;
     }
 
     location ^~ /contact {
+      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=3600; SameSite=Lax" always;
       proxy_pass http://landing:3001;
       include proxy.conf;
     }
 
     location ^~ /privacy {
+      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=3600; SameSite=Lax" always;
       proxy_pass http://landing:3001;
       include proxy.conf;
     }
 
     location ^~ /terms {
+      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=3600; SameSite=Lax" always;
       proxy_pass http://landing:3001;
       include proxy.conf;
     }
@@ -122,6 +129,7 @@ server {
     }
 
     location / {
+      add_header Set-Cookie "_next_app=web; Path=/; Max-Age=86400; SameSite=Lax" always;
       proxy_pass $web_upstream;
       include proxy.conf;
     }

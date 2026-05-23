@@ -2,13 +2,18 @@
 
 import type { INavSelectorProps } from './nav-selector'
 import * as React from 'react'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useStore as useAppStore } from '@/app/components/app/store'
 import { ArrowNarrowLeft } from '@/app/components/base/icons/src/vender/line/arrows'
 import Link from '@/next/link'
 import { useSelectedLayoutSegment } from '@/next/navigation'
 import { cn } from '@/utils/classnames'
 import { useConsoleNavLayout } from '../console-nav-layout-context'
+import {
+  consoleSidebarNavItemActiveVerticalAccentClass,
+  consoleSidebarNavItemActiveVerticalClass,
+  consoleSidebarNavItemClass,
+} from '../console-nav-sidebar-item-class'
 import NavSelector from './nav-selector'
 
 type INavProps = {
@@ -42,59 +47,92 @@ const Nav = ({
   const isActivated = Array.isArray(activeSegment) ? activeSegment.includes(segment!) : segment === activeSegment
   const isVerticalExpanded = isVertical && isActivated && !!curNav
 
+  const handleMainRowClick = useCallback((e: React.MouseEvent) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0)
+      return
+    setAppDetail()
+  }, [setAppDetail])
+
+  const verticalLinkClass = cn(
+    consoleSidebarNavItemClass,
+    isVerticalExpanded && 'rounded-b-none rounded-t-lg',
+    isActivated && !isVerticalExpanded && consoleSidebarNavItemActiveVerticalClass,
+    isActivated && isVerticalExpanded && consoleSidebarNavItemActiveVerticalAccentClass,
+    !isActivated && 'text-text-secondary hover:bg-state-base-hover hover:text-text-primary',
+    curNav && isActivated && 'hover:bg-state-base-hover',
+  )
+
+  const horizontalRowClass = cn(
+    'flex h-7 cursor-pointer select-none items-center gap-2 rounded-lg px-2.5 outline-none',
+    'focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-components-input-border-hover',
+    isActivated && 'text-components-main-nav-nav-button-text-active',
+    !isActivated && 'text-components-main-nav-nav-button-text',
+    curNav && isActivated && 'hover:bg-components-main-nav-nav-button-bg-active-hover',
+  )
+
   return (
     <div
       className={cn(
-        'flex shrink-0 rounded-xl text-sm font-medium',
+        'shrink-0 text-sm font-medium',
         isVertical
           ? cn(
-              'relative w-full flex-col items-stretch rounded-xl border border-transparent px-0',
-              isVerticalExpanded ? 'gap-0 overflow-hidden py-0' : 'gap-1 py-1',
-              isActivated
-                && 'border-divider-regular bg-state-base-hover font-semibold shadow-none border-r-[3px] border-r-text-accent',
-              !isActivated && !curNav && 'hover:bg-state-base-hover',
+              'relative flex w-full flex-col items-stretch overflow-hidden rounded-lg border border-transparent',
+              isVerticalExpanded && 'gap-0 py-0',
             )
           : cn(
-              'h-8 max-w-[670px] items-center px-0.5 max-[1024px]:max-w-[400px]',
-              isActivated && 'bg-components-main-nav-nav-button-bg-active font-semibold shadow-md',
+              'flex h-8 max-w-[670px] items-center rounded-xl px-0.5 max-[1024px]:max-w-[400px]',
+              isActivated && 'bg-components-main-nav-nav-button-bg-active text-components-main-nav-nav-button-text-active shadow-md',
               !curNav && !isActivated && 'hover:bg-components-main-nav-nav-button-bg-hover',
             ),
       )}
     >
-      <Link href={link} className={cn(isVertical && 'min-w-0 w-full')}>
-        <div
-          onClick={(e) => {
-            // Don't clear state if opening in new tab/window
-            if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0)
-              return
-            setAppDetail()
-          }}
-          className={cn(
-            'flex cursor-pointer items-center gap-2 rounded-lg',
-            isVertical ? cn('h-9 w-full min-w-0 px-3', isVerticalExpanded && 'rounded-none') : 'h-7 rounded-lg px-2.5',
-            isActivated && isVertical && 'text-text-primary',
-            isActivated && !isVertical && 'text-components-main-nav-nav-button-text-active',
-            !isActivated && isVertical && 'text-text-secondary',
-            !isActivated && !isVertical && 'text-components-main-nav-nav-button-text',
-            curNav && isActivated && !isVertical && 'hover:bg-components-main-nav-nav-button-bg-active-hover',
-            curNav && isActivated && isVertical && 'hover:bg-state-base-hover',
-          )}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-        >
-          <div className="flex h-4 w-4 shrink-0 items-center justify-center">
-            {
-              (hovered && curNav)
-                ? <ArrowNarrowLeft className="h-4 w-4" />
-                : isActivated
-                  ? activeIcon
-                  : icon
-            }
-          </div>
-          <span className={cn(isVertical ? 'min-w-0 flex-1 truncate' : 'ml-2 truncate', !isVertical && 'max-[1024px]:hidden')}>
-            {text}
-          </span>
-        </div>
+      <Link
+        href={link}
+        onClick={handleMainRowClick}
+        className={cn(
+          isVertical && cn('min-w-0 w-full no-underline', verticalLinkClass),
+          !isVertical && 'flex min-w-0 items-center',
+        )}
+        onMouseEnter={isVertical ? () => setHovered(true) : undefined}
+        onMouseLeave={isVertical ? () => setHovered(false) : undefined}
+      >
+        {isVertical
+          ? (
+              <>
+                <div className="flex h-4 w-4 shrink-0 items-center justify-center">
+                  {
+                    (hovered && curNav)
+                      ? <ArrowNarrowLeft className="h-4 w-4" />
+                      : isActivated
+                        ? activeIcon
+                        : icon
+                  }
+                </div>
+                <span className="min-w-0 flex-1 truncate">
+                  {text}
+                </span>
+              </>
+            )
+          : (
+              <div
+                className={horizontalRowClass}
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => setHovered(false)}
+              >
+                <div className="flex h-4 w-4 shrink-0 items-center justify-center">
+                  {
+                    (hovered && curNav)
+                      ? <ArrowNarrowLeft className="h-4 w-4" />
+                      : isActivated
+                        ? activeIcon
+                        : icon
+                  }
+                </div>
+                <span className={cn('ml-2 truncate max-[1024px]:hidden')}>
+                  {text}
+                </span>
+              </div>
+            )}
       </Link>
       {
         curNav && isActivated && (

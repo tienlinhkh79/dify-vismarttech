@@ -30,5 +30,37 @@ http {
     #gzip  on;
     client_max_body_size ${NGINX_CLIENT_MAX_BODY_SIZE};
 
+    # Console vs landing Next.js both use /_next/; cookie set by nginx location blocks wins over referer.
+    map $http_referer $next_static_upstream {
+        default web;
+        ~*"/(apps|explore|omnichannel|mini-crm|datasets|tools|plugins|signin|install|account|activate|reset-password|education-apply)(/|\?|$)" web;
+        ~*"/(features|pricing|contact|privacy|terms)(/|\?|$)" landing;
+    }
+
+    map $cookie__next_app $next_static_upstream_cookie {
+        default "";
+        web web;
+        landing landing;
+    }
+
+    map $next_static_upstream_cookie $next_static_upstream_resolved {
+        default $next_static_upstream;
+        web web;
+        landing landing;
+    }
+
+    map $next_static_upstream_resolved $next_upstream {
+        default http://web:3000;
+        web http://web:3000;
+        landing http://landing:3001;
+    }
+
+    # Console hostnames (no redirect to canonical — avoids client-router issues on alternate subdomain).
+    map $host $is_console_host {
+        default 0;
+        chatbotai.vismarttech.com 1;
+        chatbot.vismarttech.com 1;
+    }
+
     include /etc/nginx/conf.d/*.conf;
 }

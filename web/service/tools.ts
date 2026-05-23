@@ -231,8 +231,40 @@ export const listChannelProviders = () => {
 }
 
 export const listChannels = (params?: { include_branding?: boolean }) => {
+  const queryParams = params?.include_branding ? { include_branding: 'true' } : {}
+  const mapLegacyMessengerToChannel = (item: MessengerChannel): Channel => ({
+    id: item.id,
+    channel_id: item.channel_id,
+    channel_type: item.channel_type || 'facebook_messenger',
+    platform: item.platform || 'messenger',
+    status: item.status,
+    app_id: item.app_id,
+    name: item.name,
+    external_resource_id: item.page_id,
+    verify_token: item.verify_token,
+    client_secret: item.app_secret,
+    access_token: item.page_access_token,
+    verify_token_masked: item.verify_token_masked,
+    client_secret_masked: item.app_secret_masked,
+    access_token_masked: item.page_access_token_masked,
+    api_version: item.graph_api_version,
+    enabled: item.enabled,
+    webhook_path: item.webhook_path,
+    created_at: item.created_at,
+    updated_at: item.updated_at,
+    external_resource_picture_url: null,
+  })
+
   return get<ChannelListResponse>('/workspaces/current/channels', {
-    params: params?.include_branding ? { include_branding: 'true' } : {},
+    params: queryParams,
+  }).catch(async (error) => {
+    // Backward compatibility: older API deployments only expose messenger channels endpoints.
+    if (!(error instanceof Response) || ![404, 405].includes(error.status))
+      throw error
+    const legacy = await listMessengerChannels()
+    return {
+      data: (legacy.data || []).map(mapLegacyMessengerToChannel),
+    }
   })
 }
 

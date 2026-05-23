@@ -9,6 +9,7 @@ import Link from '@/next/link'
 import { useSelectedLayoutSegment } from '@/next/navigation'
 import { cn } from '@/utils/classnames'
 import { useConsoleNavLayout } from '../console-nav-layout-context'
+import { cnConsoleSidebarRouteNavLink } from '../console-nav-sidebar-item-class'
 
 type ToolsNavProps = {
   className?: string
@@ -26,14 +27,7 @@ const ToolsNav = ({
   return (
     <Link
       href="/tools"
-      className={cn(
-        'group text-sm font-medium',
-        className,
-        activated && isVertical && "relative border-divider-regular bg-state-base-hover text-text-primary shadow-none before:absolute before:inset-y-2 before:right-2 before:block before:w-[3px] before:rounded-full before:bg-text-accent before:content-['']",
-        activated && !isVertical && 'bg-components-main-nav-nav-button-bg-active font-semibold text-components-main-nav-nav-button-text-active shadow-md hover:bg-components-main-nav-nav-button-bg-active-hover',
-        !activated && isVertical && 'text-text-secondary hover:bg-state-base-hover hover:text-text-primary',
-        !activated && !isVertical && 'text-components-main-nav-nav-button-text hover:bg-components-main-nav-nav-button-bg-hover',
-      )}
+      className={cnConsoleSidebarRouteNavLink(className, { activated, isVertical })}
     >
       {
         activated
