@@ -97,7 +97,7 @@ const Chip: FC<Props> = ({
                     setOpen(false)
                   }}
                 >
-                  <div title={item.name} className="system-sm-medium grow truncate text-text-secondary">{item.name}</div>
+                  <div title={item.name} className="grow truncate system-sm-medium text-text-secondary">{item.name}</div>
                   {value === item.value && <RiCheckLine className="h-4 w-4 shrink-0 text-util-colors-blue-light-blue-light-600" />}
                 </div>
               ))}

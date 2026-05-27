@@ -49,10 +49,10 @@ const InputsFormNode = ({
         )}
         >
           <div className="i-custom-public-other-message-3-fill h-6 w-6 shrink-0" />
-          <div className="grow text-text-secondary system-xl-semibold">{t('chat.chatSettingsTitle', { ns: 'share' })}</div>
+          <div className="grow system-xl-semibold text-text-secondary">{t('chat.chatSettingsTitle', { ns: 'share' })}</div>
           {collapsed && (
             <Button
-              className="uppercase text-text-tertiary"
+              className="text-text-tertiary uppercase"
               size="small"
               variant="ghost"
               onClick={() => setCollapsed(false)}
@@ -63,7 +63,7 @@ const InputsFormNode = ({
           )}
           {!collapsed && currentConversationId && (
             <Button
-              className="uppercase text-text-tertiary"
+              className="text-text-tertiary uppercase"
               size="small"
               variant="ghost"
               onClick={() => setCollapsed(true)}

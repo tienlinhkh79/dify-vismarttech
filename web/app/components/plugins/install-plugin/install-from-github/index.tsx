@@ -163,12 +163,12 @@ const InstallFromGitHub: React.FC<InstallFromGitHubProps> = ({ updatePayload, on
         border-components-panel-border bg-components-panel-bg p-0`)}
       closable
     >
-      <div className="flex items-start gap-2 self-stretch pb-3 pl-6 pr-14 pt-6">
+      <div className="flex items-start gap-2 self-stretch pt-6 pr-14 pb-3 pl-6">
         <div className="flex grow flex-col items-start gap-1">
-          <div className="self-stretch text-text-primary title-2xl-semi-bold">
+          <div className="self-stretch title-2xl-semi-bold text-text-primary">
             {getTitle()}
           </div>
-          <div className="self-stretch text-text-tertiary system-xs-regular">
+          <div className="self-stretch system-xs-regular text-text-tertiary">
             {!([InstallStepFromGitHub.uploadFailed, InstallStepFromGitHub.installed, InstallStepFromGitHub.installFailed].includes(state.step)) && t('installFromGitHub.installNote', { ns: 'plugin' })}
           </div>
         </div>

@@ -1,11 +1,10 @@
 'use client'
 
-import { useCallback, useState } from 'react'
 import { RiArrowDownSLine } from '@remixicon/react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Group } from '@/app/components/base/icons/src/vender/other'
 import { Avatar } from '@/app/components/base/avatar'
-import { toast } from '@/app/components/base/ui/toast'
+import { Group } from '@/app/components/base/icons/src/vender/other'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,19 +13,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/app/components/base/ui/dropdown-menu'
+import { toast } from '@/app/components/base/ui/toast'
 import { Plan } from '@/app/components/billing/type'
+import AccountAbout from '@/app/components/header/account-about'
 import { AccountMenuPanel } from '@/app/components/header/account-dropdown/account-menu-panel'
 import { ACCOUNT_SETTING_TAB } from '@/app/components/header/account-setting/constants'
-import AccountAbout from '@/app/components/header/account-about'
 import Indicator from '@/app/components/header/indicator'
 import LicenseNav from '@/app/components/header/license-env'
 import PlanBadge from '@/app/components/header/plan-badge'
 import DownloadingIcon from '@/app/components/header/plugins-nav/downloading-icon'
 import { usePluginTaskStatus } from '@/app/components/plugins/plugin-page/plugin-tasks/hooks'
 import { useAppContext } from '@/context/app-context'
-import { useWorkspacesContext } from '@/context/workspace-context'
 import { useModalContext } from '@/context/modal-context'
 import { useProviderContext } from '@/context/provider-context'
+import { useWorkspacesContext } from '@/context/workspace-context'
 import Link from '@/next/link'
 import { switchWorkspace } from '@/service/common'
 import { cn } from '@/utils/classnames'
@@ -83,7 +83,7 @@ const ConsoleHeroMenu = ({ tone = 'default' }: ConsoleHeroMenuProps) => {
         <DropdownMenuTrigger
           aria-label={t('account.account', { ns: 'common' })}
           className={cn(
-            'flex max-w-[min(100vw-10rem,320px)] min-w-0 items-center gap-2 rounded-xl py-1 pl-1 pr-2 outline-none transition-colors',
+            'flex max-w-[min(100vw-10rem,320px)] min-w-0 items-center gap-2 rounded-xl py-1 pr-2 pl-1 transition-colors outline-none',
             isOnPrimary
               ? cn(
                   'border border-white/20 bg-white/10 hover:border-white/35 hover:bg-white/15',
@@ -146,10 +146,10 @@ const ConsoleHeroMenu = ({ tone = 'default' }: ConsoleHeroMenuProps) => {
             <div className="flex min-w-0 items-center gap-3 px-2 py-2">
               <Avatar avatar={userProfile.avatar_url} name={userProfile.name} size="xl" className="shrink-0" />
               <div className="min-w-0 flex-1">
-                <div className="truncate text-text-primary system-md-semibold">
+                <div className="truncate system-md-semibold text-text-primary">
                   {userProfile.name}
                 </div>
-                <div className="truncate text-text-tertiary system-xs-regular">
+                <div className="truncate system-xs-regular text-text-tertiary">
                   {userProfile.email}
                 </div>
               </div>
@@ -164,18 +164,18 @@ const ConsoleHeroMenu = ({ tone = 'default' }: ConsoleHeroMenuProps) => {
                 <DropdownMenuItem
                   key={workspace.id}
                   className={cn(
-                    'cursor-pointer rounded-lg py-1.5 pl-2 pr-2',
+                    'cursor-pointer rounded-lg py-1.5 pr-2 pl-2',
                     currentWorkspace?.id === workspace.id && 'bg-state-base-hover',
                   )}
                   onClick={() => void handleSwitchWorkspace(workspace.id)}
                 >
                   <div className="flex w-full min-w-0 items-center gap-2">
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-components-icon-bg-blue-solid text-[13px]">
-                      <span className="h-6 bg-gradient-to-r from-components-avatar-shape-fill-stop-0 to-components-avatar-shape-fill-stop-100 bg-clip-text align-middle font-semibold uppercase leading-6 text-shadow-shadow-1 opacity-90">
+                      <span className="h-6 bg-gradient-to-r from-components-avatar-shape-fill-stop-0 to-components-avatar-shape-fill-stop-100 bg-clip-text align-middle leading-6 font-semibold text-shadow-shadow-1 uppercase opacity-90">
                         {workspace?.name[0]?.toLocaleUpperCase()}
                       </span>
                     </div>
-                    <div className="line-clamp-1 min-w-0 grow text-left text-text-secondary system-md-regular">
+                    <div className="line-clamp-1 min-w-0 grow text-left system-md-regular text-text-secondary">
                       {workspace.name}
                     </div>
                     {(!enableBilling || workspace.id !== currentWorkspace?.id) && (
@@ -187,8 +187,8 @@ const ConsoleHeroMenu = ({ tone = 'default' }: ConsoleHeroMenuProps) => {
             </div>
           </div>
           <div className="mb-2 rounded-xl border border-divider-subtle bg-background-section-burn p-1.5">
-            <div className="px-2 pb-1 pt-0.5">
-              <span className="text-text-tertiary system-xs-medium-uppercase">{t('menus.plugins', { ns: 'common' })}</span>
+            <div className="px-2 pt-0.5 pb-1">
+              <span className="system-xs-medium-uppercase text-text-tertiary">{t('menus.plugins', { ns: 'common' })}</span>
             </div>
             <DropdownMenuLinkItem
               className="justify-between rounded-lg"
@@ -196,7 +196,7 @@ const ConsoleHeroMenu = ({ tone = 'default' }: ConsoleHeroMenuProps) => {
             >
               <div className="relative flex w-full items-center gap-2">
                 {(isFailed || isInstallingWithError) && (
-                  <Indicator color="red" className="absolute -left-0.5 -top-0.5" />
+                  <Indicator color="red" className="absolute -top-0.5 -left-0.5" />
                 )}
                 <div className="flex h-5 w-5 shrink-0 items-center justify-center text-text-secondary">
                   {(!(isInstalling || isInstallingWithError)) && <Group className="h-4 w-4" />}

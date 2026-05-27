@@ -88,7 +88,7 @@ const FormItem: FC<Props> = ({
               <Line3 className="mr-0.5"></Line3>
             </div>
           )}
-          <div className="flex items-center text-primary-600">
+          <div className="text-primary-600 flex items-center">
             {!isChatVar && <Variable02 className="h-3.5 w-3.5" />}
             {isChatVar && <BubbleX className="h-3.5 w-3.5 text-util-colors-teal-teal-700" />}
             <div className={cn('ml-0.5 max-w-[150px] truncate text-xs font-medium', isChatVar && 'text-text-secondary')} title={variable}>
@@ -124,19 +124,19 @@ const FormItem: FC<Props> = ({
   return (
     <div className={cn(className)}>
       {!isArrayLikeType && !isBooleanType && (
-        <div className="mb-1 flex h-6 items-center gap-1 text-text-secondary system-sm-semibold">
+        <div className="mb-1 flex h-6 items-center gap-1 system-sm-semibold text-text-secondary">
           <div className="truncate">
             {typeof payload.label === 'object' ? nodeKey : payload.label}
           </div>
           {payload.hide === true
             ? (
-                <span className="text-text-tertiary system-xs-regular">
+                <span className="system-xs-regular text-text-tertiary">
                   {t('panel.optional_and_hidden', { ns: 'workflow' })}
                 </span>
               )
             : (
                 !payload.required && (
-                  <span className="text-text-tertiary system-xs-regular">
+                  <span className="system-xs-regular text-text-tertiary">
                     {t('panel.optional', { ns: 'workflow' })}
                   </span>
                 )

@@ -25,7 +25,7 @@ const AuthSplitLayout = ({ children }: PropsWithChildren) => {
               </div>
             </div>
             {showDifyOfficialChrome(systemFeatures.branding.enabled) && (
-              <div className="system-xs-regular px-8 py-6 text-text-tertiary">
+              <div className="px-8 py-6 system-xs-regular text-text-tertiary">
                 ©
                 {' '}
                 {new Date().getFullYear()}
@@ -37,10 +37,10 @@ const AuthSplitLayout = ({ children }: PropsWithChildren) => {
         </div>
 
         <div className="relative hidden w-1/2 overflow-hidden border-l border-effects-highlight bg-linear-to-br from-[#2f35dc] via-[#3b44e8] to-[#2c53f1] p-6 lg:block">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_40%),radial-gradient(circle_at_78%_20%,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0)_35%)]" />
+          <div className="inset-0 absolute bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_40%),radial-gradient(circle_at_78%_20%,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0)_35%)]" />
           <div className="relative z-10 flex h-full flex-col rounded-2xl border border-white/15 p-10">
             <div className="max-w-[440px] text-white">
-              <h2 className="text-4xl font-semibold leading-tight">
+              <h2 className="text-4xl leading-tight font-semibold">
                 {t('rightTitle', { ns: 'login' })}
               </h2>
               <p className="mt-4 text-base text-white/80">

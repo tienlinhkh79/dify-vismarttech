@@ -92,18 +92,18 @@ const IndexingProgressItem: FC<IndexingProgressItemProps> = ({
     >
       {isEmbedding && (
         <div
-          className="absolute left-0 top-0 h-full min-w-0.5 border-r-2 border-r-components-progress-bar-progress-highlight bg-components-progress-bar-progress"
+          className="absolute top-0 left-0 h-full min-w-0.5 border-r-2 border-r-components-progress-bar-progress-highlight bg-components-progress-bar-progress"
           style={{ width: `${percent}%` }}
         />
       )}
-      <div className="z-1 flex h-full items-center gap-1 pl-[6px] pr-2">
+      <div className="z-1 flex h-full items-center gap-1 pr-2 pl-[6px]">
         <SourceTypeIcon
           sourceType={sourceType}
           name={name}
           notionIcon={notionIcon}
         />
         <div className="flex w-0 grow items-center gap-1" title={name}>
-          <div className="system-xs-medium truncate text-text-secondary">
+          <div className="truncate system-xs-medium text-text-secondary">
             {name}
           </div>
           {enableBilling && <PriorityLabel className="ml-0" />}

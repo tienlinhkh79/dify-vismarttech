@@ -1,9 +1,11 @@
 'use client'
 
 import Image from 'next/image'
+import { useState } from 'react'
 
+import DemoVideoModal from '@/components/demo-video-modal'
 import HeroShowcase from '@/components/hero-showcase'
-import IndustryTabs from '@/components/industry-tabs'
+import IndustrySolutions from '@/components/industry-solutions'
 import { usePreferences } from '@/components/preferences-context'
 import SiteShell from '@/components/site-shell'
 import { BrandIcon } from '@/components/brand-icons'
@@ -17,30 +19,42 @@ export default function HomePage() {
   const { lang } = usePreferences()
   const t = copy[lang]
   const home = t.homeContent
+  const [demoOpen, setDemoOpen] = useState(false)
 
   return (
     <SiteShell>
-      <section className="container py-10 md:py-14">
-        <div className="hero-layout grid items-start gap-10 lg:grid-cols-2 lg:gap-12">
-          <div className="min-w-0">
-            <h1 className="hero-title animate-fade-up">
-              {home.hero.titleLine1}
-              <br />
-              <span className="hero-title-accent">{home.hero.titleLine2}</span>
-            </h1>
-            <p className="animate-fade-up delay-1 mt-5 max-w-xl text-lg leading-8 text-slate-600">
-              {home.hero.subtitle}
-            </p>
-            <div className="animate-fade-up delay-2 mt-8 flex flex-wrap gap-3">
-              <a className="btn btn-secondary" href="/contact">{home.hero.ctaDemo}</a>
-              <a className="btn btn-primary" href="/signup">{home.hero.ctaTrial}</a>
-            </div>
-          </div>
-          <div className="animate-fade-up delay-2 min-w-0">
-            <HeroShowcase content={home.hero.showcase} />
+      <section className="container hero-copy-section">
+        <div className="hero-copy mx-auto max-w-3xl text-center">
+          <h1 className="hero-title animate-fade-up">
+            {home.hero.titleLine1}
+            <br />
+            <span className="hero-title-accent">{home.hero.titleLine2}</span>
+          </h1>
+          <p className="animate-fade-up delay-1 mt-5 text-lg leading-8 text-slate-600">
+            {home.hero.subtitle}
+          </p>
+          <div className="animate-fade-up delay-2 mt-8 flex flex-wrap justify-center gap-3">
+            <button
+              className="btn btn-secondary"
+              onClick={() => setDemoOpen(true)}
+              type="button"
+            >
+              {home.hero.ctaDemo}
+            </button>
+            <a className="btn btn-primary" href="/signup">{home.hero.ctaTrial}</a>
           </div>
         </div>
       </section>
+
+      <section
+        aria-label={home.hero.showcase.crmTitle}
+        className="feature-showcase-section"
+        id="showcase"
+      >
+        <HeroShowcase content={home.hero.showcase} variant="section" />
+      </section>
+
+      <IndustrySolutions content={home.industries} />
 
       <section className="container py-12 md:py-16" id="platform">
         <h2 className="section-title text-center">
@@ -98,8 +112,6 @@ export default function HomePage() {
           ))}
         </div>
       </section>
-
-      <IndustryTabs content={home.industries} />
 
       <section className="container py-10 md:py-14">
         <h2 className="section-title text-center">{home.partners.title}</h2>
@@ -164,6 +176,12 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+      <DemoVideoModal
+        closeLabel={t.home.demoModalClose}
+        onClose={() => setDemoOpen(false)}
+        open={demoOpen}
+        title={t.home.demoModalTitle}
+      />
     </SiteShell>
   )
 }

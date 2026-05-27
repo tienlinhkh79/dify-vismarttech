@@ -160,11 +160,11 @@ const VoiceInput = ({
   const seconds = Number.parseInt(`${originDuration}`) % 60
 
   return (
-    <div className={cn(s.wrapper, 'absolute inset-0 rounded-xl')}>
-      <div className="absolute inset-[1.5px] flex items-center overflow-hidden rounded-[10.5px] bg-primary-25 py-[14px] pl-[14.5px] pr-[6.5px]">
+    <div className={cn(s.wrapper, 'inset-0 absolute rounded-xl')}>
+      <div className="absolute inset-[1.5px] flex items-center overflow-hidden rounded-[10.5px] bg-primary-25 py-[14px] pr-[6.5px] pl-[14.5px]">
         <canvas id="voice-input-record" className="absolute bottom-0 left-0 h-4 w-full" />
         {
-          startConvert && <div className="i-ri-loader-2-line mr-2 h-4 w-4 animate-spin text-primary-700" data-testid="voice-input-loader" />
+          startConvert && <div className="mr-2 i-ri-loader-2-line h-4 w-4 animate-spin text-primary-700" data-testid="voice-input-loader" />
         }
         <div className="grow">
           {
@@ -189,7 +189,7 @@ const VoiceInput = ({
               onClick={handleStopRecorder}
               data-testid="voice-input-stop"
             >
-              <div className="i-ri-stop-circle-line h-5 w-5 text-primary-600" />
+              <div className="text-primary-600 i-ri-stop-circle-line h-5 w-5" />
             </div>
           )
         }

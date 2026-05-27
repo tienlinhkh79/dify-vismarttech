@@ -74,7 +74,7 @@ const UploadDropzone = ({
             totalCount: fileUploadConfig.file_upload_limit,
           })}
         </div>
-        {dragging && <div ref={dragRef} className="absolute left-0 top-0 h-full w-full" />}
+        {dragging && <div ref={dragRef} className="absolute top-0 left-0 h-full w-full" />}
       </div>
     </>
   )

@@ -51,7 +51,7 @@ const PlanUpgradeModal: FC<Props> = ({
       <div className="relative">
         <div
           aria-hidden
-          className={`${styles.heroOverlay} pointer-events-none absolute inset-0`}
+          className={`${styles.heroOverlay} inset-0 pointer-events-none absolute`}
         />
         <div className="px-8 pt-8">
           <div className={`${styles.icon} flex size-12 items-center justify-center rounded-xl shadow-lg backdrop-blur-[5px]`}>
@@ -69,7 +69,7 @@ const PlanUpgradeModal: FC<Props> = ({
         </div>
       </div>
 
-      <div className="mb-8 mt-10 flex justify-end space-x-2 px-8">
+      <div className="mt-10 mb-8 flex justify-end space-x-2 px-8">
         <Button
           onClick={onClose}
         >

@@ -157,7 +157,7 @@ const PluginPage = ({
     >
       <div
         className={cn(
-          'sticky top-0 z-10 flex min-h-[60px] items-center gap-1 self-stretch bg-components-panel-bg px-12 pb-2 pt-4',
+          'sticky top-0 z-10 flex min-h-[60px] items-center gap-1 self-stretch bg-components-panel-bg px-12 pt-4 pb-2',
           isExploringMarketplace && 'bg-background-body',
         )}
       >
@@ -239,7 +239,7 @@ const PluginPage = ({
           {plugins}
           {dragging && (
             <div
-              className="absolute inset-0 m-0.5 rounded-2xl border-2 border-dashed border-components-dropzone-border-accent
+              className="inset-0 absolute m-0.5 rounded-2xl border-2 border-dashed border-components-dropzone-border-accent
                   bg-[rgba(21,90,239,0.14)] p-2"
             >
             </div>

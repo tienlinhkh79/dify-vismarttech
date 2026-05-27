@@ -150,15 +150,15 @@ const ChildSegmentList: FC<IChildSegmentCardProps> = ({
     <div className={cn(
       'flex flex-col',
       contentOpacity,
-      isParagraphMode ? 'pb-2 pt-1' : 'grow px-3',
+      isParagraphMode ? 'pt-1 pb-2' : 'grow px-3',
       isFullDocMode && isLoading && 'overflow-y-hidden',
     )}
     >
       {isFullDocMode && <Divider type="horizontal" className="my-1 h-px bg-divider-subtle" />}
-      <div className={cn('flex items-center justify-between', isFullDocMode && 'sticky -top-2 left-0 bg-background-default pb-3 pt-2')}>
+      <div className={cn('flex items-center justify-between', isFullDocMode && 'sticky -top-2 left-0 bg-background-default pt-2 pb-3')}>
         <div
           className={cn(
-            'flex h-7 items-center rounded-lg pl-1 pr-3',
+            'flex h-7 items-center rounded-lg pr-3 pl-1',
             isParagraphMode && 'cursor-pointer',
             isParagraphMode && collapsed && 'bg-dataset-child-chunk-expand-btn-bg',
             isFullDocMode && 'pl-0',
@@ -174,7 +174,7 @@ const ChildSegmentList: FC<IChildSegmentCardProps> = ({
           <button
             type="button"
             className={cn(
-              'system-xs-semibold-uppercase px-1.5 py-1 text-components-button-secondary-accent-text',
+              'px-1.5 py-1 system-xs-semibold-uppercase text-components-button-secondary-accent-text',
               hoverVisibleClass,
               isFullDocMode && isLoading && 'text-components-button-secondary-accent-text-disabled',
             )}

@@ -32,10 +32,10 @@ const RadioCard: FC<Props> = ({
         {icon}
         <div>
           <div className="flex items-center justify-between">
-            <div className="text-sm font-medium leading-5 text-gray-900">{title}</div>
+            <div className="text-sm leading-5 font-medium text-gray-900">{title}</div>
             <div className={s.radio}></div>
           </div>
-          <div className="text-xs font-normal leading-[18px] text-gray-500">{description}</div>
+          <div className="text-xs leading-[18px] font-normal text-gray-500">{description}</div>
         </div>
       </div>
       {extra}

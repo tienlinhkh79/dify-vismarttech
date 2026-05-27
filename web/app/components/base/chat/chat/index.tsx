@@ -279,7 +279,7 @@ const Chat: FC<ChatProps> = ({
         <div
           data-testid="chat-container"
           ref={chatContainerRef}
-          className={cn('relative h-full overflow-y-auto overflow-x-hidden', isTryApp && 'h-0 grow', chatContainerClassName)}
+          className={cn('relative h-full overflow-x-hidden overflow-y-auto', isTryApp && 'h-0 grow', chatContainerClassName)}
         >
           {chatNode}
           <div
@@ -338,7 +338,7 @@ const Chat: FC<ChatProps> = ({
               !noStopResponding && isResponding && (
                 <div data-testid="stop-responding-container" className="mb-2 flex justify-center">
                   <Button className="border-components-panel-border bg-components-panel-bg text-components-button-secondary-text" onClick={onStopResponding}>
-                    <div className="i-custom-vender-solid-mediaAndDevices-stop-circle mr-[5px] h-3.5 w-3.5" />
+                    <div className="mr-[5px] i-custom-vender-solid-mediaAndDevices-stop-circle h-3.5 w-3.5" />
                     <span className="text-xs font-normal">{t('operation.stopResponding', { ns: 'appDebug' })}</span>
                   </Button>
                 </div>

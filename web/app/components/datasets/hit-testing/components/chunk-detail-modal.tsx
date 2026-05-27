@@ -89,14 +89,14 @@ const ChunkDetailModal = ({
             {answer && (
               <div className="break-all">
                 <div className="flex gap-x-1">
-                  <div className="w-4 shrink-0 text-[13px] font-medium leading-[20px] text-text-tertiary">Q</div>
-                  <div className={cn('body-md-regular line-clamp-20 text-text-secondary')}>
+                  <div className="w-4 shrink-0 text-[13px] leading-[20px] font-medium text-text-tertiary">Q</div>
+                  <div className={cn('line-clamp-20 body-md-regular text-text-secondary')}>
                     {content}
                   </div>
                 </div>
                 <div className="flex gap-x-1">
-                  <div className="w-4 shrink-0 text-[13px] font-medium leading-[20px] text-text-tertiary">A</div>
-                  <div className={cn('body-md-regular line-clamp-20 text-text-secondary')}>
+                  <div className="w-4 shrink-0 text-[13px] leading-[20px] font-medium text-text-tertiary">A</div>
+                  <div className={cn('line-clamp-20 body-md-regular text-text-secondary')}>
                     {answer}
                   </div>
                 </div>
@@ -115,7 +115,7 @@ const ChunkDetailModal = ({
               )}
               {showKeywords && (
                 <div className="flex flex-col gap-y-1">
-                  <div className="text-xs font-medium uppercase text-text-tertiary">{t(`${i18nPrefix}keyword`, { ns: 'datasetHitTesting' })}</div>
+                  <div className="text-xs font-medium text-text-tertiary uppercase">{t(`${i18nPrefix}keyword`, { ns: 'datasetHitTesting' })}</div>
                   <div className="flex flex-wrap gap-x-2">
                     {keywords.map(keyword => (
                       <Tag key={keyword} text={keyword} />

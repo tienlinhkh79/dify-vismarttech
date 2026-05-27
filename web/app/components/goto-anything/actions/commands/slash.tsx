@@ -1,11 +1,11 @@
 'use client'
 import type { ActionItem } from '../types'
+import type { Locale } from '@/i18n-config'
 import { useTheme } from 'next-themes'
 import { useEffect } from 'react'
 import { getI18n, useTranslation } from 'react-i18next'
-import type { Locale } from '@/i18n-config'
-import { setLocaleOnClient } from '@/i18n-config'
 import { useGlobalPublicStore } from '@/context/global-public-context'
+import { setLocaleOnClient } from '@/i18n-config'
 import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import { accountCommand } from './account'
 import { executeCommand } from './command-bus'
@@ -44,7 +44,9 @@ export const slashAction: ActionItem = {
 // Register/unregister default handlers for slash commands with external dependencies.
 const registerSlashCommands = (deps: { setTheme: (t: string) => void, setLocale: (locale: string) => void, showOfficialDifyChrome: boolean }) => {
   slashCommandRegistry.register(themeCommand, { setTheme: deps.setTheme })
-  slashCommandRegistry.register(languageCommand, { setLocale: deps.setLocale })
+  slashCommandRegistry.register(languageCommand, { setLocale: async (locale: string) => {
+    deps.setLocale(locale)
+  } })
   if (deps.showOfficialDifyChrome) {
     slashCommandRegistry.register(forumCommand, {})
     slashCommandRegistry.register(docsCommand, {})

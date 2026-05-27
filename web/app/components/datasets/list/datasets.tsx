@@ -58,7 +58,7 @@ const Datasets = ({
 
   return (
     <>
-      <nav className="grid grow grid-cols-1 content-start gap-4 px-6 pb-10 pt-4 sm:grid-cols-2 md:grid-cols-3 md:px-12 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5">
+      <nav className="grid grow grid-cols-1 content-start gap-4 px-6 pt-4 pb-10 sm:grid-cols-2 md:grid-cols-3 md:px-12 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5">
         {isCurrentWorkspaceEditor && <NewDatasetCard />}
         {datasetList?.pages.map(({ data: datasets }) => datasets.map(dataset => (
           <DatasetCard key={dataset.id} dataset={dataset} onSuccess={invalidDatasetList} />),

@@ -78,7 +78,7 @@ const ToolItem: FC<Props> = ({
     >
       <div
         key={payload.name}
-        className="flex cursor-pointer items-center justify-between rounded-lg pl-[21px] pr-1 hover:bg-state-base-hover"
+        className="flex cursor-pointer items-center justify-between rounded-lg pr-1 pl-[21px] hover:bg-state-base-hover"
         onClick={() => {
           if (disabled)
             return
@@ -111,11 +111,11 @@ const ToolItem: FC<Props> = ({
           })
         }}
       >
-        <div className={cn('truncate border-l-2 border-divider-subtle py-2 pl-4 text-text-secondary system-sm-medium')}>
+        <div className={cn('truncate border-l-2 border-divider-subtle py-2 pl-4 system-sm-medium text-text-secondary')}>
           <span className={cn(disabled && 'opacity-30')}>{payload.label[language]}</span>
         </div>
         {isAdded && (
-          <div className="mr-4 text-text-tertiary system-xs-regular">{t('addToolModal.added', { ns: 'tools' })}</div>
+          <div className="mr-4 system-xs-regular text-text-tertiary">{t('addToolModal.added', { ns: 'tools' })}</div>
         )}
       </div>
     </Tooltip>

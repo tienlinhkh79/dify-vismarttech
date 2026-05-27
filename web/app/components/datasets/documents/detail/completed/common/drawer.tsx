@@ -105,13 +105,13 @@ const Drawer = ({
   const overlayPointerEvents = modal && open ? 'pointer-events-auto' : 'pointer-events-none'
 
   const content = (
-    <div className="pointer-events-none fixed inset-0 z-9999">
+    <div className="inset-0 pointer-events-none fixed z-9999">
       {showOverlay && (
         <div
           onClick={modal ? onClose : undefined}
           aria-hidden="true"
           className={cn(
-            'fixed inset-0 bg-black/30 opacity-0 transition-opacity duration-200 ease-in',
+            'inset-0 fixed bg-black/30 opacity-0 transition-opacity duration-200 ease-in',
             open && 'opacity-100',
             overlayPointerEvents,
           )}

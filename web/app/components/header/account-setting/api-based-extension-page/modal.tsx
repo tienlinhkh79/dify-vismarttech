@@ -68,7 +68,7 @@ const ApiBasedExtensionModal: FC<ApiBasedExtensionModalProps> = ({ data, onCance
           : t('apiBasedExtension.modal.title', { ns: 'common' })}
       </div>
       <div className="py-2">
-        <div className="text-sm font-medium leading-9 text-text-primary">
+        <div className="text-sm leading-9 font-medium text-text-primary">
           {t('apiBasedExtension.modal.name.title', { ns: 'common' })}
         </div>
         <input value={localeData.name || ''} onChange={e => handleDataChange('name', e.target.value)} className="block h-9 w-full appearance-none rounded-lg bg-components-input-bg-normal px-3 text-sm text-text-primary outline-hidden" placeholder={t('apiBasedExtension.modal.name.placeholder', { ns: 'common' }) || ''} />
@@ -84,7 +84,7 @@ const ApiBasedExtensionModal: FC<ApiBasedExtensionModalProps> = ({ data, onCance
         <input value={localeData.api_endpoint || ''} onChange={e => handleDataChange('api_endpoint', e.target.value)} className="block h-9 w-full appearance-none rounded-lg bg-components-input-bg-normal px-3 text-sm text-text-primary outline-hidden" placeholder={t('apiBasedExtension.modal.apiEndpoint.placeholder', { ns: 'common' }) || ''} />
       </div>
       <div className="py-2">
-        <div className="text-sm font-medium leading-9 text-text-primary">
+        <div className="text-sm leading-9 font-medium text-text-primary">
           {t('apiBasedExtension.modal.apiKey.title', { ns: 'common' })}
         </div>
         <div className="flex items-center">

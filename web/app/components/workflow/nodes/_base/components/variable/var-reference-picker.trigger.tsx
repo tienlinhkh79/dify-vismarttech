@@ -145,8 +145,8 @@ const VarReferencePickerTrigger: FC<Props> = ({
                         <TypeSelector
                           noLeft
                           trigger={(
-                            <div className="flex h-8 items-center bg-components-input-bg-normal px-2 radius-md">
-                              <div className="mr-1 text-components-input-text-filled system-sm-regular">{varKindTypes.find(item => item.value === varKindType)?.label}</div>
+                            <div className="flex h-8 items-center radius-md bg-components-input-bg-normal px-2">
+                              <div className="mr-1 system-sm-regular text-components-input-text-filled">{varKindTypes.find(item => item.value === varKindType)?.label}</div>
                               <RiArrowDownSLine className="h-4 w-4 text-text-quaternary" />
                             </div>
                           )}
@@ -160,7 +160,7 @@ const VarReferencePickerTrigger: FC<Props> = ({
                       </div>
                     )
                   : (!hasValue && (
-                      <div className="ml-1.5 mr-1">
+                      <div className="mr-1 ml-1.5">
                         <Variable02 className={`h-4 w-4 ${readonly ? 'text-components-input-text-disabled' : 'text-components-input-text-placeholder'}`} />
                       </div>
                     ))}
@@ -240,7 +240,7 @@ const VarReferencePickerTrigger: FC<Props> = ({
                                             </div>
                                           </div>
                                           <div
-                                            className="ml-0.5 truncate text-center capitalize text-text-tertiary system-xs-regular"
+                                            className="ml-0.5 truncate text-center system-xs-regular text-text-tertiary capitalize"
                                             title={type}
                                             style={{ maxWidth: maxTypeWidth }}
                                           >
@@ -250,7 +250,7 @@ const VarReferencePickerTrigger: FC<Props> = ({
                                         </>
                                       )
                                     : (
-                                        <div className={`overflow-hidden ${readonly ? 'text-components-input-text-disabled' : 'text-components-input-text-placeholder'} text-ellipsis system-sm-regular`}>
+                                        <div className={`overflow-hidden ${readonly ? 'text-components-input-text-disabled' : 'text-components-input-text-placeholder'} system-sm-regular text-ellipsis`}>
                                           {isLoading
                                             ? (
                                                 <div className="flex items-center">
@@ -276,7 +276,7 @@ const VarReferencePickerTrigger: FC<Props> = ({
                     )}
                 {(hasValue && !readonly && !isInTable && !isJustShowValue) && (
                   <div
-                    className="group invisible absolute right-1 top-[50%] h-5 translate-y-[-50%] cursor-pointer rounded-md p-1 hover:bg-state-base-hover group-hover/wrap:visible"
+                    className="group invisible absolute top-[50%] right-1 h-5 translate-y-[-50%] cursor-pointer rounded-md p-1 group-hover/wrap:visible hover:bg-state-base-hover"
                     onClick={handleClearVar}
                     data-testid="var-reference-picker-clear"
                   >
@@ -285,7 +285,7 @@ const VarReferencePickerTrigger: FC<Props> = ({
                 )}
                 {!hasValue && valueTypePlaceHolder && (
                   <Badge
-                    className="absolute right-1 top-[50%] translate-y-[-50%] capitalize"
+                    className="absolute top-[50%] right-1 translate-y-[-50%] capitalize"
                     text={valueTypePlaceHolder}
                     uppercase={false}
                   />
@@ -294,14 +294,14 @@ const VarReferencePickerTrigger: FC<Props> = ({
             )}
         {!readonly && isInTable && (
           <RemoveButton
-            className="absolute right-1 top-0.5 hidden group-hover/picker-trigger-wrap:block"
+            className="absolute top-0.5 right-1 hidden group-hover/picker-trigger-wrap:block"
             onClick={() => onRemove?.()}
           />
         )}
 
         {!hasValue && typePlaceHolder && (
           <Badge
-            className="absolute right-2 top-1.5"
+            className="absolute top-1.5 right-2"
             text={typePlaceHolder}
             uppercase={false}
           />

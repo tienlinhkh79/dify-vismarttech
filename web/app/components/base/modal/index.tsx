@@ -44,10 +44,10 @@ export default function Modal({
     <Transition appear show={isShow} as={Fragment}>
       <Dialog as="div" className={cn('relative', highPriority ? 'z-1100' : 'z-60', wrapperClassName)} onClose={clickOutsideNotClose ? noop : onClose}>
         <TransitionChild>
-          <div className={cn('fixed inset-0', overlayOpacity ? 'bg-workflow-canvas-canvas-overlay' : 'bg-background-overlay', 'duration-300 ease-in data-closed:opacity-0', 'data-enter:opacity-100', 'data-leave:opacity-0')} />
+          <div className={cn('inset-0 fixed', overlayOpacity ? 'bg-workflow-canvas-canvas-overlay' : 'bg-background-overlay', 'duration-300 ease-in data-closed:opacity-0', 'data-enter:opacity-100', 'data-leave:opacity-0')} />
         </TransitionChild>
         <div
-          className="fixed inset-0 overflow-y-auto"
+          className="inset-0 fixed overflow-y-auto"
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
@@ -59,19 +59,19 @@ export default function Modal({
                 {!!title && (
                   <DialogTitle
                     as="h3"
-                    className="text-text-primary title-2xl-semi-bold"
+                    className="title-2xl-semi-bold text-text-primary"
                   >
                     {title}
                   </DialogTitle>
                 )}
                 {!!description && (
-                  <div className="mt-2 text-text-secondary body-md-regular">
+                  <div className="mt-2 body-md-regular text-text-secondary">
                     {description}
                   </div>
                 )}
                 {closable
                   && (
-                    <div className="absolute right-6 top-6 z-10 flex h-5 w-5 items-center justify-center rounded-2xl hover:cursor-pointer hover:bg-state-base-hover">
+                    <div className="absolute top-6 right-6 z-10 flex h-5 w-5 items-center justify-center rounded-2xl hover:cursor-pointer hover:bg-state-base-hover">
                       <span
                         className="i-ri-close-line h-4 w-4 text-text-tertiary"
                         onClick={

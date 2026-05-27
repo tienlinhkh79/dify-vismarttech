@@ -13,7 +13,7 @@ type PopoverContentProps = {
 const PopoverContent = ({ title, description, onClose }: PopoverContentProps) => {
   return (
     <div className="flex min-w-[220px] flex-col gap-2 p-3">
-      <div className="text-xs font-semibold uppercase tracking-[0.12em] text-text-tertiary">
+      <div className="text-xs font-semibold tracking-[0.12em] text-text-tertiary uppercase">
         {title}
       </div>
       <p className="text-sm leading-5 text-text-secondary">{description}</p>

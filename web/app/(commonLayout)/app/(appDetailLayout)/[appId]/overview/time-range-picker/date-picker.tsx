@@ -30,7 +30,7 @@ const DatePicker: FC<Props> = ({
 
   const renderDate = useCallback(({ value, handleClickTrigger, isOpen }: TriggerProps) => {
     return (
-      <div className={cn('system-sm-regular flex h-7 cursor-pointer items-center rounded-lg px-1 text-components-input-text-filled hover:bg-state-base-hover', isOpen && 'bg-state-base-hover')} onClick={handleClickTrigger}>
+      <div className={cn('flex h-7 cursor-pointer items-center rounded-lg px-1 system-sm-regular text-components-input-text-filled hover:bg-state-base-hover', isOpen && 'bg-state-base-hover')} onClick={handleClickTrigger}>
         {value ? formatToLocalTime(value, locale, 'MMM D') : ''}
       </div>
     )

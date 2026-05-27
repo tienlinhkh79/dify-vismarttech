@@ -92,11 +92,11 @@ const AddAnnotationModal: FC<Props> = ({
           (
             <div>
               {isAnnotationFull && (
-                <div className="mb-4 mt-6 px-6">
+                <div className="mt-6 mb-4 px-6">
                   <AnnotationFull />
                 </div>
               )}
-              <div className="system-sm-medium flex h-16 items-center justify-between rounded-bl-xl rounded-br-xl border-t border-divider-subtle bg-background-section-burn px-4 text-text-tertiary">
+              <div className="flex h-16 items-center justify-between rounded-br-xl rounded-bl-xl border-t border-divider-subtle bg-background-section-burn px-4 system-sm-medium text-text-tertiary">
                 <div
                   className="flex items-center space-x-2"
                 >

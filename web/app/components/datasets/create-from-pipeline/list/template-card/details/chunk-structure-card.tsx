@@ -35,7 +35,7 @@ const ChunkStructureCard = ({
     )}
     >
       <div className={cn(
-        'absolute -left-1 -top-1 size-14 rounded-full blur-[80px]',
+        'absolute -top-1 -left-1 size-14 rounded-full blur-[80px]',
         `${HEADER_EFFECT_MAP[effectColor]}`,
       )}
       />

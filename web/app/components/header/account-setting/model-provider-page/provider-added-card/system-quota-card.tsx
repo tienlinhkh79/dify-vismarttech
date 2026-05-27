@@ -33,7 +33,7 @@ const SystemQuotaCard = ({
         containerVariants[variant],
       )}
       >
-        <div className={cn('pointer-events-none absolute inset-0 rounded-[7px]', styles.gridBg)} />
+        <div className={cn('inset-0 pointer-events-none absolute rounded-[7px]', styles.gridBg)} />
         {children}
       </div>
     </VariantContext.Provider>

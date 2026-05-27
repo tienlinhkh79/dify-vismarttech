@@ -39,7 +39,7 @@ const FileListInLog = ({ fileList, isExpanded = false, noBorder = false, noPaddi
     <div className={cn('px-3 py-2', expanded && 'py-3', !noBorder && 'border-t border-divider-subtle', noPadding && 'p-0!')}>
       <div className="flex justify-between gap-1">
         {expanded && (
-          <div className="system-xs-semibold-uppercase grow cursor-pointer py-1 text-text-secondary" onClick={() => setExpanded(!expanded)}>{t('runDetail.fileListLabel', { ns: 'appLog' })}</div>
+          <div className="grow cursor-pointer py-1 system-xs-semibold-uppercase text-text-secondary" onClick={() => setExpanded(!expanded)}>{t('runDetail.fileListLabel', { ns: 'appLog' })}</div>
         )}
         {!expanded && (
           <div className="flex gap-1">
@@ -85,8 +85,8 @@ const FileListInLog = ({ fileList, isExpanded = false, noBorder = false, noPaddi
       {expanded && (
         <div className="flex flex-col gap-3">
           {fileList.map(item => (
-            <div key={item.varName} className="system-xs-regular flex flex-col gap-1">
-              <div className="py-1 text-text-tertiary ">{item.varName}</div>
+            <div key={item.varName} className="flex flex-col gap-1 system-xs-regular">
+              <div className="py-1 text-text-tertiary">{item.varName}</div>
               {item.list.map(file => (
                 <FileItem
                   key={file.id}

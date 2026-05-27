@@ -103,7 +103,7 @@ export default function MailAndPasswordAuth({ isEmailSetup }: MailAndPasswordAut
   return (
     <form onSubmit={noop}>
       <div className="mb-3">
-        <label htmlFor="email" className="system-md-semibold my-2 text-text-secondary">
+        <label htmlFor="email" className="my-2 system-md-semibold text-text-secondary">
           {t('email', { ns: 'login' })}
         </label>
         <div className="mt-1">

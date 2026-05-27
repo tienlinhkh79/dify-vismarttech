@@ -126,7 +126,7 @@ const RetrievalParamConfig: FC<Props> = ({
               />
             )}
             <div className="flex items-center">
-              <span className="mr-0.5 text-text-secondary system-sm-semibold">{t('modelProvider.rerankModel.key', { ns: 'common' })}</span>
+              <span className="mr-0.5 system-sm-semibold text-text-secondary">{t('modelProvider.rerankModel.key', { ns: 'common' })}</span>
               <Tooltip
                 popupContent={
                   <div className="w-[200px]">{t('modelProvider.rerankModel.tip', { ns: 'common' })}</div>
@@ -152,11 +152,11 @@ const RetrievalParamConfig: FC<Props> = ({
                 />
                 {showMultiModalTip && (
                   <div className="mt-2 flex h-10 items-center gap-x-0.5 overflow-hidden rounded-xl border-[0.5px] border-components-panel-border bg-components-panel-bg-blur p-2 shadow-xs backdrop-blur-[5px]">
-                    <div className="absolute bottom-0 left-0 right-0 top-0 bg-dataset-warning-message-bg opacity-40" />
+                    <div className="absolute top-0 right-0 bottom-0 left-0 bg-dataset-warning-message-bg opacity-40" />
                     <div className="p-1">
                       <AlertTriangle className="size-4 text-text-warning-secondary" />
                     </div>
-                    <span className="text-text-primary system-xs-medium">
+                    <span className="system-xs-medium text-text-primary">
                       {t('form.retrievalSetting.multiModalTip', { ns: 'datasetSettings' })}
                     </span>
                   </div>
@@ -276,11 +276,11 @@ const RetrievalParamConfig: FC<Props> = ({
                   />
                   {showMultiModalTip && (
                     <div className="mt-2 flex h-10 items-center gap-x-0.5 overflow-hidden rounded-xl border-[0.5px] border-components-panel-border bg-components-panel-bg-blur p-2 shadow-xs backdrop-blur-[5px]">
-                      <div className="absolute bottom-0 left-0 right-0 top-0 bg-dataset-warning-message-bg opacity-40" />
+                      <div className="absolute top-0 right-0 bottom-0 left-0 bg-dataset-warning-message-bg opacity-40" />
                       <div className="p-1">
                         <AlertTriangle className="size-4 text-text-warning-secondary" />
                       </div>
-                      <span className="text-text-primary system-xs-medium">
+                      <span className="system-xs-medium text-text-primary">
                         {t('form.retrievalSetting.multiModalTip', { ns: 'datasetSettings' })}
                       </span>
                     </div>

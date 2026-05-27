@@ -126,7 +126,7 @@ const ProviderList = () => {
           className="relative flex grow flex-col overflow-y-auto bg-background-body"
         >
           <div className={cn(
-            'sticky top-0 z-10 flex flex-wrap items-center justify-between gap-y-2 bg-background-body px-12 pb-2 pt-4 leading-[56px]',
+            'sticky top-0 z-10 flex flex-wrap items-center justify-between gap-y-2 bg-background-body px-12 pt-4 pb-2 leading-[56px]',
             currentProviderId && 'pr-6',
           )}
           >
@@ -163,7 +163,7 @@ const ProviderList = () => {
           </div>
           {activeTab !== 'mcp' && (
             <div className={cn(
-              'relative grid shrink-0 grid-cols-1 content-start gap-4 px-12 pb-4 pt-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
+              'relative grid shrink-0 grid-cols-1 content-start gap-4 px-12 pt-2 pb-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
               !filteredCollectionList.length && activeTab === 'workflow' && 'grow',
             )}
             >
@@ -193,7 +193,7 @@ const ProviderList = () => {
                   />
                 </div>
               ))}
-              {!filteredCollectionList.length && activeTab === 'workflow' && <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"><WorkflowToolEmpty type={getToolType(activeTab)} /></div>}
+              {!filteredCollectionList.length && activeTab === 'workflow' && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"><WorkflowToolEmpty type={getToolType(activeTab)} /></div>}
             </div>
           )}
           {!filteredCollectionList.length && activeTab === 'builtin' && (

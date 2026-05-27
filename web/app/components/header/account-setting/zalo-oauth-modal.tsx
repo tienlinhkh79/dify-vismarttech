@@ -54,9 +54,11 @@ export default function ZaloOAuthModal({
   useEffect(() => {
     if (!open || !channelId) {
       clearPoll()
-      setQrDataUri('')
-      setAuthUrl('')
-      setCallbackUrl('')
+      queueMicrotask(() => {
+        setQrDataUri('')
+        setAuthUrl('')
+        setCallbackUrl('')
+      })
       return
     }
 
@@ -137,9 +139,9 @@ export default function ZaloOAuthModal({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="w-[440px] max-w-[440px] overflow-hidden p-0">
-        <DialogCloseButton className="right-5 top-5" />
-        <div className="px-6 pb-3 pr-14 pt-6">
-          <DialogTitle className="text-text-primary title-lg-semi-bold">
+        <DialogCloseButton className="top-5 right-5" />
+        <div className="px-6 pt-6 pr-14 pb-3">
+          <DialogTitle className="title-lg-semi-bold text-text-primary">
             {t('settings.channelsZaloQRTitle', { ns: 'common' })}
           </DialogTitle>
           <p className="mt-2 system-sm-regular text-text-secondary">
@@ -153,7 +155,6 @@ export default function ZaloOAuthModal({
             </div>
           )}
           {!loading && qrDataUri && (
-            // eslint-disable-next-line @next/next/no-img-element
             <img src={qrDataUri} alt="" className="size-56 rounded-lg border border-divider-subtle bg-white p-2" />
           )}
           {authUrl && (
@@ -170,7 +171,7 @@ export default function ZaloOAuthModal({
               <div className="system-xs-semibold-uppercase text-text-tertiary">
                 {t('settings.channelsZaloCallbackUrlLabel', { ns: 'common' })}
               </div>
-              <div className="break-all system-xs-regular text-text-secondary">{callbackUrl}</div>
+              <div className="system-xs-regular break-all text-text-secondary">{callbackUrl}</div>
               <Button size="small" variant="secondary" onClick={() => copyText(callbackUrl, 'settings.channelsCopyWebhookUrlSuccess')}>
                 {t('operation.copy', { ns: 'common' })}
               </Button>

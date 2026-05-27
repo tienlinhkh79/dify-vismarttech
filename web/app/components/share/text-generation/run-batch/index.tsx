@@ -46,7 +46,7 @@ const RunBatch: FC<IRunBatchProps> = ({
       <div className="flex justify-end">
         <Button
           variant="primary"
-          className={cn('mt-4 pl-3 pr-4', !isPC && 'grow')}
+          className={cn('mt-4 pr-4 pl-3', !isPC && 'grow')}
           onClick={handleSend}
           disabled={!isParsed || !isAllFinished}
         >

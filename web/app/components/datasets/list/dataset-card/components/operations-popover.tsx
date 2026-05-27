@@ -20,7 +20,7 @@ const OperationsPopover = ({
   handleExportPipeline,
   detectIsUsedByApp,
 }: OperationsPopoverProps) => (
-  <div className="absolute right-2 top-2 z-15 hidden group-hover:block">
+  <div className="absolute top-2 right-2 z-15 hidden group-hover:block">
     <CustomPopover
       htmlContent={(
         <Operations
@@ -42,7 +42,7 @@ const OperationsPopover = ({
       )}
       btnClassName={open =>
         cn(
-          'size-9 cursor-pointer justify-center radius-lg border-[0.5px] border-components-actionbar-border bg-components-actionbar-bg p-0 shadow-lg shadow-shadow-shadow-5 ring-2 ring-inset ring-components-actionbar-bg hover:border-components-actionbar-border',
+          'size-9 cursor-pointer justify-center radius-lg border-[0.5px] border-components-actionbar-border bg-components-actionbar-bg p-0 shadow-lg ring-2 shadow-shadow-shadow-5 ring-components-actionbar-bg ring-inset hover:border-components-actionbar-border',
           open ? 'border-components-actionbar-border bg-state-base-hover' : '',
         )}
     />

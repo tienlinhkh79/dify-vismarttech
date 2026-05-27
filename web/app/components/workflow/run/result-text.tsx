@@ -28,7 +28,7 @@ const ResultText: FC<ResultTextProps> = ({
   return (
     <div className="bg-background-section-burn">
       {isRunning && !outputs && (
-        <div className="pl-[26px] pt-4">
+        <div className="pt-4 pl-[26px]">
           <LoadingAnim type="text" />
         </div>
       )}
@@ -45,7 +45,7 @@ const ResultText: FC<ResultTextProps> = ({
           <div className="mr-2">{t('resultEmpty.title', { ns: 'runLog' })}</div>
           <div>
             {t('resultEmpty.tipLeft', { ns: 'runLog' })}
-            <span onClick={onClick} className="cursor-pointer text-primary-600">{t('resultEmpty.link', { ns: 'runLog' })}</span>
+            <span onClick={onClick} className="text-primary-600 cursor-pointer">{t('resultEmpty.link', { ns: 'runLog' })}</span>
             {t('resultEmpty.tipRight', { ns: 'runLog' })}
           </div>
         </div>
@@ -58,8 +58,8 @@ const ResultText: FC<ResultTextProps> = ({
             </div>
           )}
           {!!allFiles?.length && allFiles.map(item => (
-            <div key={item.varName} className="system-xs-regular flex flex-col gap-1 px-4 py-2">
-              <div className="py-1 text-text-tertiary ">{item.varName}</div>
+            <div key={item.varName} className="flex flex-col gap-1 px-4 py-2 system-xs-regular">
+              <div className="py-1 text-text-tertiary">{item.varName}</div>
               <FileList
                 files={item.list}
                 showDeleteAction={false}

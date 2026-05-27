@@ -106,7 +106,7 @@ const BaseNode: FC<BaseNodeProps> = ({
       return (
         <div
           className={cn(
-            'mr-2 text-text-tertiary system-xs-medium',
+            'mr-2 system-xs-medium text-text-tertiary',
             data._runningStatus === NodeRunningStatus.Running && 'text-text-accent',
           )}
         >
@@ -135,7 +135,7 @@ const BaseNode: FC<BaseNodeProps> = ({
       {(data._dimmed || pluginDimmed || pluginInstallLocked) && (
         <div
           className={cn(
-            'absolute inset-0 rounded-2xl transition-opacity',
+            'inset-0 absolute rounded-2xl transition-opacity',
             pluginInstallLocked
               ? 'pointer-events-auto z-30 bg-workflow-block-parma-bg opacity-80 backdrop-blur-[2px]'
               : 'pointer-events-none z-20 bg-workflow-block-parma-bg opacity-50',
@@ -147,7 +147,7 @@ const BaseNode: FC<BaseNodeProps> = ({
       {
         data.type === BlockEnum.DataSource && (
           <div className="absolute inset-[-2px] top-[-22px] z-[-1] rounded-[18px] bg-node-data-source-bg p-0.5 backdrop-blur-[6px]">
-            <div className="flex h-5 items-center px-2.5 text-text-tertiary system-2xs-semibold-uppercase">
+            <div className="flex h-5 items-center px-2.5 system-2xs-semibold-uppercase text-text-tertiary">
               {t('blocks.datasource', { ns: 'workflow' })}
             </div>
           </div>
@@ -221,7 +221,7 @@ const BaseNode: FC<BaseNodeProps> = ({
           )
         }
         <div className={cn(
-          'flex items-center rounded-t-2xl px-3 pb-2 pt-3',
+          'flex items-center rounded-t-2xl px-3 pt-3 pb-2',
           isContainerNode(data.type) && 'bg-transparent',
         )}
         >
@@ -233,7 +233,7 @@ const BaseNode: FC<BaseNodeProps> = ({
           />
           <div
             title={data.title}
-            className="mr-1 flex grow items-center truncate text-text-primary system-sm-semibold-uppercase"
+            className="mr-1 flex grow items-center truncate system-sm-semibold-uppercase text-text-primary"
           >
             <div>
               {data.title}

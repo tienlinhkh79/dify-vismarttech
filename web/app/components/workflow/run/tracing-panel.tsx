@@ -106,7 +106,7 @@ const TracingPanel: FC<TracingPanelProps> = ({
                 ? <span aria-hidden className="i-ri-arrow-down-s-line h-3 w-3" />
                 : <span aria-hidden className="i-ri-menu-4-line h-3 w-3 text-text-tertiary" />}
             </button>
-            <div className="flex items-center text-text-secondary system-xs-semibold-uppercase">
+            <div className="flex items-center system-xs-semibold-uppercase text-text-secondary">
               <span>{parallelDetail.parallelTitle}</span>
             </div>
             <div
@@ -117,7 +117,7 @@ const TracingPanel: FC<TracingPanelProps> = ({
           </div>
           <div className={`relative pl-2 ${isCollapsed ? 'hidden' : ''}`}>
             <div className={cn(
-              'absolute bottom-0 left-[5px] top-0 w-[2px]',
+              'absolute top-0 bottom-0 left-[5px] w-[2px]',
               isHovered ? 'bg-text-accent-secondary' : 'bg-divider-subtle',
             )}
             >

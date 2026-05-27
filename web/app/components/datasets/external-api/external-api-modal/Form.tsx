@@ -60,7 +60,7 @@ const Form: FC<FormProps> = React.memo(({
               href={docLink('/use-dify/knowledge/external-knowledge-api') || '/'}
               target="_blank"
               rel="noopener noreferrer"
-              className="body-xs-regular flex items-center text-text-accent"
+              className="flex items-center body-xs-regular text-text-accent"
             >
               <RiBookOpenLine className="mr-1 h-3 w-3 text-text-accent" />
               {t('externalAPIPanelDocumentation', { ns: 'dataset' })}

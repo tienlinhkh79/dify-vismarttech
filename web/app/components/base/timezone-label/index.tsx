@@ -43,7 +43,7 @@ const TimezoneLabel: React.FC<TimezoneLabelProps> = ({
   return (
     <span
       className={cn(
-        'text-text-tertiary system-sm-regular',
+        'system-sm-regular text-text-tertiary',
         inline && 'text-text-quaternary',
         className,
       )}

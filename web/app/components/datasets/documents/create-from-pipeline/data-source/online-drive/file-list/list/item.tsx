@@ -91,13 +91,13 @@ const Item = ({
         >
           <FileIcon type={type} fileName={name} className="shrink-0 transform-gpu" />
           <span
-            className="grow truncate text-text-secondary system-sm-medium"
+            className="grow truncate system-sm-medium text-text-secondary"
             title={name}
           >
             {name}
           </span>
           {!isFolder && typeof size === 'number' && (
-            <span className="shrink-0 text-text-tertiary system-xs-regular">{formatFileSize(size)}</span>
+            <span className="shrink-0 system-xs-regular text-text-tertiary">{formatFileSize(size)}</span>
           )}
         </div>
       </Wrapper>

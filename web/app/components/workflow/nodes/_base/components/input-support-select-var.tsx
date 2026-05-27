@@ -116,9 +116,9 @@ const Editor: FC<Props> = ({
           onFocus={setFocus}
         />
         {/* to patch Editor not support dynamic change editable status */}
-        {readOnly && <div className="absolute inset-0 z-10"></div>}
+        {readOnly && <div className="inset-0 absolute z-10"></div>}
         {isFocus && (
-          <div className={cn('absolute z-10', insertVarTipToLeft ? 'left-[-12px] top-1.5' : 'right-1 top-[-9px]')}>
+          <div className={cn('absolute z-10', insertVarTipToLeft ? 'top-1.5 left-[-12px]' : 'top-[-9px] right-1')}>
             <Tooltip
               popupContent={`${t('common.insertVarTip', { ns: 'workflow' })}`}
             >

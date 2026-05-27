@@ -42,11 +42,11 @@ const RadioCard: FC<Props> = ({
           {icon}
         </div>
         <div className="grow">
-          <div className="system-sm-semibold mb-1 text-text-secondary">{title}</div>
+          <div className="mb-1 system-sm-semibold text-text-secondary">{title}</div>
           <div className="system-xs-regular text-text-tertiary">{description}</div>
         </div>
         {!noRadio && (
-          <div className="absolute right-3 top-3">
+          <div className="absolute top-3 right-3">
             <div className={cn(
               'h-4 w-4 rounded-full border border-components-radio-border bg-components-radio-bg shadow-xs',
               isChosen && 'border-[5px] border-components-radio-border-checked',

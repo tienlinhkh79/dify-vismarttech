@@ -22,7 +22,7 @@ const ErrorMessage: FC<Props> = ({
         <div className="system-md-medium text-text-warning">{title}</div>
       </div>
       {errorMsg && (
-        <div className="system-xs-regular mt-1 pl-6 text-text-secondary">{errorMsg}</div>
+        <div className="mt-1 pl-6 system-xs-regular text-text-secondary">{errorMsg}</div>
       )}
     </div>
   )

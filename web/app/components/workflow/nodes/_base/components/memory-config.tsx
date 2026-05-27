@@ -154,7 +154,7 @@ const MemoryConfig: FC<Props> = ({
                   size="md"
                   disabled={readonly}
                 />
-                <div className="text-text-tertiary system-xs-medium-uppercase">{t(`${i18nPrefix}.windowSize`, { ns: 'workflow' })}</div>
+                <div className="system-xs-medium-uppercase text-text-tertiary">{t(`${i18nPrefix}.windowSize`, { ns: 'workflow' })}</div>
               </div>
               <div className="flex h-8 items-center space-x-2">
                 <Slider
@@ -183,7 +183,7 @@ const MemoryConfig: FC<Props> = ({
             </div>
             {canSetRoleName && (
               <div className="mt-4">
-                <div className="text-xs font-medium uppercase leading-6 text-text-tertiary">{t(`${i18nPrefix}.conversationRoleName`, { ns: 'workflow' })}</div>
+                <div className="text-xs leading-6 font-medium text-text-tertiary uppercase">{t(`${i18nPrefix}.conversationRoleName`, { ns: 'workflow' })}</div>
                 <div className="mt-1 space-y-2">
                   <RoleItem
                     readonly={readonly}

@@ -36,7 +36,7 @@ const ImageUploader = () => {
           dragging && 'border-components-dropzone-border-accent bg-components-dropzone-bg-accent',
         )}
       >
-        <div className="system-sm-medium flex items-center justify-center gap-x-2 text-text-secondary">
+        <div className="flex items-center justify-center gap-x-2 system-sm-medium text-text-secondary">
           <RiUploadCloud2Line className="size-5 text-text-tertiary" />
           <div>
             <span>{t('imageUploader.button', { ns: 'dataset' })}</span>
@@ -56,7 +56,7 @@ const ImageUploader = () => {
             batchCount: fileUploadConfig.imageFileBatchLimit,
           })}
         </div>
-        {dragging && <div ref={dragRef} className="absolute inset-0" />}
+        {dragging && <div ref={dragRef} className="inset-0 absolute" />}
       </div>
     </div>
   )

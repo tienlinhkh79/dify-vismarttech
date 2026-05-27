@@ -82,7 +82,7 @@ const Options = ({
     >
       <div className="flex items-center gap-x-1 px-4 py-2">
         <div
-          className="flex grow cursor-pointer select-none items-center gap-x-0.5"
+          className="flex grow cursor-pointer items-center gap-x-0.5 select-none"
           onClick={foldToggle}
         >
           <span className="system-sm-semibold-uppercase text-text-secondary">

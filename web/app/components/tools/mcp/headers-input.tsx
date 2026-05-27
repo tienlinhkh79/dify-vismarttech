@@ -77,9 +77,9 @@ const HeadersInput = ({
         </div>
       )}
       <div className="overflow-hidden rounded-lg border border-divider-regular">
-        <div className="system-xs-medium-uppercase bg-background-secondary flex h-7 items-center leading-7 text-text-tertiary">
+        <div className="bg-background-secondary flex h-7 items-center system-xs-medium-uppercase leading-7 text-text-tertiary">
           <div className="h-full w-1/2 border-r border-divider-regular pl-3">{t('mcp.modal.headerKey', { ns: 'tools' })}</div>
-          <div className="h-full w-1/2 pl-3 pr-1">{t('mcp.modal.headerValue', { ns: 'tools' })}</div>
+          <div className="h-full w-1/2 pr-1 pl-3">{t('mcp.modal.headerValue', { ns: 'tools' })}</div>
         </div>
         {headersItems.map((item, index) => (
           <div

@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Button from '@/app/components/base/button'
 import { toast } from '@/app/components/base/ui/toast'
-import ConfigCredential from '@/app/components/tools/setting/build-in/config-credentials'
 import ToolProviderList from '@/app/components/tools/provider-list'
+import ConfigCredential from '@/app/components/tools/setting/build-in/config-credentials'
 import { CollectionType } from '@/app/components/tools/types'
 import {
   fetchBuiltInToolCredential,
@@ -107,35 +107,33 @@ const ToolsPage = () => {
         )}
         {!!credentialProviders.length && (
           <div className="space-y-2">
-            {credentialProviders.map(provider => (
-              <div
-                key={provider.id}
-                className="flex items-center justify-between rounded-lg border border-divider-subtle px-3 py-2"
-              >
-                {(() => {
-                  const configured = providerConfiguredMap[provider.id] ?? provider.is_team_authorization
-                  return (
-                    <>
-                      <div>
-                        <div className="system-sm-medium text-text-primary">{provider.label.en_US}</div>
-                        <div className="mt-0.5 system-xs-regular text-text-tertiary">
-                          {configured ? 'Configured' : 'Not configured'}
-                        </div>
+            {credentialProviders.map((provider) => {
+              const configured = providerConfiguredMap[provider.id] ?? provider.is_team_authorization
+              return (
+                <div
+                  key={provider.id}
+                  className="flex items-center justify-between rounded-lg border border-divider-subtle px-3 py-2"
+                >
+                  <>
+                    <div>
+                      <div className="system-sm-medium text-text-primary">{provider.label.en_US}</div>
+                      <div className="mt-0.5 system-xs-regular text-text-tertiary">
+                        {configured ? 'Configured' : 'Not configured'}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="small"
-                          variant="secondary"
-                          onClick={() => setEditingProvider(provider)}
-                        >
-                          {configured ? t('operation.edit', { ns: 'common' }) : t('dataSource.configure', { ns: 'common' })}
-                        </Button>
-                      </div>
-                    </>
-                  )
-                })()}
-              </div>
-            ))}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="small"
+                        variant="secondary"
+                        onClick={() => setEditingProvider(provider)}
+                      >
+                        {configured ? t('operation.edit', { ns: 'common' }) : t('dataSource.configure', { ns: 'common' })}
+                      </Button>
+                    </div>
+                  </>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>

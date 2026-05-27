@@ -44,6 +44,8 @@ export const copy = {
       newsletter: 'Nhận tư vấn triển khai',
       newsletterPlaceholder: 'Email công việc',
       newsletterCta: 'Gửi',
+      demoModalTitle: 'Video demo sản phẩm',
+      demoModalClose: 'Đóng video demo',
     },
     footer: {
       about: 'Về',
@@ -101,6 +103,8 @@ export const copy = {
       newsletter: 'Get rollout advice',
       newsletterPlaceholder: 'Work email',
       newsletterCta: 'Send',
+      demoModalTitle: 'Product demo video',
+      demoModalClose: 'Close demo video',
     },
     footer: {
       about: 'About',

@@ -29,7 +29,7 @@ ENV PORT=3001
 WORKDIR /app
 COPY --from=builder /app/landing/.next/standalone ./
 COPY --from=builder /app/landing/.next/static ./landing/.next/static
-RUN mkdir -p /app/landing/public
+COPY landing/public /app/landing/public
 COPY ["Logo đơn giản - vuông 35x35cm.png", "/app/landing/public/vismarttech-logo.png"]
 
 EXPOSE 3001

@@ -32,7 +32,7 @@ export const TextEditorSection = ({
 }: TextEditorSectionProps) => {
   return (
     <>
-      {isTruncated && <LargeDataAlert className="absolute left-3 right-3 top-1" />}
+      {isTruncated && <LargeDataAlert className="absolute top-1 right-3 left-3" />}
       {currentVar.value_type === 'string'
         ? (
             <DisplayContent

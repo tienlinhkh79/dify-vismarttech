@@ -102,7 +102,7 @@ const InputItem: FC<Props> = ({
           )}
       {hasRemove && !isFocus && (
         <RemoveButton
-          className="absolute right-1 top-0.5 hidden group-hover:block"
+          className="absolute top-0.5 right-1 hidden group-hover:block"
           onClick={handleRemove}
         />
       )}

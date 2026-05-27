@@ -48,13 +48,13 @@ const TagsFilter = ({
     >
       <PortalToFollowElemTrigger onClick={() => setOpen(v => !v)}>
         <div className={cn(
-          'flex h-8 cursor-pointer select-none items-center rounded-lg bg-components-input-bg-normal px-2 py-1 text-text-tertiary hover:bg-state-base-hover-alt',
+          'flex h-8 cursor-pointer items-center rounded-lg bg-components-input-bg-normal px-2 py-1 text-text-tertiary select-none hover:bg-state-base-hover-alt',
           selectedTagsLength && 'text-text-secondary',
           open && 'bg-state-base-hover',
         )}
         >
           <div className={cn(
-            'system-sm-medium flex items-center p-1',
+            'flex items-center p-1 system-sm-medium',
           )}
           >
             {
@@ -65,7 +65,7 @@ const TagsFilter = ({
             }
             {
               selectedTagsLength > 2 && (
-                <div className="system-xs-medium ml-1 text-text-tertiary">
+                <div className="ml-1 system-xs-medium text-text-tertiary">
                   +
                   {selectedTagsLength - 2}
                 </div>
@@ -102,14 +102,14 @@ const TagsFilter = ({
               filteredOptions.map(option => (
                 <div
                   key={option.name}
-                  className="flex h-7 cursor-pointer select-none items-center rounded-lg px-2 py-1.5 hover:bg-state-base-hover"
+                  className="flex h-7 cursor-pointer items-center rounded-lg px-2 py-1.5 select-none hover:bg-state-base-hover"
                   onClick={() => handleCheck(option.name)}
                 >
                   <Checkbox
                     className="mr-1"
                     checked={value.includes(option.name)}
                   />
-                  <div className="system-sm-medium px-1 text-text-secondary">
+                  <div className="px-1 system-sm-medium text-text-secondary">
                     {option.label}
                   </div>
                 </div>

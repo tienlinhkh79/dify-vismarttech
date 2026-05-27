@@ -155,7 +155,7 @@ export const AgentStrategySelector = memo((props: AgentStrategySelectorProps) =>
     <PortalToFollowElem open={open} onOpenChange={setOpen} placement="bottom">
       <PortalToFollowElemTrigger className="w-full">
         <div
-          className="flex h-8 w-full select-none items-center gap-0.5 rounded-lg bg-components-input-bg-normal p-1 hover:bg-state-base-hover-alt"
+          className="flex h-8 w-full items-center gap-0.5 rounded-lg bg-components-input-bg-normal p-1 select-none hover:bg-state-base-hover-alt"
           onClick={() => setOpen(o => !o)}
         >
           { }

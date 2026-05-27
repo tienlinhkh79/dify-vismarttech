@@ -261,7 +261,7 @@ const AllTools = ({
             )}
             {hasToolsListContent && (
               <>
-                <div className="px-3 pb-1 pt-2">
+                <div className="px-3 pt-2 pb-1">
                   <span className="system-xs-medium text-text-primary">{t('allTools', { ns: 'tools' })}</span>
                 </div>
                 <Tools

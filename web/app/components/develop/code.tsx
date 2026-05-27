@@ -50,9 +50,9 @@ function CopyButton({ code }: { code: string }) {
   return (
     <button
       type="button"
-      className={cn('group/button absolute right-4 top-1.5 overflow-hidden rounded-full py-1 pl-2 pr-3 text-2xs font-medium opacity-0 backdrop-blur-sm transition focus:opacity-100 group-hover:opacity-100', copied
-        ? 'bg-emerald-400/10 ring-1 ring-inset ring-emerald-400/20'
-        : 'hover:bg-white/7.5 dark:bg-white/2.5 bg-white/5 dark:hover:bg-white/5')}
+      className={cn('group/button absolute top-1.5 right-4 overflow-hidden rounded-full py-1 pr-3 pl-2 text-2xs font-medium opacity-0 backdrop-blur-sm transition group-hover:opacity-100 focus:opacity-100', copied
+        ? 'bg-emerald-400/10 ring-1 ring-emerald-400/20 ring-inset'
+        : 'bg-white/5 hover:bg-white/7.5 dark:bg-white/2.5 dark:hover:bg-white/5')}
       onClick={() => {
         writeTextToClipboard(code).then(() => {
           setCopyCount(count => count + 1)
@@ -68,7 +68,7 @@ function CopyButton({ code }: { code: string }) {
       </span>
       <span
         aria-hidden={!copied}
-        className={cn('pointer-events-none absolute inset-0 flex items-center justify-center text-emerald-400 transition duration-300', !copied && 'translate-y-1.5 opacity-0')}
+        className={cn('inset-0 pointer-events-none absolute flex items-center justify-center text-emerald-400 transition duration-300', !copied && 'translate-y-1.5 opacity-0')}
       >
         Copied!
       </span>
@@ -81,7 +81,7 @@ function CodePanelHeader({ tag, label }: { tag?: string, label?: string }) {
     return null
 
   return (
-    <div className="border-b-white/7.5 bg-white/2.5 dark:bg-white/1 flex h-9 items-center gap-2 border-y border-t-transparent bg-zinc-900 px-4 dark:border-b-white/5">
+    <div className="flex h-9 items-center gap-2 border-y border-t-transparent border-b-white/7.5 bg-white/2.5 bg-zinc-900 px-4 dark:border-b-white/5 dark:bg-white/1">
       {tag && (
         <div className="dark flex">
           <Tag variant="small">{tag}</Tag>
@@ -116,7 +116,7 @@ function CodePanel({ tag, label, children, targetCode }: ICodePanelProps) {
   const child = Children.toArray(children)[0] as ReactElement<any>
 
   return (
-    <div className="dark:bg-white/2.5 group">
+    <div className="group dark:bg-white/2.5">
       <CodePanelHeader
         tag={tag}
         label={label}

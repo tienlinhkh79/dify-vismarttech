@@ -124,7 +124,7 @@ const Card = ({
           <div className="system-md-semibold text-text-primary">
             {renderI18nObject(label)}
           </div>
-          <div className="system-xs-regular flex h-4 items-center text-text-tertiary">
+          <div className="flex h-4 items-center system-xs-regular text-text-tertiary">
             {author}
             <div className="mx-0.5 text-text-quaternary">/</div>
             {name}
@@ -136,7 +136,7 @@ const Card = ({
           onUpdate={handleAuthUpdate}
         />
       </div>
-      <div className="system-xs-medium flex h-4 items-center pl-3 text-text-tertiary">
+      <div className="flex h-4 items-center pl-3 system-xs-medium text-text-tertiary">
         {t('auth.connectedWorkspace', { ns: 'plugin' })}
         <div className="ml-3 h-px grow bg-divider-subtle"></div>
       </div>
@@ -158,7 +158,7 @@ const Card = ({
       {
         !credentials_list.length && (
           <div className="p-3 pt-1">
-            <div className="system-xs-regular flex h-10 items-center justify-center radius-lg bg-background-section text-text-tertiary">
+            <div className="flex h-10 items-center justify-center radius-lg bg-background-section system-xs-regular text-text-tertiary">
               {t('auth.emptyAuth', { ns: 'plugin' })}
             </div>
           </div>

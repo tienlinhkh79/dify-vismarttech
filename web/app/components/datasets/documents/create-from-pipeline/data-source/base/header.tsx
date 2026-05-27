@@ -47,7 +47,7 @@ const Header = ({
         </Tooltip>
       </div>
       <a
-        className="system-xs-medium flex shrink-0 items-center gap-x-1 text-text-accent"
+        className="flex shrink-0 items-center gap-x-1 system-xs-medium text-text-accent"
         href={docLink}
         target="_blank"
         rel="noopener noreferrer"

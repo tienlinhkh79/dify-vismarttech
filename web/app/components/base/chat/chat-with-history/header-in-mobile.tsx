@@ -78,7 +78,7 @@ const HeaderInMobile = () => {
                 imageUrl={appData?.site.icon_url}
                 background={appData?.site.icon_background}
               />
-              <div className="truncate text-text-secondary system-md-semibold">
+              <div className="truncate system-md-semibold text-text-secondary">
                 {appData?.site.title}
               </div>
             </>
@@ -103,7 +103,7 @@ const HeaderInMobile = () => {
       </div>
       {showSidebar && (
         <div
-          className="fixed inset-0 z-50 flex bg-background-overlay p-1"
+          className="inset-0 fixed z-50 flex bg-background-overlay p-1"
           onClick={() => setShowSidebar(false)}
           data-testid="mobile-sidebar-overlay"
         >
@@ -114,14 +114,14 @@ const HeaderInMobile = () => {
       )}
       {showChatSettings && (
         <div
-          className="fixed inset-0 z-50 flex justify-end bg-background-overlay p-1"
+          className="inset-0 fixed z-50 flex justify-end bg-background-overlay p-1"
           onClick={() => setShowChatSettings(false)}
           data-testid="mobile-chat-settings-overlay"
         >
           <div className="flex h-full w-[calc(100vw-40px)] flex-col rounded-xl bg-components-panel-bg shadow-lg backdrop-blur-xs" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 rounded-t-2xl border-b border-divider-subtle px-4 py-3">
               <div className="i-custom-public-other-message-3-fill h-6 w-6 shrink-0" />
-              <div className="grow text-text-secondary system-xl-semibold">{t('chat.chatSettingsTitle', { ns: 'share' })}</div>
+              <div className="grow system-xl-semibold text-text-secondary">{t('chat.chatSettingsTitle', { ns: 'share' })}</div>
             </div>
             <div className="p-4">
               <InputsFormContent />

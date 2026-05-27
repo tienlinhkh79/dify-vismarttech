@@ -66,7 +66,7 @@ const ModelListItem = ({ model, provider, isConfigurable, onChange, onModifyLoad
   return (
     <div
       key={`${model.model}-${model.fetch_from}`}
-      className={cn('group flex h-8 items-center rounded-lg pl-2 pr-2.5', isConfigurable && 'hover:bg-components-panel-on-panel-item-bg-hover', model.deprecated && 'opacity-60')}
+      className={cn('group flex h-8 items-center rounded-lg pr-2.5 pl-2', isConfigurable && 'hover:bg-components-panel-on-panel-item-bg-hover', model.deprecated && 'opacity-60')}
     >
       <ModelIcon
         className="mr-2 shrink-0"
@@ -74,7 +74,7 @@ const ModelListItem = ({ model, provider, isConfigurable, onChange, onModifyLoad
         modelName={model.model}
       />
       <ModelName
-        className="grow text-text-secondary system-md-regular"
+        className="grow system-md-regular text-text-secondary"
         modelItem={model}
         showModelType
         showMode

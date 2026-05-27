@@ -17,7 +17,7 @@ const SyncButton: FC<Props> = ({
 }) => {
   return (
     <TooltipPlus popupContent={popupContent}>
-      <div className={cn(className, 'cursor-pointer select-none rounded-md p-1 hover:bg-state-base-hover')} onClick={onClick} data-testid="sync-button">
+      <div className={cn(className, 'cursor-pointer rounded-md p-1 select-none hover:bg-state-base-hover')} onClick={onClick} data-testid="sync-button">
         <span className="i-ri-refresh-line h-4 w-4 text-text-tertiary" />
       </div>
     </TooltipPlus>

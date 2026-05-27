@@ -44,7 +44,7 @@ function PresetsParameter({ onSelect }: PresetsParameterProps) {
         )}
       >
         {t('modelProvider.loadPresets', { ns: 'common' })}
-        <span className="i-ri-arrow-down-s-line ml-0.5 h-3.5 w-3.5" />
+        <span className="ml-0.5 i-ri-arrow-down-s-line h-3.5 w-3.5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         {TONE_LIST.slice(0, 3).map(tone => (

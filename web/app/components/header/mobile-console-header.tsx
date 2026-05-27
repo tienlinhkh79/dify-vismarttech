@@ -1,30 +1,30 @@
 'use client'
 
 import { useCallback } from 'react'
-import ConsoleBrandedLogo from '@/app/components/header/console-branded-logo'
-import { APP_DISPLAY_NAME } from '@/config/app-display-name'
 import WorkplaceSelector from '@/app/components/header/account-dropdown/workplace-selector'
 import { ACCOUNT_SETTING_TAB } from '@/app/components/header/account-setting/constants'
+import ConsoleBrandedLogo from '@/app/components/header/console-branded-logo'
+import { APP_DISPLAY_NAME } from '@/config/app-display-name'
 import { useAppContext } from '@/context/app-context'
 import { useGlobalPublicStore } from '@/context/global-public-context'
 import { useModalContext } from '@/context/modal-context'
 import { useProviderContext } from '@/context/provider-context'
 import { WorkspaceProvider } from '@/context/workspace-context-provider'
 import Link from '@/next/link'
-import { Plan } from '../billing/type'
 import { cn } from '@/utils/classnames'
+import { Plan } from '../billing/type'
 import AccountDropdown from './account-dropdown'
 import AppNav from './app-nav'
 import { ConsoleNavLayoutProvider } from './console-nav-layout-context'
 import DatasetNav from './dataset-nav'
 import ExploreNav from './explore-nav'
+import s from './index.module.css'
 import LicenseNav from './license-env'
 import MiniCrmNav from './mini-crm-nav'
 import OmnichannelNav from './omnichannel-nav'
 import PlanBadge from './plan-badge'
 import PluginsNav from './plugins-nav'
 import ToolsNav from './tools-nav'
-import s from './index.module.css'
 
 const navClassName = `
   flex items-center relative px-3 h-8 rounded-xl
@@ -50,7 +50,10 @@ const MobileConsoleHeader = () => {
     <h1>
       <Link
         href="/apps"
-        className="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-2 overflow-hidden px-0.5"
+        className={cn(
+          'flex h-10 shrink-0 cursor-pointer items-center justify-center gap-2 overflow-hidden',
+          s.consoleLogoSurface,
+        )}
       >
         <span className="sr-only">
           {isBrandingEnabled && systemFeatures.branding.application_title ? systemFeatures.branding.application_title : APP_DISPLAY_NAME}

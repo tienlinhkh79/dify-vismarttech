@@ -73,11 +73,11 @@ const DependencyPicker: FC<Props> = ({
             }).map(dependency => (
               <div
                 key={dependency.name}
-                className="flex h-[30px] cursor-pointer items-center justify-between rounded-lg pl-3 pr-2 text-[13px] text-gray-900 hover:bg-gray-100"
+                className="flex h-[30px] cursor-pointer items-center justify-between rounded-lg pr-2 pl-3 text-[13px] text-gray-900 hover:bg-gray-100"
                 onClick={handleChange(dependency)}
               >
                 <div className="w-0 grow truncate">{dependency.name}</div>
-                {dependency.name === value.name && <Check className="h-4 w-4 shrink-0 text-primary-600" />}
+                {dependency.name === value.name && <Check className="text-primary-600 h-4 w-4 shrink-0" />}
               </div>
             ))}
           </div>

@@ -29,7 +29,7 @@ const WebsitePreview = ({
         <div className="title-sm-semi-bold wrap-break-word text-text-primary">
           {payload.title}
         </div>
-        <div className="system-xs-medium truncate text-text-tertiary" title={payload.source_url}>{payload.source_url}</div>
+        <div className="truncate system-xs-medium text-text-tertiary" title={payload.source_url}>{payload.source_url}</div>
       </div>
       <div className={cn(s.previewContent, 'body-md-regular')}>
         <div className={cn(s.fileContent)}>{payload.markdown}</div>

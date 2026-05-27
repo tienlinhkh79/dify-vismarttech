@@ -117,11 +117,11 @@ const PromptValuePanel: FC<IPromptValuePanelProps> = ({
             {!userInputFieldCollapse && <RiArrowDownSLine className="h-4 w-4 text-text-secondary" />}
           </div>
           {!userInputFieldCollapse && (
-            <div className="system-xs-regular mt-1 text-text-tertiary">{t('inputs.completionVarTip', { ns: 'appDebug' })}</div>
+            <div className="mt-1 system-xs-regular text-text-tertiary">{t('inputs.completionVarTip', { ns: 'appDebug' })}</div>
           )}
         </div>
         {!userInputFieldCollapse && promptVariables.length > 0 && (
-          <div className="px-4 pb-4 pt-3">
+          <div className="px-4 pt-3 pb-4">
             {promptVariables.map(({ key, name, type, options, max_length, required }, index) => (
               <div
                 key={key}
@@ -129,7 +129,7 @@ const PromptValuePanel: FC<IPromptValuePanelProps> = ({
               >
                 <div>
                   {type !== 'checkbox' && (
-                    <div className="system-sm-semibold mb-1 flex h-6 items-center gap-1 text-text-secondary">
+                    <div className="mb-1 flex h-6 items-center gap-1 system-sm-semibold text-text-secondary">
                       <div className="truncate">{name || key}</div>
                       {!required && <span className="system-xs-regular text-text-tertiary">{t('panel.optional', { ns: 'workflow' })}</span>}
                     </div>

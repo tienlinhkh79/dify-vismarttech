@@ -11,3 +11,10 @@ export const MODULE_VISUAL_PLACEHOLDERS = [
 /** Hero chat card — fashion product placeholder */
 export const HERO_CHAT_PRODUCT_IMAGE =
   'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=200&h=280&q=80'
+
+/** Mini CRM row avatars (Unsplash license) */
+export const HERO_CRM_AVATARS = [
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80&q=80',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&h=80&q=80',
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=80&h=80&q=80',
+] as const

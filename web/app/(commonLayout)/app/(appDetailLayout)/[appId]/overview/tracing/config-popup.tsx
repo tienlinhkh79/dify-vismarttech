@@ -331,7 +331,7 @@ const ConfigPopup: FC<PopupProps> = ({
         </div>
         <div className="flex items-center">
           <Indicator color={enabled ? 'green' : 'gray'} />
-          <div className={cn('system-xs-semibold-uppercase ml-1 text-text-tertiary', enabled && 'text-util-colors-green-green-600')}>
+          <div className={cn('ml-1 system-xs-semibold-uppercase text-text-tertiary', enabled && 'text-util-colors-green-green-600')}>
             {t(`${I18N_PREFIX}.${enabled ? 'enabled' : 'disabled'}`, { ns: 'app' })}
           </div>
           {!readOnly && (
@@ -350,7 +350,7 @@ const ConfigPopup: FC<PopupProps> = ({
         </div>
       </div>
 
-      <div className="system-xs-regular mt-2 text-text-tertiary">
+      <div className="mt-2 system-xs-regular text-text-tertiary">
         {t(`${I18N_PREFIX}.tracingDescription`, { ns: 'app' })}
       </div>
       <Divider className="my-3" />
@@ -379,7 +379,7 @@ const ConfigPopup: FC<PopupProps> = ({
                 <div className="mt-2 max-h-40 space-y-2 overflow-y-auto">
                   {configuredProviderPanel()}
                 </div>
-                <div className="system-xs-medium-uppercase mt-3 text-text-tertiary">{t(`${I18N_PREFIX}.configProviderTitle.moreProvider`, { ns: 'app' })}</div>
+                <div className="mt-3 system-xs-medium-uppercase text-text-tertiary">{t(`${I18N_PREFIX}.configProviderTitle.moreProvider`, { ns: 'app' })}</div>
                 <div className="mt-2 max-h-40 space-y-2 overflow-y-auto">
                   {moreProviderPanel()}
                 </div>

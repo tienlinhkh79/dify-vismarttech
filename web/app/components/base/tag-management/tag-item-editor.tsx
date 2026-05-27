@@ -91,14 +91,14 @@ const TagItemEditor: FC<TagItemEditorProps> = ({ tag }) => {
   }, { wait: 200 })
   return (
     <>
-      <div className={cn('flex shrink-0 items-center gap-0.5 rounded-lg border border-components-panel-border py-1 pl-2 pr-1 text-sm leading-5 text-text-secondary')}>
+      <div className={cn('flex shrink-0 items-center gap-0.5 rounded-lg border border-components-panel-border py-1 pr-1 pl-2 text-sm leading-5 text-text-secondary')}>
         {!isEditing && (
           <>
             <div className="text-sm leading-5 text-text-secondary">
               {tag.name}
             </div>
             <Tooltip popupContent={<div>{t('common.tagBound', { ns: 'workflow' })}</div>} needsDelay>
-              <div className="leading-4.5 shrink-0 px-1 text-sm font-medium text-text-tertiary">{tag.binding_count}</div>
+              <div className="shrink-0 px-1 text-sm leading-4.5 font-medium text-text-tertiary">{tag.binding_count}</div>
             </Tooltip>
             <div className="group/edit shrink-0 cursor-pointer rounded-md p-1 hover:bg-state-base-hover" onClick={() => setIsEditing(true)}>
               <span className="i-ri-edit-line h-3 w-3 text-text-tertiary group-hover/edit:text-text-secondary" data-testid="tag-item-editor-edit-button" />

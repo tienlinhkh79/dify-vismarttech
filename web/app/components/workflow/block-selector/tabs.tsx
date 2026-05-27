@@ -215,7 +215,7 @@ const Tabs: FC<TabsProps> = ({
     <div onClick={e => e.stopPropagation()}>
       {
         !noBlocks && (
-          <div className="relative flex bg-background-section-burn pl-1 pt-1">
+          <div className="relative flex bg-background-section-burn pt-1 pl-1">
             {
               tabs.map(tab => (
                 <TabHeaderItem

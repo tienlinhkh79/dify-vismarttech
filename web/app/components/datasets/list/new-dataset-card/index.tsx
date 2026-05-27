@@ -20,24 +20,24 @@ const NewDatasetCard = () => {
     >
       <Link
         href="/datasets/create"
-        className="flex min-h-0 grow flex-col items-center justify-center gap-1 px-4 pb-14 pt-4 text-center outline-none"
+        className="flex min-h-0 grow flex-col items-center justify-center gap-1 px-4 pt-4 pb-14 text-center outline-none"
         data-disable-nprogress={true}
       >
-        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-state-accent-hover text-text-accent transition-colors group-hover:bg-text-accent group-hover:text-primary-on-surface">
+        <div className="group-hover:text-primary-on-surface flex h-11 w-11 items-center justify-center rounded-full bg-state-accent-hover text-text-accent transition-colors group-hover:bg-text-accent">
           <RiAddLine className="h-6 w-6" aria-hidden />
         </div>
         <span className="system-md-semibold text-text-secondary group-hover:text-text-primary">
           {t('createDataset', { ns: 'dataset' })}
         </span>
-        <span className="system-xs-regular max-w-[220px] text-text-tertiary">
+        <span className="max-w-[220px] system-xs-regular text-text-tertiary">
           {t('createKnowledgeCardSubtitle', { ns: 'dataset' })}
         </span>
       </Link>
-      <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2 px-3">
+      <div className="absolute right-0 bottom-3 left-0 flex justify-center gap-2 px-3">
         <Link
           href="/datasets/create-from-pipeline"
           className={cn(
-            'system-xs-medium rounded-full border border-divider-regular bg-components-input-bg-normal px-2.5 py-1 text-text-secondary',
+            'rounded-full border border-divider-regular bg-components-input-bg-normal px-2.5 py-1 system-xs-medium text-text-secondary',
             'transition-colors hover:border-text-accent hover:text-text-accent',
           )}
           data-disable-nprogress={true}
@@ -47,7 +47,7 @@ const NewDatasetCard = () => {
         <Link
           href="/datasets/connect"
           className={cn(
-            'system-xs-medium rounded-full border border-divider-regular bg-components-input-bg-normal px-2.5 py-1 text-text-secondary',
+            'rounded-full border border-divider-regular bg-components-input-bg-normal px-2.5 py-1 system-xs-medium text-text-secondary',
             'transition-colors hover:border-text-accent hover:text-text-accent',
           )}
           data-disable-nprogress={true}

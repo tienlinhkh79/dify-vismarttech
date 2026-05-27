@@ -48,14 +48,14 @@ const ApiInput: FC<Props> = ({
   })
 
   return (
-    <div className="flex items-start  space-x-1">
+    <div className="flex items-start space-x-1">
       <Selector
         value={method}
         onChange={onMethodChange}
         options={MethodOptions}
         trigger={(
           <div className={cn(readonly && 'cursor-pointer', 'flex h-8 shrink-0 items-center rounded-lg border border-components-button-secondary-border bg-components-button-secondary-bg px-2.5')}>
-            <div className="w-12 pl-0.5 text-xs font-medium uppercase leading-[18px] text-text-primary">{method}</div>
+            <div className="w-12 pl-0.5 text-xs leading-[18px] font-medium text-text-primary uppercase">{method}</div>
             {!readonly && <RiArrowDownSLine className="ml-1 h-3.5 w-3.5 text-text-secondary" />}
           </div>
         )}

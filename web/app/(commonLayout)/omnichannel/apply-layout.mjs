@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const pagePath = path.join(__dirname, 'page.tsx')
-let s = fs.readFileSync(pagePath, 'utf8').replace(/\r\n/g, '\n')
-const start = s.indexOf("  return (\n    <div className='mx-auto w-full max-w-[1600px] px-6 py-6'>")
+const s = fs.readFileSync(pagePath, 'utf8').replace(/\r\n/g, '\n')
+const start = s.indexOf('  return (\n    <div className=\'mx-auto w-full max-w-[1600px] px-6 py-6\'>')
 const end = s.search(/\}\r?\n\r?\nexport default OmnichannelPage/)
 if (start < 0 || end < 0) {
   console.error('markers', start, end, 'hint: old return wrapper must match exactly')

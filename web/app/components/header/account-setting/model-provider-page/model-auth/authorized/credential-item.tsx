@@ -71,9 +71,9 @@ const CredentialItem = ({
             </div>
           )
         }
-        <Indicator className="ml-2 mr-1.5 shrink-0" />
+        <Indicator className="mr-1.5 ml-2 shrink-0" />
         <div
-          className="truncate text-text-secondary system-md-regular"
+          className="truncate system-md-regular text-text-secondary"
           title={credential.credential_name}
         >
           {credential.credential_name}

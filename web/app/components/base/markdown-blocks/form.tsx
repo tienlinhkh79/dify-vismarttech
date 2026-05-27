@@ -240,7 +240,7 @@ const MarkdownForm = ({ node }: { node: HastElement }) => {
             <label
               key={key}
               htmlFor={str(child.properties.htmlFor || child.properties.name)}
-              className="my-2 text-text-secondary system-md-semibold"
+              className="my-2 system-md-semibold text-text-secondary"
               data-testid="label-field"
             >
               {getTextContent(child)}

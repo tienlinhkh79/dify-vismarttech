@@ -224,7 +224,7 @@ const AppPublisher = ({
         <PortalToFollowElemTrigger onClick={handleTrigger}>
           <Button
             variant="primary"
-            className="py-2 pl-3 pr-2"
+            className="py-2 pr-2 pl-3"
             disabled={disabled}
           >
             {t('common.publish', { ns: 'workflow' })}

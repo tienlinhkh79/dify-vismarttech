@@ -18,7 +18,7 @@ const ConsoleSidebarNav = () => {
   return (
     <ConsoleNavLayoutProvider orientation="vertical">
       <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
-        <nav className="min-h-0 w-full flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-2 py-3">
+        <nav className="min-h-0 w-full flex-1 space-y-1 overflow-x-hidden overflow-y-auto px-2 py-3">
           {!isCurrentWorkspaceDatasetOperator && <ExploreNav className={consoleSidebarNavItemClass} />}
           {!isCurrentWorkspaceDatasetOperator && <AppNav />}
           {(isCurrentWorkspaceEditor || isCurrentWorkspaceDatasetOperator) && <DatasetNav />}

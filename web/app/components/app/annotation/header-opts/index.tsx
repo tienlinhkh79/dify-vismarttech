@@ -94,65 +94,65 @@ const HeaderOptions: FC<Props> = ({
   }
   const operations = (
     <div className="w-full py-1">
-        <button
-          type="button"
-          className="mx-1 flex h-9 w-[calc(100%-8px)] cursor-pointer items-center space-x-2 rounded-lg px-3 py-2 hover:bg-components-panel-on-panel-item-bg-hover disabled:opacity-50"
-          onClick={() => {
-            setShowBulkImportModal(true)
-          }}
+      <button
+        type="button"
+        className="mx-1 flex h-9 w-[calc(100%-8px)] cursor-pointer items-center space-x-2 rounded-lg px-3 py-2 hover:bg-components-panel-on-panel-item-bg-hover disabled:opacity-50"
+        onClick={() => {
+          setShowBulkImportModal(true)
+        }}
+      >
+        <FilePlus02 className="h-4 w-4 text-text-tertiary" />
+        <span className="grow text-left system-sm-regular text-text-secondary">{t('table.header.bulkImport', { ns: 'appAnnotation' })}</span>
+      </button>
+      <Menu as="div" className="relative h-full w-full">
+        <MenuButton className="mx-1 flex h-9 w-[calc(100%-8px)] cursor-pointer items-center space-x-2 rounded-lg px-3 py-2 hover:bg-components-panel-on-panel-item-bg-hover disabled:opacity-50">
+          <FileDownload02 className="h-4 w-4 text-text-tertiary" />
+          <span className="grow text-left system-sm-regular text-text-secondary">{t('table.header.bulkExport', { ns: 'appAnnotation' })}</span>
+          <ChevronRight className="h-[14px] w-[14px] shrink-0 text-text-tertiary" />
+        </MenuButton>
+        <Transition
+          as={Fragment}
+          enter="transition ease-out duration-100"
+          enterFrom="transform opacity-0 scale-95"
+          enterTo="transform opacity-100 scale-100"
+          leave="transition ease-in duration-75"
+          leaveFrom="transform opacity-100 scale-100"
+          leaveTo="transform opacity-0 scale-95"
         >
-          <FilePlus02 className="h-4 w-4 text-text-tertiary" />
-          <span className="system-sm-regular grow text-left text-text-secondary">{t('table.header.bulkImport', { ns: 'appAnnotation' })}</span>
-        </button>
-        <Menu as="div" className="relative h-full w-full">
-          <MenuButton className="mx-1 flex h-9 w-[calc(100%-8px)] cursor-pointer items-center space-x-2 rounded-lg px-3 py-2 hover:bg-components-panel-on-panel-item-bg-hover disabled:opacity-50">
-            <FileDownload02 className="h-4 w-4 text-text-tertiary" />
-            <span className="system-sm-regular grow text-left text-text-secondary">{t('table.header.bulkExport', { ns: 'appAnnotation' })}</span>
-            <ChevronRight className="h-[14px] w-[14px] shrink-0 text-text-tertiary" />
-          </MenuButton>
-          <Transition
-            as={Fragment}
-            enter="transition ease-out duration-100"
-            enterFrom="transform opacity-0 scale-95"
-            enterTo="transform opacity-100 scale-100"
-            leave="transition ease-in duration-75"
-            leaveFrom="transform opacity-100 scale-100"
-            leaveTo="transform opacity-0 scale-95"
+          <MenuItems
+            className={cn(
+              'absolute top-px left-1 z-10 min-w-[100px] origin-top-right -translate-x-full rounded-xl border-[0.5px] border-components-panel-on-panel-item-bg bg-components-panel-bg py-1 shadow-xs',
+            )}
           >
-            <MenuItems
-              className={cn(
-                'absolute left-1 top-px z-10 min-w-[100px] origin-top-right -translate-x-full rounded-xl border-[0.5px] border-components-panel-on-panel-item-bg bg-components-panel-bg py-1 shadow-xs',
-              )}
+            <CSVDownloader
+              type={Type.Link}
+              filename={`annotations-${locale}`}
+              bom={true}
+              data={[
+                locale !== LanguagesSupported[1] ? CSV_HEADER_QA_EN : CSV_HEADER_QA_CN,
+                ...list.map(item => [item.question, item.answer]),
+              ]}
             >
-              <CSVDownloader
-                type={Type.Link}
-                filename={`annotations-${locale}`}
-                bom={true}
-                data={[
-                  locale !== LanguagesSupported[1] ? CSV_HEADER_QA_EN : CSV_HEADER_QA_CN,
-                  ...list.map(item => [item.question, item.answer]),
-                ]}
-              >
-                <button type="button" disabled={annotationUnavailable} className="mx-1 flex h-9 w-[calc(100%-8px)] cursor-pointer items-center space-x-2 rounded-lg px-3 py-2 hover:bg-components-panel-on-panel-item-bg-hover disabled:opacity-50">
-                  <span className="system-sm-regular grow text-left text-text-secondary">CSV</span>
-                </button>
-              </CSVDownloader>
-        <button type="button" disabled={annotationUnavailable} className={cn('mx-1 flex h-9 w-[calc(100%-8px)] cursor-pointer items-center space-x-2 rounded-lg px-3 py-2 hover:bg-components-panel-on-panel-item-bg-hover disabled:opacity-50', 'border-0!')} onClick={downloadJSONL}>
-                <span className="system-sm-regular grow text-left text-text-secondary">JSONL</span>
+              <button type="button" disabled={annotationUnavailable} className="mx-1 flex h-9 w-[calc(100%-8px)] cursor-pointer items-center space-x-2 rounded-lg px-3 py-2 hover:bg-components-panel-on-panel-item-bg-hover disabled:opacity-50">
+                <span className="grow text-left system-sm-regular text-text-secondary">CSV</span>
               </button>
-            </MenuItems>
-          </Transition>
-        </Menu>
-        <button
-          type="button"
-          onClick={handleClearAll}
-          className="mx-1 flex h-9 w-[calc(100%-8px)] cursor-pointer items-center space-x-2 rounded-lg px-3 py-2 text-red-600 hover:bg-red-50 disabled:opacity-50"
-        >
-          <RiDeleteBinLine className="h-4 w-4" />
-          <span className="system-sm-regular grow text-left">
-            {t('table.header.clearAll', { ns: 'appAnnotation' })}
-          </span>
-        </button>
+            </CSVDownloader>
+            <button type="button" disabled={annotationUnavailable} className={cn('mx-1 flex h-9 w-[calc(100%-8px)] cursor-pointer items-center space-x-2 rounded-lg px-3 py-2 hover:bg-components-panel-on-panel-item-bg-hover disabled:opacity-50', 'border-0!')} onClick={downloadJSONL}>
+              <span className="grow text-left system-sm-regular text-text-secondary">JSONL</span>
+            </button>
+          </MenuItems>
+        </Transition>
+      </Menu>
+      <button
+        type="button"
+        onClick={handleClearAll}
+        className="mx-1 flex h-9 w-[calc(100%-8px)] cursor-pointer items-center space-x-2 rounded-lg px-3 py-2 text-red-600 hover:bg-red-50 disabled:opacity-50"
+      >
+        <RiDeleteBinLine className="h-4 w-4" />
+        <span className="grow text-left system-sm-regular">
+          {t('table.header.clearAll', { ns: 'appAnnotation' })}
+        </span>
+      </button>
     </div>
   )
 

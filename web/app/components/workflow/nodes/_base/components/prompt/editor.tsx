@@ -158,9 +158,9 @@ const Editor: FC<Props> = ({
     <Wrap className={cn(className, wrapClassName)} style={wrapStyle} isInNode isExpand={isExpand}>
       <div ref={ref} className={cn(isFocus ? (gradientBorder && 'bg-linear-to-r from-components-input-border-active-prompt-1 to-components-input-border-active-prompt-2') : 'bg-transparent', isExpand && 'h-full', 'rounded-[9px]! p-0.5', containerClassName)}>
         <div className={cn(isFocus ? 'bg-background-default' : 'bg-components-input-bg-normal', isExpand && 'flex h-full flex-col', 'rounded-lg', containerClassName)}>
-          <div className={cn('flex items-center justify-between pl-3 pr-2 pt-1', headerClassName)}>
+          <div className={cn('flex items-center justify-between pt-1 pr-2 pl-3', headerClassName)}>
             <div className="flex gap-2">
-              <div className={cn('text-xs font-semibold uppercase leading-4 text-text-secondary', titleClassName)}>
+              <div className={cn('text-xs leading-4 font-semibold text-text-secondary uppercase', titleClassName)}>
                 {title}
                 {' '}
                 {required && <span className="text-text-destructive">*</span>}
@@ -168,7 +168,7 @@ const Editor: FC<Props> = ({
               {!!titleTooltip && <Tooltip popupContent={titleTooltip} />}
             </div>
             <div className="flex items-center">
-              <div className="text-xs font-medium leading-[18px] text-text-tertiary">{value?.length || 0}</div>
+              <div className="text-xs leading-[18px] font-medium text-text-tertiary">{value?.length || 0}</div>
               {isSupportPromptGenerator && (
                 <PromptGeneratorBtn
                   nodeId={nodeId!}
@@ -180,7 +180,7 @@ const Editor: FC<Props> = ({
                 />
               )}
 
-              <div className="ml-2 mr-2 h-3 w-px bg-divider-regular"></div>
+              <div className="mr-2 ml-2 h-3 w-px bg-divider-regular"></div>
               {/* Operations */}
               <div className="flex items-center space-x-[2px]">
                 {isSupportJinja && (
@@ -300,7 +300,7 @@ const Editor: FC<Props> = ({
                       isSupportFileVar={isSupportFileVar}
                     />
                     {/* to patch Editor not support dynamic change editable status */}
-                    {readOnly && <div className="absolute inset-0 z-10"></div>}
+                    {readOnly && <div className="inset-0 absolute z-10"></div>}
                   </div>
                 )
               : (

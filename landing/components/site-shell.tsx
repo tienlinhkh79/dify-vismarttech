@@ -75,27 +75,17 @@ export default function SiteShell({ children }: SiteShellProps) {
   return (
     <main>
       <header className="container sticky top-4 z-20 py-4">
-        <div className="glass-header grid grid-cols-[1fr_auto_1fr] items-center gap-4 rounded-2xl px-5 py-3">
-          <Link className="flex items-center" href="/" aria-label={siteContent.company}>
+        <div className="glass-header flex items-center gap-2 rounded-2xl px-4 py-3 sm:gap-3 sm:px-5">
+          <Link className="flex shrink-0 items-center" href="/" aria-label={siteContent.company}>
             <img alt={`${siteContent.company} logo`} className="h-8 w-auto" src="/logo/logo.png" />
           </Link>
 
-          <button
-            aria-expanded={mobileOpen}
-            aria-label="Toggle menu"
-            className="icon-button mobile-menu-button justify-self-end"
-            onClick={() => setMobileOpen(prev => !prev)}
-            type="button"
-          >
-            <MenuIcon />
-          </button>
-
-          <nav className="desktop-nav contents text-sm text-slate-700" aria-label="Primary">
-            <div className="flex items-center justify-center gap-5">
+          <nav className="desktop-nav min-w-0 flex-1 text-sm text-slate-700" aria-label="Primary">
+            <div className="flex items-center justify-center gap-3 xl:gap-5">
               {navItems.map(item => (
                 <Link
                   aria-current={pathname === item.href ? 'page' : undefined}
-                  className={`nav-link ${pathname === item.href ? 'nav-link-active' : ''}`}
+                  className={`nav-link header-nav-link ${pathname === item.href ? 'nav-link-active' : ''}`}
                   href={item.href}
                   key={item.href}
                 >
@@ -103,30 +93,41 @@ export default function SiteShell({ children }: SiteShellProps) {
                 </Link>
               ))}
             </div>
-            <div className="utility-dock justify-self-end" aria-label="Quick actions">
-              <a className="nav-link auth-link" href="/signin">{t.nav.login}</a>
-              <a className="btn btn-secondary auth-cta" href="/signup">{t.nav.register}</a>
-              <button
-                aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-                aria-pressed={theme === 'dark'}
-                className="icon-button"
-                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                type="button"
-              >
-                {theme === 'light' ? <MoonIcon /> : <SunIcon />}
-              </button>
-              <button
-                aria-label={lang === 'vi' ? 'Switch to English' : 'Chuyển tiếng Việt'}
-                className="icon-button language-button"
-                onClick={() => setLang(lang === 'vi' ? 'en' : 'vi')}
-                type="button"
-              >
-                <GlobeIcon />
-                <span>{lang === 'vi' ? 'EN' : 'VI'}</span>
-              </button>
-              <a className="btn btn-primary header-cta" href="/apps">{t.nav.app}</a>
-            </div>
           </nav>
+
+          <div className="utility-dock shrink-0" aria-label="Quick actions">
+            <a className="nav-link auth-link whitespace-nowrap" href="/signin">{t.nav.login}</a>
+            <a className="btn btn-secondary auth-cta whitespace-nowrap" href="/signup">{t.nav.register}</a>
+            <button
+              aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+              aria-pressed={theme === 'dark'}
+              className="icon-button"
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              type="button"
+            >
+              {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+            </button>
+            <button
+              aria-label={lang === 'vi' ? 'Switch to English' : 'Chuyển tiếng Việt'}
+              className="icon-button language-button"
+              onClick={() => setLang(lang === 'vi' ? 'en' : 'vi')}
+              type="button"
+            >
+              <GlobeIcon />
+              <span>{lang === 'vi' ? 'EN' : 'VI'}</span>
+            </button>
+            <a className="btn btn-primary header-cta whitespace-nowrap" href="/apps">{t.nav.app}</a>
+          </div>
+
+          <button
+            aria-expanded={mobileOpen}
+            aria-label="Toggle menu"
+            className="icon-button mobile-menu-button ml-auto shrink-0"
+            onClick={() => setMobileOpen(prev => !prev)}
+            type="button"
+          >
+            <MenuIcon />
+          </button>
         </div>
 
         {mobileOpen && (

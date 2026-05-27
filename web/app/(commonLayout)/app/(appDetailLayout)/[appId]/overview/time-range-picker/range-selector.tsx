@@ -44,7 +44,7 @@ const RangeSelector: FC<Props> = ({
 
   const renderTrigger = useCallback((item: Item | null, isOpen: boolean) => {
     return (
-      <div className={cn('flex h-8 cursor-pointer items-center space-x-1.5 rounded-lg bg-components-input-bg-normal pl-3 pr-2', isOpen && 'bg-state-base-hover-alt')}>
+      <div className={cn('flex h-8 cursor-pointer items-center space-x-1.5 rounded-lg bg-components-input-bg-normal pr-2 pl-3', isOpen && 'bg-state-base-hover-alt')}>
         <div className="system-sm-regular text-components-input-text-filled">{isCustomRange ? t('filter.period.custom', { ns: 'appLog' }) : item?.name}</div>
         <RiArrowDownSLine className={cn('size-4 text-text-quaternary', isOpen && 'text-text-secondary')} />
       </div>
@@ -57,13 +57,13 @@ const RangeSelector: FC<Props> = ({
         {selected && (
           <span
             className={cn(
-              'absolute left-2 top-[9px] flex items-center  text-text-accent',
+              'absolute top-[9px] left-2 flex items-center text-text-accent',
             )}
           >
             <RiCheckLine className="h-4 w-4" aria-hidden="true" />
           </span>
         )}
-        <span className={cn('system-md-regular block truncate')}>{item.name}</span>
+        <span className={cn('block truncate system-md-regular')}>{item.name}</span>
       </>
     )
   }, [])

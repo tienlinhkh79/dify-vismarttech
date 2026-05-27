@@ -82,7 +82,7 @@ const HeaderInRestoring = ({
       <div>
         <RestoringTitle />
       </div>
-      <div className=" flex items-center justify-end gap-x-2">
+      <div className="flex items-center justify-end gap-x-2">
         <Button
           onClick={handleRestore}
           disabled={!canRestore}

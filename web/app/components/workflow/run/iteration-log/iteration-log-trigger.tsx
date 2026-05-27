@@ -145,7 +145,7 @@ const IterationLogTrigger = ({
     >
       {/* eslint-disable-next-line hyoban/prefer-tailwind-icons */}
       <Iteration className="h-4 w-4 shrink-0 text-components-button-tertiary-text" />
-      <div className="system-sm-medium flex-1 text-left text-components-button-tertiary-text">
+      <div className="flex-1 text-left system-sm-medium text-components-button-tertiary-text">
         {t('nodes.iteration.iteration', { ns: 'workflow', count: displayIterationCount })}
         {errorCount > 0 && (
           <>

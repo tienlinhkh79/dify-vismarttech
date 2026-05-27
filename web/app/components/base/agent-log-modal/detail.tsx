@@ -67,10 +67,10 @@ const AgentLogDetail: FC<AgentLogDetailProps> = ({ activeTab = 'DETAIL', convers
     <div className="relative flex grow flex-col">
       {/* tab */}
       <div className="flex shrink-0 items-center border-b-[0.5px] border-divider-regular px-4">
-        <div className={cn('mr-6 cursor-pointer border-b-2 border-transparent py-3 text-[13px] font-semibold leading-[18px] text-text-tertiary', currentTab === 'DETAIL' && '!border-[rgb(21,94,239)] text-text-secondary')} data-active={currentTab === 'DETAIL'} onClick={() => switchTab('DETAIL')}>
+        <div className={cn('mr-6 cursor-pointer border-b-2 border-transparent py-3 text-[13px] leading-[18px] font-semibold text-text-tertiary', currentTab === 'DETAIL' && '!border-[rgb(21,94,239)] text-text-secondary')} data-active={currentTab === 'DETAIL'} onClick={() => switchTab('DETAIL')}>
           {t('detail', { ns: 'runLog' })}
         </div>
-        <div className={cn('mr-6 cursor-pointer border-b-2 border-transparent py-3 text-[13px] font-semibold leading-[18px] text-text-tertiary', currentTab === 'TRACING' && '!border-[rgb(21,94,239)] text-text-secondary')} data-active={currentTab === 'TRACING'} onClick={() => switchTab('TRACING')}>
+        <div className={cn('mr-6 cursor-pointer border-b-2 border-transparent py-3 text-[13px] leading-[18px] font-semibold text-text-tertiary', currentTab === 'TRACING' && '!border-[rgb(21,94,239)] text-text-secondary')} data-active={currentTab === 'TRACING'} onClick={() => switchTab('TRACING')}>
           {t('tracing', { ns: 'runLog' })}
         </div>
       </div>

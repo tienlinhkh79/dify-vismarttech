@@ -9,7 +9,7 @@ import type {
   WorkflowToolProviderResponse,
 } from '@/app/components/tools/types'
 import { buildProviderQuery } from './_tools_util'
-import { del, get, patch, post } from './base'
+import { del, get, patch, post, upload } from './base'
 
 export type MessengerChannel = {
   id?: string
@@ -395,12 +395,41 @@ export const createOmnichannelConversation = (channelId: string, body: { externa
   )
 }
 
+export type OmnichannelMediaUpload = {
+  url: string
+  attachment_type: 'image' | 'video' | 'audio' | 'file'
+  file_id: string
+  name: string
+}
+
+export const uploadOmnichannelMedia = (
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<OmnichannelMediaUpload> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return upload(
+    {
+      xhr: new XMLHttpRequest(),
+      data: formData,
+      onprogress: onProgress
+        ? (e) => {
+            if (e.lengthComputable)
+              onProgress(Math.floor(e.loaded / e.total * 100))
+          }
+        : undefined,
+    },
+    false,
+    '/workspaces/current/omnichannel/media-upload',
+  ).then(res => (res as unknown as { data: OmnichannelMediaUpload }).data)
+}
+
 export const sendOmnichannelAgentMessage = (
   channelId: string,
   conversationId: string,
-  body: { text: string; attachment_url?: string; attachment_type?: 'image' | 'video' | 'audio' | 'file' },
+  body: { text: string, attachment_url?: string, attachment_type?: 'image' | 'video' | 'audio' | 'file' },
 ) => {
-  return post<OmnichannelItemResponse<{ id: string; conversation_id: string; channel_type: string }>>(
+  return post<OmnichannelItemResponse<{ id: string, conversation_id: string, channel_type: string }>>(
     `/workspaces/current/channels/${encodeURIComponent(channelId)}/conversations/${encodeURIComponent(conversationId)}/messages`,
     { body },
   )
@@ -431,7 +460,7 @@ export const getOmnichannelSyncJob = (channelId: string, jobId: string) => {
   return get<OmnichannelItemResponse<OmnichannelSyncJob>>(`/workspaces/current/channels/${channelId}/sync-jobs/${jobId}`)
 }
 
-export const getOmnichannelStats = (channelId: string, params?: { since?: string; until?: string }) => {
+export const getOmnichannelStats = (channelId: string, params?: { since?: string, until?: string }) => {
   return get<OmnichannelItemResponse<{
     total_messages: number
     inbound_messages: number

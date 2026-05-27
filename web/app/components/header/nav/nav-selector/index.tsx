@@ -68,12 +68,12 @@ const NavSelector = ({ curNav, navigationItems, createText, isApp, onCreate, onL
                   open && 'bg-state-base-hover',
                 )
               : cn(
-                  'h-7 justify-center radius-lg pl-2 pr-2.5 hover:hover:bg-components-main-nav-nav-button-bg-active-hover',
+                  'hover:hover:bg-components-main-nav-nav-button-bg-active-hover h-7 justify-center radius-lg pr-2.5 pl-2',
                   open && 'bg-components-main-nav-nav-button-bg-active',
                 ),
           )}
           >
-            <div className={cn('truncate', isVertical ? 'min-w-0 max-w-full flex-1 text-left' : 'max-w-[157px]')} title={curNav?.name}>{curNav?.name}</div>
+            <div className={cn('truncate', isVertical ? 'max-w-full min-w-0 flex-1 text-left' : 'max-w-[157px]')} title={curNav?.name}>{curNav?.name}</div>
             <RiArrowDownSLine
               className={cn('ml-1 h-3 w-3 shrink-0 opacity-50 group-hover:opacity-100', open && 'opacity-100!')}
               aria-hidden="true"
@@ -83,8 +83,8 @@ const NavSelector = ({ curNav, navigationItems, createText, isApp, onCreate, onL
             className={cn(
               'absolute z-50 w-60 divide-y divide-divider-regular rounded-lg bg-components-panel-bg-blur shadow-lg',
               isVertical
-                ? 'left-full top-0 ml-1.5 mt-0 max-w-[min(20rem,calc(100vw-19rem))] origin-top-left'
-                : '-left-11 right-0 mt-1.5 max-w-80 origin-top-right',
+                ? 'top-0 left-full mt-0 ml-1.5 max-w-[min(20rem,calc(100vw-19rem))] origin-top-left'
+                : 'right-0 -left-11 mt-1.5 max-w-80 origin-top-right',
             )}
           >
             <div className="overflow-auto px-1 py-1" style={{ maxHeight: '50vh' }} onScroll={handleScroll}>
@@ -131,7 +131,7 @@ const NavSelector = ({ curNav, navigationItems, createText, isApp, onCreate, onL
                 <div
                   onClick={() => onCreate('')}
                   className={cn(
-                    'flex cursor-pointer items-center gap-2 rounded-lg px-3 py-[6px] hover:bg-state-base-hover ',
+                    'flex cursor-pointer items-center gap-2 rounded-lg px-3 py-[6px] hover:bg-state-base-hover',
                   )}
                 >
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center radius-sm border-[0.5px] border-divider-regular bg-background-default">
@@ -169,7 +169,7 @@ const NavSelector = ({ curNav, navigationItems, createText, isApp, onCreate, onL
                     >
                       <MenuItems className={cn(
                         'absolute z-10 min-w-[200px] rounded-lg bg-components-panel-bg-blur shadow-lg',
-                        isVertical ? 'left-full top-0 ml-1.5' : 'right-[-198px] top-[3px]',
+                        isVertical ? 'top-0 left-full ml-1.5' : 'top-[3px] right-[-198px]',
                       )}
                       >
                         <div className="p-1">

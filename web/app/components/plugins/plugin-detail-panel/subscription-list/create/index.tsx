@@ -73,7 +73,7 @@ export const CreateSubscriptionButton = ({ buttonType = CreateButtonType.FULL_BU
         tag: !showCustomBadge
           ? null
           : (
-              <Badge className="ml-1 mr-0.5">
+              <Badge className="mr-0.5 ml-1">
                 {t('auth.custom', { ns: 'plugin' })}
               </Badge>
             ),
@@ -175,7 +175,7 @@ export const CreateSubscriptionButton = ({ buttonType = CreateButtonType.FULL_BU
                     {buttonTextMap[methodType]}
                     {methodType === SupportedCreationMethods.OAUTH && oauthConfig?.custom_enabled && oauthConfig?.custom_configured && (
                       <Badge
-                        className="ml-1 mr-0.5 border-text-primary-on-surface bg-components-badge-bg-dimm text-text-primary-on-surface"
+                        className="mr-0.5 ml-1 border-text-primary-on-surface bg-components-badge-bg-dimm text-text-primary-on-surface"
                       >
                         {t('auth.custom', { ns: 'plugin' })}
                       </Badge>

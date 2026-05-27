@@ -42,7 +42,7 @@ const VariableTypeSelector = ({
         )}
         >
           <div className={cn(
-            'system-sm-regular grow truncate p-1 text-components-input-text-filled',
+            'grow truncate p-1 system-sm-regular text-components-input-text-filled',
             inCell && 'system-xs-regular text-text-secondary',
           )}
           >
@@ -56,13 +56,13 @@ const VariableTypeSelector = ({
           {list.map((item: any) => (
             <div
               key={item}
-              className="radius-md flex cursor-pointer items-center gap-2 py-[6px] pl-3 pr-2 hover:bg-state-base-hover"
+              className="flex cursor-pointer items-center gap-2 radius-md py-[6px] pr-2 pl-3 hover:bg-state-base-hover"
               onClick={() => {
                 onSelect(item)
                 setOpen(false)
               }}
             >
-              <div className="system-md-regular grow truncate text-text-secondary">{item}</div>
+              <div className="grow truncate system-md-regular text-text-secondary">{item}</div>
               {value === item && <RiCheckLine className="h-4 w-4 text-text-accent" />}
             </div>
           ))}

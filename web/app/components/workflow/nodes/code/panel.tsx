@@ -110,7 +110,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({
         />
       </div>
       <Split />
-      <div className="px-4 pb-2 pt-4">
+      <div className="px-4 pt-4 pb-2">
         <Field
           title={t(`${i18nPrefix}.outputVars`, { ns: 'workflow' })}
           operations={

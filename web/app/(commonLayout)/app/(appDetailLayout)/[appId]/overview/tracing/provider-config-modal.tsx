@@ -289,7 +289,7 @@ const ProviderConfigModal: FC<Props> = ({
         ? (
             <PortalToFollowElem open>
               <PortalToFollowElemContent className="z-60 h-full w-full">
-                <div className="fixed inset-0 flex items-center justify-center bg-background-overlay">
+                <div className="inset-0 fixed flex items-center justify-center bg-background-overlay">
                   <div className="mx-2 max-h-[calc(100vh-120px)] w-[640px] overflow-y-auto rounded-2xl bg-components-panel-bg shadow-xl">
                     <div className="px-8 pt-8">
                       <div className="mb-4 flex items-center justify-between">
@@ -621,7 +621,7 @@ const ProviderConfigModal: FC<Props> = ({
                       </div>
                       <div className="my-8 flex h-8 items-center justify-between">
                         <a
-                          className="flex items-center space-x-1 text-xs font-normal leading-[18px] text-[#155EEF]"
+                          className="flex items-center space-x-1 text-xs leading-[18px] font-normal text-[#155EEF]"
                           target="_blank"
                           href={docURL[type]}
                         >
@@ -663,7 +663,7 @@ const ProviderConfigModal: FC<Props> = ({
                         <Lock01 className="mr-1 h-3 w-3 text-text-tertiary" />
                         {t('modelProvider.encrypted.front', { ns: 'common' })}
                         <a
-                          className="mx-1 text-primary-600"
+                          className="text-primary-600 mx-1"
                           target="_blank"
                           rel="noopener noreferrer"
                           href="https://pycryptodome.readthedocs.io/en/latest/src/cipher/oaep.html"

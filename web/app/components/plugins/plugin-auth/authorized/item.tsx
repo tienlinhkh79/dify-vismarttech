@@ -127,11 +127,11 @@ const Item = ({
               )
             }
             <Indicator
-              className="ml-2 mr-1.5 shrink-0"
+              className="mr-1.5 ml-2 shrink-0"
               color={credential.not_allowed_to_use ? 'gray' : 'green'}
             />
             <div
-              className="system-md-regular truncate text-text-secondary"
+              className="truncate system-md-regular text-text-secondary"
               title={credential.name}
             >
               {credential.name}

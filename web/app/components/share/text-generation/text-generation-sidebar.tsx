@@ -87,11 +87,11 @@ const TextGenerationSidebar: FC<TextGenerationSidebarProps> = ({
             background={siteInfo.icon_background || appDefaultIconBackground}
             imageUrl={siteInfo.icon_url}
           />
-          <div className="grow truncate text-text-secondary system-md-semibold">{siteInfo.title}</div>
+          <div className="grow truncate system-md-semibold text-text-secondary">{siteInfo.title}</div>
           <MenuDropdown hideLogout={isInstalledApp || accessMode === AccessMode.PUBLIC} data={siteInfo} />
         </div>
         {siteInfo.description && (
-          <div className="text-text-tertiary system-xs-regular">{siteInfo.description}</div>
+          <div className="system-xs-regular text-text-tertiary">{siteInfo.description}</div>
         )}
         <TabHeader
           items={[
@@ -162,7 +162,7 @@ const TextGenerationSidebar: FC<TextGenerationSidebarProps> = ({
             !isPC && resultExisted && 'rounded-b-2xl border-b-[0.5px] border-divider-regular',
           )}
         >
-          <div className="text-text-tertiary system-2xs-medium-uppercase">{t('chat.poweredBy', { ns: 'share' })}</div>
+          <div className="system-2xs-medium-uppercase text-text-tertiary">{t('chat.poweredBy', { ns: 'share' })}</div>
           {customConfig?.replace_webapp_logo
             ? <img src={customConfig.replace_webapp_logo} alt="logo" className="block h-5 w-auto" />
             : <DifyLogo size="small" />}

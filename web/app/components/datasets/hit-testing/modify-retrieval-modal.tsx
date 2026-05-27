@@ -74,10 +74,10 @@ const ModifyRetrievalModal: FC<Props> = ({ indexMethod, value, isShow, onHide, o
       }}
       ref={ref}
     >
-      <div className="h-15 flex shrink-0 justify-between px-3 pb-1 pt-3.5">
+      <div className="flex h-15 shrink-0 justify-between px-3 pt-3.5 pb-1">
         <div className="text-base font-semibold text-text-primary">
           <div>{t('form.retrievalSetting.title', { ns: 'datasetSettings' })}</div>
-          <div className="text-xs font-normal leading-[18px] text-text-tertiary">
+          <div className="text-xs leading-[18px] font-normal text-text-tertiary">
             <a target="_blank" rel="noopener noreferrer" href={docLink('/use-dify/knowledge/create-knowledge/setting-indexing-methods')} className="text-text-accent">
               {t('form.retrievalSetting.learnMore', { ns: 'datasetSettings' })}
             </a>
@@ -92,7 +92,7 @@ const ModifyRetrievalModal: FC<Props> = ({ indexMethod, value, isShow, onHide, o
       </div>
 
       <div className="px-4 py-2">
-        <div className="mb-1 text-[13px] font-semibold leading-6 text-text-secondary">
+        <div className="mb-1 text-[13px] leading-6 font-semibold text-text-secondary">
           {t('form.retrievalSetting.method', { ns: 'datasetSettings' })}
         </div>
         {indexMethod === 'high_quality'

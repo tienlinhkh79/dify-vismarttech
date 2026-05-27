@@ -35,7 +35,7 @@ const ConditionDate = ({
       <div className="group flex items-center" onClick={handleClickTrigger}>
         <div
           className={cn(
-            'system-sm-regular mr-0.5 flex h-6 grow cursor-pointer items-center px-1',
+            'mr-0.5 flex h-6 grow cursor-pointer items-center px-1 system-sm-regular',
             value ? 'text-text-secondary' : 'text-text-tertiary',
           )}
         >
@@ -49,7 +49,7 @@ const ConditionDate = ({
           !!value && (
             <RiCloseCircleFill
               className={cn(
-                'hidden h-4 w-4 shrink-0 cursor-pointer hover:text-components-input-text-filled group-hover:block',
+                'hidden h-4 w-4 shrink-0 cursor-pointer group-hover:block hover:text-components-input-text-filled',
                 value && 'text-text-quaternary',
               )}
               onClick={(e) => {

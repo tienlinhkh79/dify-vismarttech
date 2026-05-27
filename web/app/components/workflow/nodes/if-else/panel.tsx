@@ -78,7 +78,7 @@ const Panel: FC<NodePanelProps<IfElseNodeType>> = ({
         title={t(`${i18nPrefix}.else`, { ns: 'workflow' })}
         className="px-4 py-2"
       >
-        <div className="text-xs font-normal leading-[18px] text-text-tertiary">{t(`${i18nPrefix}.elseDescription`, { ns: 'workflow' })}</div>
+        <div className="text-xs leading-[18px] font-normal text-text-tertiary">{t(`${i18nPrefix}.elseDescription`, { ns: 'workflow' })}</div>
       </Field>
     </div>
   )

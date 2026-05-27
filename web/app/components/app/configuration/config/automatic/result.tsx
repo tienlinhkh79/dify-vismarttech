@@ -42,7 +42,7 @@ const Result: FC<Props> = ({
     <div className="flex h-full flex-col">
       <div className="mb-3 flex shrink-0 items-center justify-between">
         <div>
-          <div className="shrink-0 text-base font-semibold leading-[160%] text-text-secondary">{t('generate.resTitle', { ns: 'appDebug' })}</div>
+          <div className="shrink-0 text-base leading-[160%] font-semibold text-text-secondary">{t('generate.resTitle', { ns: 'appDebug' })}</div>
           <VersionSelector
             versionLen={versions.length}
             value={currentVersionIndex}

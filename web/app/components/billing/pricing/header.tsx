@@ -31,12 +31,12 @@ const Header = ({
             {t('plansCommon.title.plans', { ns: 'billing' })}
           </DialogTitle>
         </div>
-        <DialogDescription className="text-text-tertiary system-sm-regular">
+        <DialogDescription className="system-sm-regular text-text-tertiary">
           {t('plansCommon.title.description', { ns: 'billing' })}
         </DialogDescription>
         <Button
           variant="secondary"
-          className="absolute bottom-[40.5px] right-[-18px] z-10 size-9 rounded-full p-2"
+          className="absolute right-[-18px] bottom-[40.5px] z-10 size-9 rounded-full p-2"
           aria-label={t('operation.close', { ns: 'common' })}
           onClick={onClose}
         >

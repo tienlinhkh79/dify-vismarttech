@@ -51,13 +51,13 @@ const Panel: FC<NodePanelProps<IterationNodeType>> = ({
   } = useConfig(id, data)
 
   return (
-    <div className="pb-2 pt-2">
+    <div className="pt-2 pb-2">
       <div className="space-y-4 px-4 pb-4">
         <Field
           title={t(`${i18nPrefix}.input`, { ns: 'workflow' })}
           required
           operations={(
-            <div className="flex h-[18px] items-center rounded-[5px] border border-divider-deep px-1 capitalize text-text-tertiary system-2xs-medium-uppercase">Array</div>
+            <div className="flex h-[18px] items-center rounded-[5px] border border-divider-deep px-1 system-2xs-medium-uppercase text-text-tertiary capitalize">Array</div>
           )}
         >
           <VarReferencePicker
@@ -76,7 +76,7 @@ const Panel: FC<NodePanelProps<IterationNodeType>> = ({
           title={t(`${i18nPrefix}.output`, { ns: 'workflow' })}
           required
           operations={(
-            <div className="flex h-[18px] items-center rounded-[5px] border border-divider-deep px-1 capitalize text-text-tertiary system-2xs-medium-uppercase">Array</div>
+            <div className="flex h-[18px] items-center rounded-[5px] border border-divider-deep px-1 system-2xs-medium-uppercase text-text-tertiary capitalize">Array</div>
           )}
         >
           <VarReferencePicker

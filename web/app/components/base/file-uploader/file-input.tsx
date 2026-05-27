@@ -35,7 +35,7 @@ const FileInput = ({
 
   return (
     <input
-      className="absolute inset-0 block w-full cursor-pointer text-[0] opacity-0 disabled:cursor-not-allowed"
+      className="inset-0 absolute block w-full cursor-pointer text-[0] opacity-0 disabled:cursor-not-allowed"
       onClick={e => ((e.target as HTMLInputElement).value = '')}
       type="file"
       onChange={handleChange}

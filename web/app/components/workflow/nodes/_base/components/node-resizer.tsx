@@ -52,7 +52,7 @@ const NodeResizer = ({
         minHeight={minHeight}
         maxWidth={maxWidth}
       >
-        <div className="absolute bottom-px right-px">{icon}</div>
+        <div className="absolute right-px bottom-px">{icon}</div>
       </NodeResizeControl>
     </div>
   )

@@ -45,7 +45,7 @@ const EmojiPicker: FC<IEmojiPickerProps> = ({
             className="pt-3"
             onSelect={handleSelectEmoji}
           />
-          <Divider className="mb-0 mt-3" />
+          <Divider className="mt-3 mb-0" />
           <div className="flex w-full items-center justify-center gap-2 p-3">
             <Button
               className="w-full"

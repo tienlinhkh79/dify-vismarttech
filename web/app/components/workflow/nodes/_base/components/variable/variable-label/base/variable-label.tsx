@@ -46,7 +46,7 @@ const VariableLabel = ({
         notShowFullPath && (
           <>
             <span className="i-ri-more-line h-3 w-3 shrink-0 text-text-secondary" />
-            <div className="shrink-0 text-divider-deep system-xs-regular">/</div>
+            <div className="shrink-0 system-xs-regular text-divider-deep">/</div>
           </>
         )
       }
@@ -61,7 +61,7 @@ const VariableLabel = ({
       />
       {
         !!variableType && (
-          <div className="shrink-0 text-text-tertiary system-xs-regular">
+          <div className="shrink-0 system-xs-regular text-text-tertiary">
             {capitalize(variableType)}
           </div>
         )

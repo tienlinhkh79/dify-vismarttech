@@ -3,9 +3,9 @@ import type { KiotVietConnection } from '@/service/tools'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Button from '@/app/components/base/button'
+import Drawer from '@/app/components/base/drawer-plus'
 import Input from '@/app/components/base/input'
 import { toast } from '@/app/components/base/ui/toast'
-import Drawer from '@/app/components/base/drawer-plus'
 import {
   createKiotVietConnection,
   fetchBuiltInToolCredential,
@@ -212,7 +212,13 @@ const KiotVietPage = () => {
               <div>
                 <div className="system-sm-medium text-text-primary">{connection.name}</div>
                 <div className="mt-0.5 system-xs-regular text-text-tertiary">
-                  {connection.connection_id} · {connection.client_id} · {connection.enabled ? t('dataSource.website.active', { ns: 'common' }) : t('dataSource.website.inactive', { ns: 'common' })}
+                  {connection.connection_id}
+                  {' '}
+                  ·
+                  {connection.client_id}
+                  {' '}
+                  ·
+                  {connection.enabled ? t('dataSource.website.active', { ns: 'common' }) : t('dataSource.website.inactive', { ns: 'common' })}
                 </div>
               </div>
               <Button

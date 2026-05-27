@@ -79,7 +79,7 @@ const VarList: FC<Props> = ({
 
   if (list.length === 0) {
     return (
-      <div className="flex h-[42px] items-center justify-center rounded-md bg-components-panel-bg text-xs font-normal leading-[18px] text-text-tertiary">
+      <div className="flex h-[42px] items-center justify-center rounded-md bg-components-panel-bg text-xs leading-[18px] font-normal text-text-tertiary">
         {t('nodes.start.noVarTip', { ns: 'workflow' })}
       </div>
     )
@@ -109,7 +109,7 @@ const VarList: FC<Props> = ({
           />
           {canDrag && (
             <RiDraggable className={cn(
-              'handle absolute left-3 top-2.5 hidden h-3 w-3 cursor-pointer text-text-tertiary',
+              'handle absolute top-2.5 left-3 hidden h-3 w-3 cursor-pointer text-text-tertiary',
               'group-hover:block',
             )}
             />

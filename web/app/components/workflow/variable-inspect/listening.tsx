@@ -176,7 +176,7 @@ const Listening: FC<ListeningProps> = ({
       </div>
       {webhookDebugUrl && (
         <div className="flex items-center gap-2">
-          <div className="system-xs-regular shrink-0 whitespace-pre-line text-text-tertiary">
+          <div className="shrink-0 system-xs-regular whitespace-pre-line text-text-tertiary">
             {t('nodes.triggerWebhook.debugUrlTitle', { ns: 'workflow' })}
           </div>
           <Tooltip
@@ -191,7 +191,7 @@ const Listening: FC<ListeningProps> = ({
             <button
               type="button"
               aria-label={t('nodes.triggerWebhook.debugUrlCopy', { ns: 'workflow' }) || ''}
-              className={`inline-flex items-center radius-sm border border-divider-regular bg-components-badge-white-to-dark px-1.5 py-[2px] font-mono text-[13px] leading-[18px] text-text-secondary transition-colors hover:bg-components-panel-on-panel-item-bg-hover focus:outline-hidden focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-components-panel-border ${debugUrlCopied ? 'bg-components-panel-on-panel-item-bg-hover text-text-primary' : ''}`}
+              className={`inline-flex items-center radius-sm border border-divider-regular bg-components-badge-white-to-dark px-1.5 py-[2px] font-mono text-[13px] leading-[18px] text-text-secondary transition-colors hover:bg-components-panel-on-panel-item-bg-hover focus:outline-hidden focus-visible:outline-2 focus-visible:outline-components-panel-border focus-visible:outline-solid ${debugUrlCopied ? 'bg-components-panel-on-panel-item-bg-hover text-text-primary' : ''}`}
               onClick={() => {
                 copy(webhookDebugUrl)
                 setDebugUrlCopied(true)

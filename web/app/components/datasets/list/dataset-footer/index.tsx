@@ -9,7 +9,7 @@ const DatasetFooter = () => {
   const { t } = useTranslation()
 
   return (
-    <footer className="shrink-0 px-6 pb-8 pt-2 md:px-12">
+    <footer className="shrink-0 px-6 pt-2 pb-8 md:px-12">
       <div
         className={cn(
           'flex gap-4 rounded-xl border border-divider-regular px-4 py-4 md:px-5 md:py-5',

@@ -98,7 +98,7 @@ export const ToolIcon = memo(({ providerName }: ToolIconProps) => {
             return <Group className="h-3 w-3 opacity-35" />
           })()}
         </div>
-        {indicator && <Indicator color={indicator} className="absolute -right-px -top-px" />}
+        {indicator && <Indicator color={indicator} className="absolute -top-px -right-px" />}
       </div>
     </Tooltip>
   )

@@ -1,6 +1,6 @@
 'use client'
-import type { Channel, ChannelProvider } from '@/service/tools'
 import type { ReactNode } from 'react'
+import type { Channel, ChannelProvider } from '@/service/tools'
 import { useId } from 'react'
 import Button from '@/app/components/base/button'
 import { cn } from '@/utils/classnames'
@@ -41,10 +41,10 @@ const BrandMessengerIcon = () => (
 
 const BrandFacebookMessengerComboIcon = () => (
   <div className="relative h-full w-full">
-    <div className="absolute left-0 top-0 flex h-[82%] w-[82%] items-center justify-center rounded-md bg-[#1877F2] p-0.5">
+    <div className="absolute top-0 left-0 flex h-[82%] w-[82%] items-center justify-center rounded-md bg-[#1877F2] p-0.5">
       <BrandFacebookIcon />
     </div>
-    <div className="absolute bottom-0 right-0 flex h-[58%] w-[58%] items-center justify-center rounded-md bg-[#00B2FF] p-0.5 ring-1 ring-background-default">
+    <div className="absolute right-0 bottom-0 flex h-[58%] w-[58%] items-center justify-center rounded-md bg-[#00B2FF] p-0.5 ring-1 ring-background-default">
       <BrandMessengerIcon />
     </div>
   </div>
@@ -135,14 +135,14 @@ export const ProviderSummaryCard = ({
         </div>
         {provider.status === 'coming_soon'
           ? (
-            <div className="rounded bg-state-warning-hover-alt px-1.5 py-0.5 text-[10px] text-text-warning">
-              {t('settings.channelsComingSoon', { ns: 'common' })}
-            </div>
+              <div className="rounded bg-state-warning-hover-alt px-1.5 py-0.5 text-[10px] text-text-warning">
+                {t('settings.channelsComingSoon', { ns: 'common' })}
+              </div>
             )
           : (
-            <div className="rounded bg-state-success-hover px-1.5 py-0.5 text-[10px] text-text-success">
-              {t('dataSource.website.active', { ns: 'common' })}
-            </div>
+              <div className="rounded bg-state-success-hover px-1.5 py-0.5 text-[10px] text-text-success">
+                {t('dataSource.website.active', { ns: 'common' })}
+              </div>
             )}
       </div>
       <div className="mt-1 system-xs-regular text-text-tertiary">
@@ -185,7 +185,13 @@ export const ChannelItem = ({
           <div className={`rounded px-1.5 py-0.5 text-[10px] ${channelBadge.className}`}>{channelBadge.label}</div>
         </div>
         <div className="mt-0.5 system-xs-regular text-text-tertiary">
-          {channel.platform} · {channel.channel_id} · {channel.enabled ? t('dataSource.website.active', { ns: 'common' }) : t('dataSource.website.inactive', { ns: 'common' })}
+          {channel.platform}
+          {' '}
+          ·
+          {channel.channel_id}
+          {' '}
+          ·
+          {channel.enabled ? t('dataSource.website.active', { ns: 'common' }) : t('dataSource.website.inactive', { ns: 'common' })}
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -268,14 +274,14 @@ export const SetupProviderSelector = ({
             </div>
             {isComingSoon
               ? (
-                <div className="rounded bg-state-warning-hover-alt px-1.5 py-0.5 text-[10px] text-text-warning">
-                  {t('settings.channelsComingSoon', { ns: 'common' })}
-                </div>
+                  <div className="rounded bg-state-warning-hover-alt px-1.5 py-0.5 text-[10px] text-text-warning">
+                    {t('settings.channelsComingSoon', { ns: 'common' })}
+                  </div>
                 )
               : (
-                <div className="rounded bg-state-success-hover px-1.5 py-0.5 text-[10px] text-text-success">
-                  {t('dataSource.website.active', { ns: 'common' })}
-                </div>
+                  <div className="rounded bg-state-success-hover px-1.5 py-0.5 text-[10px] text-text-success">
+                    {t('dataSource.website.active', { ns: 'common' })}
+                  </div>
                 )}
           </button>
         )

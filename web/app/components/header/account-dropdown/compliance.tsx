@@ -48,12 +48,12 @@ function ComplianceDocActionVisual({
         aria-hidden
         data-disabled={isPending || undefined}
         className={cn(
-          'btn btn-small btn-secondary pointer-events-none flex items-center gap-px',
+          'pointer-events-none btn flex btn-small items-center gap-px btn-secondary',
           isPending && 'cursor-not-allowed',
         )}
       >
         <span className="i-ri-arrow-down-circle-line size-[14px] text-components-button-secondary-text-disabled" />
-        <span className="px-[3px] text-components-button-secondary-text system-xs-medium">{downloadText}</span>
+        <span className="px-[3px] system-xs-medium text-components-button-secondary-text">{downloadText}</span>
         {isPending && <Spinner loading={true} className="ml-1! h-3! w-3! border-2! text-text-tertiary!" />}
       </div>
     )
@@ -146,12 +146,12 @@ function ComplianceDocRowItem({
 
   return (
     <DropdownMenuItem
-      className="h-10 justify-between py-1 pl-1 pr-2"
+      className="h-10 justify-between py-1 pr-2 pl-1"
       closeOnClick={!isCurrentPlanCanDownload}
       onClick={handleSelect}
     >
       {icon}
-      <div className="grow truncate px-1 text-text-secondary system-md-regular">{label}</div>
+      <div className="grow truncate px-1 system-md-regular text-text-secondary">{label}</div>
       <ComplianceDocActionVisual
         isCurrentPlanCanDownload={isCurrentPlanCanDownload}
         isPending={isPending}

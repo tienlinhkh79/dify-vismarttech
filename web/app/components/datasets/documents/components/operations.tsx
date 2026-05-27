@@ -158,7 +158,7 @@ const Operations = ({ embeddingAvailable, datasetId, detail, selectedIds, onSele
                 </Tooltip>
               )
             : <Switch value={enabled} onChange={v => handleSwitch(v ? 'enable' : 'disable')} size="md" />}
-          <Divider className="!ml-4 !mr-2 !h-3" type="vertical" />
+          <Divider className="!mr-2 !ml-4 !h-3" type="vertical" />
         </>
       )}
       {embeddingAvailable && (

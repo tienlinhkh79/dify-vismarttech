@@ -16,7 +16,7 @@ const GridMask: FC<GridMaskProps> = ({
 }) => {
   return (
     <div className={cn('relative bg-saas-background', wrapperClassName)}>
-      <div className={cn('absolute inset-0 z-0 h-full w-full opacity-70', canvasClassName, Style.gridBg)} />
+      <div className={cn('inset-0 absolute z-0 h-full w-full opacity-70', canvasClassName, Style.gridBg)} />
       <div className={cn('absolute z-1 h-full w-full rounded-lg bg-grid-mask-background', gradientClassName)} />
       <div className="relative z-2">{children}</div>
     </div>

@@ -60,7 +60,7 @@ const ReadonlyInputWithSelectVar: FC<Props> = ({
   })()
 
   return (
-    <div className={cn('break-all text-xs', className)}>
+    <div className={cn('text-xs break-all', className)}>
       {res}
     </div>
   )

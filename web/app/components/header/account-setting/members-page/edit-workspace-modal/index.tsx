@@ -94,7 +94,7 @@ const EditWorkspaceModal = ({ onCancel }: IEditWorkspaceModalProps) => {
             />
             <div className="min-h-6">
               {hasError && (
-                <p id={errorId} data-testid="edit-workspace-error" className="text-text-destructive system-xs-regular" role="alert">
+                <p id={errorId} data-testid="edit-workspace-error" className="system-xs-regular text-text-destructive" role="alert">
                   {nameErrorMessage}
                 </p>
               )}

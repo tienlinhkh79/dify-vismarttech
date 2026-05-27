@@ -57,7 +57,7 @@ const TypeSelector: FC<TypeSelectorProps> = ({
                   setOpen(false)
                 }}
               >
-                <span className="system-sm-medium px-1 text-text-secondary">{item.text}</span>
+                <span className="px-1 system-sm-medium text-text-secondary">{item.text}</span>
                 {isSelected && <RiCheckLine className="h-4 w-4 text-text-accent" />}
               </div>
             )

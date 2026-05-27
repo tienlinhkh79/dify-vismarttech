@@ -40,7 +40,7 @@ const LanguageSelect: FC<ILanguageSelectProps> = ({
       btnElement={(
         <div className={cn('inline-flex items-center gap-x-px', disabled && 'cursor-not-allowed')}>
           <span className={cn(
-            'system-xs-semibold px-[3px] text-components-button-tertiary-text',
+            'px-[3px] system-xs-semibold text-components-button-tertiary-text',
             disabled ? 'text-components-button-tertiary-text-disabled' : '',
           )}
           >

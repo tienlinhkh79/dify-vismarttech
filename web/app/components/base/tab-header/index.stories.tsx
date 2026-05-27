@@ -6,7 +6,7 @@ import TabHeader from '.'
 const items: ITabHeaderProps['items'] = [
   { id: 'overview', name: 'Overview' },
   { id: 'playground', name: 'Playground' },
-  { id: 'changelog', name: 'Changelog', extra: <span className="ml-1 rounded-full bg-primary-50 px-2 py-0.5 text-xs text-primary-600">New</span> },
+  { id: 'changelog', name: 'Changelog', extra: <span className="text-primary-600 ml-1 rounded-full bg-primary-50 px-2 py-0.5 text-xs">New</span> },
   { id: 'docs', name: 'Docs', isRight: true },
   { id: 'settings', name: 'Settings', isRight: true, disabled: true },
 ]
@@ -20,7 +20,7 @@ const TabHeaderDemo = ({
 
   return (
     <div className="flex w-full max-w-3xl flex-col gap-6 rounded-2xl border border-divider-subtle bg-components-panel-bg p-6">
-      <div className="flex items-center justify-between text-xs uppercase tracking-[0.18em] text-text-tertiary">
+      <div className="flex items-center justify-between text-xs tracking-[0.18em] text-text-tertiary uppercase">
         <span>Tabs</span>
         <code className="rounded-md bg-background-default px-2 py-1 text-[11px] text-text-tertiary">
           active="

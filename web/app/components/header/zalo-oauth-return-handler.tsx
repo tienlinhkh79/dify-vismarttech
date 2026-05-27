@@ -27,10 +27,10 @@ export default function ZaloOAuthReturnHandler() {
       'oauth_callback_error',
     ])
     const reasonKey = knownReason.has(reasonRaw) ? `settings.channelsZaloOAuthReason.${reasonRaw}` : ''
-    const reasonText = reasonKey ? t(reasonKey, { ns: 'common' }) : reasonRaw
+    const reasonText = reasonKey ? t(reasonKey as never, { ns: 'common' }) : reasonRaw
     const reasonSuffix = reasonText ? `: ${reasonText}` : ''
     if (zalo === 'success')
-      toast.success(t('settings.channelsZaloOAuthToastSuccess', { ns: 'common' }))
+      toast.success(t('settings.channelsZaloOAuthToastSuccess' as never, { ns: 'common' }))
     else
       toast.error(t('settings.channelsZaloOAuthToastError', { ns: 'common', reason: reasonSuffix }))
 

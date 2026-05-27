@@ -36,7 +36,7 @@ const UserInput = () => {
 
   return (
     <div className={cn('relative z-1 rounded-xl border-[0.5px] border-components-panel-border-subtle bg-components-panel-on-panel-item-bg shadow-xs')}>
-      <div className="px-4 pb-4 pt-3">
+      <div className="px-4 pt-3 pb-4">
         {visibleVariables.map((variable, index) => (
           <div
             key={variable.variable}

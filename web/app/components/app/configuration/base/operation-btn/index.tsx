@@ -30,7 +30,7 @@ const OperationBtn: FC<IOperationBtnProps> = ({
   const { t } = useTranslation()
   return (
     <div
-      className={cn('flex h-7 cursor-pointer select-none items-center space-x-1 rounded-md px-3 text-text-secondary hover:bg-state-base-hover', className)}
+      className={cn('flex h-7 cursor-pointer items-center space-x-1 rounded-md px-3 text-text-secondary select-none hover:bg-state-base-hover', className)}
       onClick={onClick}
     >
       <div>

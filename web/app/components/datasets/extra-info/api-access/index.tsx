@@ -45,9 +45,9 @@ const ApiAccess = ({
           )}
           >
             <ApiAggregate className="size-4 shrink-0 text-text-secondary" />
-            {expand && <div className="system-sm-medium grow text-text-secondary">{t('appMenus.apiAccess', { ns: 'common' })}</div>}
+            {expand && <div className="grow system-sm-medium text-text-secondary">{t('appMenus.apiAccess', { ns: 'common' })}</div>}
             <Indicator
-              className={cn('shrink-0', !expand && 'absolute -right-px -top-px')}
+              className={cn('shrink-0', !expand && 'absolute -top-px -right-px')}
               color={apiEnabled ? 'green' : 'yellow'}
             />
           </div>

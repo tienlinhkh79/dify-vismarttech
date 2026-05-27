@@ -38,7 +38,7 @@ const Empty = ({
   return (
     <div className="flex flex-col items-center justify-center">
       <NoToolPlaceholder className={theme === 'dark' ? 'invert' : ''} />
-      <div className="mb-1 mt-2 text-[13px] font-medium leading-[18px] text-text-primary">
+      <div className="mt-2 mb-1 text-[13px] leading-[18px] font-medium text-text-primary">
         {(hasTitle && renderType) ? t(`addToolModal.${renderType}.title`, { ns: 'tools' }) : 'No tools available'}
       </div>
       {!!(!isAgent && hasTitle && renderType) && (

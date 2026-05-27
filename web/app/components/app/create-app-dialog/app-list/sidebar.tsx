@@ -22,7 +22,7 @@ export default function Sidebar({ current, categories, onClick, onCreateFromBlan
       <ul className="pt-0.5">
         <CategoryItem category={AppCategories.RECOMMENDED} active={current === AppCategories.RECOMMENDED} onClick={onClick} />
       </ul>
-      <div className="system-xs-medium-uppercase mb-0.5 mt-3 px-3 pb-1 pt-2 text-text-tertiary">{t('newAppFromTemplate.byCategories', { ns: 'app' })}</div>
+      <div className="mt-3 mb-0.5 px-3 pt-2 pb-1 system-xs-medium-uppercase text-text-tertiary">{t('newAppFromTemplate.byCategories', { ns: 'app' })}</div>
       <ul className="flex grow flex-col gap-0.5">
         {categories.map(category => (<CategoryItem key={category} category={category} active={current === category} onClick={onClick} />))}
       </ul>

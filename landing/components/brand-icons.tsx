@@ -6,8 +6,12 @@
 const si = (slug: string, color: string) =>
   `https://cdn.simpleicons.org/${slug}/${color.replace(/^#/, '')}`
 
+/** Lazada is not in Simple Icons — serve from /public/brands/. */
+const LOCAL_BRAND_SRC: Record<string, string> = {
+  lazada: '/brands/lazada.svg',
+}
+
 const SLUG_COLOR: Record<string, string> = {
-  lazada: '0F146F',
   zalo: '0068FF',
   facebook: '0866FF',
   instagram: 'E4405F',
@@ -25,6 +29,9 @@ export function resolveBrandIcon(
   const n = normalizeBrand(raw)
   if (n === 'website' || n === 'web')
     return { kind: 'globe' }
+  const local = LOCAL_BRAND_SRC[n]
+  if (local)
+    return { kind: 'img', src: local }
   const color = SLUG_COLOR[n]
   if (color)
     return { kind: 'img', src: si(n, color) }
@@ -90,7 +97,8 @@ type HubChannelTileProps = {
 export function HubChannelTile({ name }: HubChannelTileProps) {
   return (
     <div aria-label={name} className="hub-channel-cell" role="img" title={name}>
-      <BrandIcon className="hub-channel-icon" name={name} size={26} />
+      <BrandIcon className="hub-channel-icon" name={name} size={22} />
+      <span className="hub-channel-label">{name}</span>
     </div>
   )
 }

@@ -41,8 +41,8 @@ const SearchInput: FC<SearchInputProps> = ({
         type="text"
         name="query"
         className={cn(
-          'system-sm-regular caret-#295EFF block h-[18px] grow appearance-none border-0 bg-transparent text-components-input-text-filled outline-hidden placeholder:text-components-input-text-placeholder',
-          white && 'bg-white! placeholder:text-gray-400! hover:bg-white! group-hover:bg-white!',
+          'caret-#295EFF block h-[18px] grow appearance-none border-0 bg-transparent system-sm-regular text-components-input-text-filled outline-hidden placeholder:text-components-input-text-placeholder',
+          white && 'bg-white! group-hover:bg-white! placeholder:text-gray-400! hover:bg-white!',
         )}
         placeholder={placeholder || t('operation.search', { ns: 'common' })!}
         value={isComposing.current ? compositionValue : value}

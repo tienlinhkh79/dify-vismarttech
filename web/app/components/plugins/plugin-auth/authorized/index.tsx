@@ -239,7 +239,7 @@ const Authorized = ({
                 !!oAuthCredentials.length && (
                   <div className="p-1">
                     <div className={cn(
-                      'px-3 pb-0.5 pt-1 text-text-tertiary system-xs-medium',
+                      'px-3 pt-1 pb-0.5 system-xs-medium text-text-tertiary',
                       showItemSelectedIcon && 'pl-7',
                     )}
                     >
@@ -269,7 +269,7 @@ const Authorized = ({
                 !!apiKeyCredentials.length && (
                   <div className="p-1">
                     <div className={cn(
-                      'px-3 pb-0.5 pt-1 text-text-tertiary system-xs-medium',
+                      'px-3 pt-1 pb-0.5 system-xs-medium text-text-tertiary',
                       showItemSelectedIcon && 'pl-7',
                     )}
                     >

@@ -89,7 +89,7 @@ const Header = () => {
             />
           </div>
           {!currentConversationId && (
-            <div className={cn('grow truncate text-text-secondary system-md-semibold')}>{appData?.site.title}</div>
+            <div className={cn('grow truncate system-md-semibold text-text-secondary')}>{appData?.site.title}</div>
           )}
           {currentConversationId && currentConversationItem && isSidebarCollapsed && (
             <>

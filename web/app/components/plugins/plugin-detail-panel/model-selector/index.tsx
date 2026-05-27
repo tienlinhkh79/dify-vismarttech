@@ -229,7 +229,7 @@ const ModelParameterModal: FC<ModelParameterModalProps> = ({
         >
           <div className="max-h-[420px] overflow-y-auto p-4 pt-3">
             <div className="relative">
-              <div className="mb-1 flex h-6 items-center text-text-secondary system-sm-semibold">
+              <div className="mb-1 flex h-6 items-center system-sm-semibold text-text-secondary">
                 {t('modelProvider.model', { ns: 'common' }).toLocaleUpperCase()}
               </div>
               <ModelSelector

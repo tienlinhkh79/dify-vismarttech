@@ -52,11 +52,11 @@ const PreviewDocumentPicker: FC<Props> = ({
       offset={4}
     >
       <PortalToFollowElemTrigger onClick={togglePopup}>
-        <div className={cn('flex h-6 select-none items-center rounded-md px-1 hover:bg-state-base-hover', open && 'bg-state-base-hover', className)}>
+        <div className={cn('flex h-6 items-center rounded-md px-1 select-none hover:bg-state-base-hover', open && 'bg-state-base-hover', className)}>
           <FileIcon name={name} extension={extension} size="lg" />
           <div className="ml-1 flex flex-col items-start">
             <div className="flex items-center space-x-0.5">
-              <span className={cn('system-md-semibold max-w-[200px] truncate text-text-primary')}>
+              <span className={cn('max-w-[200px] truncate system-md-semibold text-text-primary')}>
                 {' '}
                 {name || '--'}
               </span>
@@ -67,7 +67,7 @@ const PreviewDocumentPicker: FC<Props> = ({
       </PortalToFollowElemTrigger>
       <PortalToFollowElemContent className="z-11">
         <div className="w-[392px] rounded-xl border-[0.5px] border-components-panel-border bg-components-panel-bg-blur p-1 shadow-lg backdrop-blur-[5px]">
-          {files?.length > 1 && <div className="system-xs-medium-uppercase flex h-8 items-center pl-2 text-text-tertiary">{t('preprocessDocument', { ns: 'dataset', num: files.length })}</div>}
+          {files?.length > 1 && <div className="flex h-8 items-center pl-2 system-xs-medium-uppercase text-text-tertiary">{t('preprocessDocument', { ns: 'dataset', num: files.length })}</div>}
           {files?.length > 0
             ? (
                 <DocumentList

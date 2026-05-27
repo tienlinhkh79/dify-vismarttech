@@ -105,7 +105,7 @@ const InputsPanel = ({ onRun }: Props) => {
 
   return (
     <>
-      <div className="px-4 pb-2 pt-3">
+      <div className="px-4 pt-3 pb-2">
         {
           variables.map((variable, index) => (
             <div

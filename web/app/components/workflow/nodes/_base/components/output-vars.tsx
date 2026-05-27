@@ -60,10 +60,10 @@ export const VarItem: FC<VarItemProps> = ({
         <div className="flex">
           <div className="flex items-center leading-[18px]">
             <div className="code-sm-semibold text-text-secondary">{name}</div>
-            <div className="system-xs-regular ml-2 text-text-tertiary">{type}</div>
+            <div className="ml-2 system-xs-regular text-text-tertiary">{type}</div>
           </div>
         </div>
-        <div className="system-xs-regular mt-0.5 text-text-tertiary">
+        <div className="mt-0.5 system-xs-regular text-text-tertiary">
           {description}
           {subItems && (
             <div className="ml-2 border-l border-gray-200 pl-2">

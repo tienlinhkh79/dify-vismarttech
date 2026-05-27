@@ -1,7 +1,7 @@
 'use client'
 
-import { useCallback } from 'react'
 import { RiSearchLine } from '@remixicon/react'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import ConsoleBrandedLogo from '@/app/components/header/console-branded-logo'
 import { APP_DISPLAY_NAME } from '@/config/app-display-name'
@@ -10,8 +10,8 @@ import { useGlobalPublicStore } from '@/context/global-public-context'
 import { WorkspaceProvider } from '@/context/workspace-context-provider'
 import Link from '@/next/link'
 import { cn } from '@/utils/classnames'
-import { ConsoleNavLayoutProvider } from './console-nav-layout-context'
 import ConsoleHeroMenu from './console-hero-menu'
+import { ConsoleNavLayoutProvider } from './console-nav-layout-context'
 import s from './index.module.css'
 
 const ConsoleTopBar = () => {
@@ -42,7 +42,10 @@ const ConsoleTopBar = () => {
         <h1 className="shrink-0">
           <Link
             href="/apps"
-            className="flex h-10 cursor-pointer items-center gap-2 overflow-hidden px-0.5"
+            className={cn(
+              'flex h-10 cursor-pointer items-center gap-2 overflow-hidden',
+              s.consoleLogoSurface,
+            )}
           >
             <span className="sr-only">
               {isBrandingEnabled && systemFeatures.branding.application_title ? systemFeatures.branding.application_title : APP_DISPLAY_NAME}
@@ -55,7 +58,7 @@ const ConsoleTopBar = () => {
             type="button"
             onClick={openCommandPalette}
             className={cn(
-              'system-sm-regular flex min-h-9 min-w-0 max-w-xl flex-1 cursor-pointer items-center gap-2 rounded-lg border border-white/20',
+              'flex min-h-9 max-w-xl min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-lg border border-white/20 system-sm-regular',
               'bg-white/10 px-3 py-2 text-left text-white/80 transition-colors',
               'hover:border-white/35 hover:bg-white/15 hover:text-white',
             )}

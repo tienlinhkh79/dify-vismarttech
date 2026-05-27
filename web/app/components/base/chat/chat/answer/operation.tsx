@@ -165,8 +165,8 @@ const Operation: FC<OperationProps> = ({
       <div
         className={cn(
           'absolute flex justify-end gap-1',
-          hasWorkflowProcess && '-bottom-4 right-2',
-          !positionRight && '-bottom-4 right-2',
+          hasWorkflowProcess && 'right-2 -bottom-4',
+          !positionRight && 'right-2 -bottom-4',
           !hasWorkflowProcess && positionRight && 'top-[9px]!',
         )}
         style={(!hasWorkflowProcess && positionRight) ? { left: contentWidth + 8 } : {}}
@@ -353,7 +353,7 @@ const Operation: FC<OperationProps> = ({
         >
           <div className="space-y-3">
             <div>
-              <label className="mb-2 block text-text-secondary system-sm-semibold">
+              <label className="mb-2 block system-sm-semibold text-text-secondary">
                 {t('feedback.content', { ns: 'common' }) || 'Feedback Content'}
               </label>
               <Textarea

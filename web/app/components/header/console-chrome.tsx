@@ -27,9 +27,10 @@ const ConsoleChrome = ({
   const [hideChrome, setHideChrome] = useState(workflowCanvasMaximize)
   const { eventEmitter } = useEventEmitterContextContext()
 
+  // eslint-disable-next-line ts/no-explicit-any
   eventEmitter?.useSubscription((v: any) => {
     if (v?.type === 'workflow-canvas-maximize')
-      setHideChrome(v.payload)
+      setHideChrome(!!v.payload)
   })
 
   if (isMobile) {
@@ -46,7 +47,7 @@ const ConsoleChrome = ({
             className={cn(
               'shrink-0',
               hideChrome && (inWorkflowCanvas || isPipelineCanvas) && 'hidden',
-              !hideChrome && 'sticky left-0 right-0 top-0 z-30',
+              !hideChrome && 'sticky top-0 right-0 left-0 z-30',
               isBordered && 'border-b border-divider-regular',
             )}
           >

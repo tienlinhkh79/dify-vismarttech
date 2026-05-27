@@ -1,6 +1,6 @@
 import { API_PREFIX } from '@/config'
-import { resolveConsoleApiBaseHref } from '@/utils/console-api-base'
 import { fetchWithRetry } from '@/utils'
+import { resolveConsoleApiBaseHref } from '@/utils/console-api-base'
 
 const LOCAL_STORAGE_KEY = 'is_other_tab_refreshing'
 

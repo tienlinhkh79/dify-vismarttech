@@ -178,7 +178,7 @@ const Tool: FC<Props> = ({
     >
       <div className={cn(className)}>
         <div
-          className="group/item flex w-full cursor-pointer select-none items-center justify-between rounded-lg pl-3 pr-1 hover:bg-state-base-hover"
+          className="group/item flex w-full cursor-pointer items-center justify-between rounded-lg pr-1 pl-3 select-none hover:bg-state-base-hover"
           onClick={() => {
             if (hasAction) {
               setFold(!isFold)
@@ -219,7 +219,7 @@ const Tool: FC<Props> = ({
             <div className="ml-2 flex w-0 grow items-center text-sm text-text-primary">
               <span className="max-w-[250px] truncate">{notShowProvider ? actions[0]?.label[language] : payload.label[language]}</span>
               {isFlatView && groupName && (
-                <span className="system-xs-regular ml-2 shrink-0 text-text-quaternary">{groupName}</span>
+                <span className="ml-2 shrink-0 system-xs-regular text-text-quaternary">{groupName}</span>
               )}
               {isMCPTool && <Mcp className="ml-2 size-3.5 shrink-0 text-text-quaternary" />}
             </div>

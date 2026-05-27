@@ -57,7 +57,7 @@ const VarReferencePicker: FC<Props> = ({
             {TYPES.map(type => (
               <div
                 key={type}
-                className="flex h-[30px] cursor-pointer items-center justify-between rounded-lg pl-3 pr-2 text-[13px] text-text-primary hover:bg-state-base-hover"
+                className="flex h-[30px] cursor-pointer items-center justify-between rounded-lg pr-2 pl-3 text-[13px] text-text-primary hover:bg-state-base-hover"
                 onClick={handleChange(type)}
               >
                 <div className="w-0 grow truncate capitalize">{type}</div>

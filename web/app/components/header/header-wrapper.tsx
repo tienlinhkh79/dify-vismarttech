@@ -9,10 +9,12 @@ import s from './index.module.css'
 
 type HeaderWrapperProps = {
   children: React.ReactNode
+  className?: string
 }
 
 const HeaderWrapper = ({
   children,
+  className,
 }: HeaderWrapperProps) => {
   const pathname = usePathname()
   const media = useBreakpoints()
@@ -37,11 +39,12 @@ const HeaderWrapper = ({
         s.header,
         isMobile
           ? cn(
-              'sticky left-0 right-0 top-0 min-h-[56px] grow-0 basis-auto',
+              'sticky top-0 right-0 left-0 min-h-[56px] grow-0 basis-auto',
               isBordered && 'border-b border-divider-regular',
             )
           : cn(
               'sticky top-0 h-screen w-[280px] border-r border-divider-regular bg-background-body shadow-sm',
+              className,
             ),
         hideHeader && (inWorkflowCanvas || isPipelineCanvas) && 'hidden',
       )}

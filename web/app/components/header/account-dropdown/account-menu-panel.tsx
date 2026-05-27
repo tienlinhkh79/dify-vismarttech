@@ -9,7 +9,6 @@ import ThemeSwitcher from '@/app/components/base/theme-switcher'
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLinkItem, DropdownMenuSeparator } from '@/app/components/base/ui/dropdown-menu'
 import { ACCOUNT_SETTING_TAB } from '@/app/components/header/account-setting/constants'
 import { IS_CLOUD_EDITION } from '@/config'
-import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import { useAppContext } from '@/context/app-context'
 import { useGlobalPublicStore } from '@/context/global-public-context'
 import { useDocLink } from '@/context/i18n'
@@ -19,6 +18,7 @@ import { env } from '@/env'
 import Link from '@/next/link'
 import { useRouter } from '@/next/navigation'
 import { useLogout } from '@/service/use-common'
+import { showDifyOfficialChrome } from '@/utils/dify-official-chrome'
 import GithubStar from '../github-star'
 import Indicator from '../indicator'
 import Compliance from './compliance'
@@ -134,18 +134,18 @@ export function AccountMenuPanel({
     <>
       <DropdownMenuGroup className="py-1">
         {showProfile && (
-          <div className="mx-1 flex flex-nowrap items-center py-2 pl-3 pr-2">
+          <div className="mx-1 flex flex-nowrap items-center py-2 pr-2 pl-3">
             <div className="grow">
-              <div className="break-all text-text-primary system-md-medium">
+              <div className="system-md-medium break-all text-text-primary">
                 {userProfile.name}
                 {isEducationAccount && (
                   <PremiumBadge size="s" color="blue" className="ml-1 px-2!">
-                    <span aria-hidden className="i-ri-graduation-cap-fill mr-1 h-3 w-3" />
+                    <span aria-hidden className="mr-1 i-ri-graduation-cap-fill h-3 w-3" />
                     <span className="system-2xs-medium">EDU</span>
                   </PremiumBadge>
                 )}
               </div>
-              <div className="break-all text-text-tertiary system-xs-regular">{userProfile.email}</div>
+              <div className="system-xs-regular break-all text-text-tertiary">{userProfile.email}</div>
             </div>
             <Avatar avatar={userProfile.avatar_url} name={userProfile.name} size="lg" />
           </div>
@@ -193,7 +193,7 @@ export function AccountMenuPanel({
               trailing={(
                 <div className="flex items-center gap-0.5 rounded-[5px] border border-divider-deep bg-components-badge-bg-dimm px-[5px] py-[3px]">
                   <span aria-hidden className="i-ri-star-line size-3 shrink-0 text-text-tertiary" />
-                  <GithubStar className="text-text-tertiary system-2xs-medium-uppercase" />
+                  <GithubStar className="system-2xs-medium-uppercase text-text-tertiary" />
                 </div>
               )}
             />
@@ -207,7 +207,7 @@ export function AccountMenuPanel({
                   }}
                   trailing={(
                     <div className="flex shrink-0 items-center">
-                      <div className="mr-2 text-text-tertiary system-xs-regular">{langGeniusVersionInfo.current_version}</div>
+                      <div className="mr-2 system-xs-regular text-text-tertiary">{langGeniusVersionInfo.current_version}</div>
                       <Indicator color={langGeniusVersionInfo.current_version === langGeniusVersionInfo.latest_version ? 'green' : 'orange'} />
                     </div>
                   )}

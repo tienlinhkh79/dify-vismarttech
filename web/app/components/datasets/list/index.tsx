@@ -1,9 +1,9 @@
 'use client'
 
+import { RiSearchLine } from '@remixicon/react'
 import { useBoolean, useDebounceFn } from 'ahooks'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RiSearchLine } from '@remixicon/react'
 
 import Button from '@/app/components/base/button'
 import { ApiConnectionMod } from '@/app/components/base/icons/src/vender/solid/development'
@@ -66,7 +66,7 @@ const List = () => {
           'sticky top-0 z-10 shrink-0 border-b border-divider-regular bg-background-body/90 backdrop-blur-md',
         )}
       >
-        <div className="flex flex-col gap-4 px-6 pb-4 pt-5 md:px-12 md:pb-5 md:pt-6">
+        <div className="flex flex-col gap-4 px-6 pt-5 pb-4 md:px-12 md:pt-6 md:pb-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-6">
             <div className="min-w-0 shrink-0 lg:max-w-[min(100%,14rem)]">
               <h1 className="text-xl font-semibold tracking-tight text-text-primary md:text-2xl">
@@ -77,7 +77,7 @@ const List = () => {
               type="button"
               onClick={openCommandPalette}
               className={cn(
-                'system-sm-regular flex min-h-10 w-full min-w-0 cursor-pointer items-center gap-2 rounded-xl border border-divider-regular',
+                'flex min-h-10 w-full min-w-0 cursor-pointer items-center gap-2 rounded-xl border border-divider-regular system-sm-regular',
                 'bg-components-input-bg-normal px-3 py-2.5 text-left text-text-tertiary transition-colors',
                 'hover:border-divider-deep hover:bg-state-base-hover hover:text-text-secondary',
                 'lg:mx-auto lg:max-w-2xl lg:flex-1',
@@ -131,7 +131,7 @@ const List = () => {
                 onClick={() => setShowExternalApiPanel(true)}
               >
                 <ApiConnectionMod className="h-4 w-4 text-components-button-secondary-text" />
-                <div className="flex items-center justify-center gap-1 px-0.5 text-components-button-secondary-text system-sm-medium">
+                <div className="flex items-center justify-center gap-1 px-0.5 system-sm-medium text-components-button-secondary-text">
                   {t('externalAPIPanelTitle', { ns: 'dataset' })}
                 </div>
               </Button>

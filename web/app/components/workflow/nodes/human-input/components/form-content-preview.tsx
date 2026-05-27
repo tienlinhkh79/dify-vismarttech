@@ -92,7 +92,7 @@ const FormContentPreview: FC<FormContentPreviewProps> = ({
             </Button>
           ))}
         </div>
-        <div className="mt-1 text-text-tertiary system-xs-regular">{t('nodes.humanInput.editor.previewTip', { ns: 'workflow' })}</div>
+        <div className="mt-1 system-xs-regular text-text-tertiary">{t('nodes.humanInput.editor.previewTip', { ns: 'workflow' })}</div>
       </div>
     </div>
   )

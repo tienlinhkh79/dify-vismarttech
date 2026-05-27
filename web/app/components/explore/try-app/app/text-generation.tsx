@@ -199,7 +199,7 @@ const TextGeneration: FC<Props> = ({
       )}
       >
         {/* Header */}
-        <div className={cn('shrink-0 space-y-4 pb-2', isPC ? ' p-8 pb-0' : 'p-4 pb-0')}>
+        <div className={cn('shrink-0 space-y-4 pb-2', isPC ? 'p-8 pb-0' : 'p-4 pb-0')}>
           <div className="flex items-center gap-3">
             <AppIcon
               size={isPC ? 'large' : 'small'}
@@ -208,7 +208,7 @@ const TextGeneration: FC<Props> = ({
               background={siteInfo.icon_background || appDefaultIconBackground}
               imageUrl={siteInfo.icon_url}
             />
-            <div className="system-md-semibold grow truncate text-text-secondary">{siteInfo.title}</div>
+            <div className="grow truncate system-md-semibold text-text-secondary">{siteInfo.title}</div>
           </div>
           {siteInfo.description && (
             <div className="system-xs-regular text-text-tertiary">{siteInfo.description}</div>
@@ -241,7 +241,7 @@ const TextGeneration: FC<Props> = ({
             className={cn(
               isShowResultPanel
                 ? 'flex items-center justify-center p-2 pt-6'
-                : 'absolute left-0 top-0 z-10 flex w-full items-center justify-center px-2 pb-[57px] pt-[3px]',
+                : 'absolute top-0 left-0 z-10 flex w-full items-center justify-center px-2 pt-[3px] pb-[57px]',
             )}
             onClick={() => {
               if (isShowResultPanel)

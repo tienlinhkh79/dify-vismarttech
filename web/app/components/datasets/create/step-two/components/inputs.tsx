@@ -16,7 +16,7 @@ import {
 import { env } from '@/env'
 
 const TextLabel: FC<PropsWithChildren> = (props) => {
-  return <label className="text-xs font-semibold leading-none text-text-secondary">{props.children}</label>
+  return <label className="text-xs leading-none font-semibold text-text-secondary">{props.children}</label>
 }
 
 const FormField: FC<PropsWithChildren<{ label: ReactNode }>> = (props) => {

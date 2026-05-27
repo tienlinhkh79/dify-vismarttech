@@ -54,13 +54,13 @@ export default function Drawer({
         if (!clickOutsideNotOpen)
           onClose()
       }}
-      className={cn('fixed inset-0 z-30 overflow-y-auto', dialogClassName)}
+      className={cn('inset-0 fixed z-30 overflow-y-auto', dialogClassName)}
     >
       <div className={cn('flex h-screen w-screen justify-end', positionCenter && 'justify-center!', containerClassName)}>
         {/* mask */}
         {!noOverlay && (
           <DialogBackdrop
-            className={cn('fixed inset-0 z-40', mask && 'bg-black/30', dialogBackdropClassName)}
+            className={cn('inset-0 fixed z-40', mask && 'bg-black/30', dialogBackdropClassName)}
             onClick={() => {
               if (!clickOutsideNotOpen)
                 onClose()
@@ -73,7 +73,7 @@ export default function Drawer({
               {title && (
                 <DialogTitle
                   as="h3"
-                  className="text-lg font-medium leading-6 text-text-primary"
+                  className="text-lg leading-6 font-medium text-text-primary"
                 >
                   {title}
                 </DialogTitle>

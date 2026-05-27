@@ -61,7 +61,7 @@ const Conversion = () => {
             </span>
           </div>
         </div>
-        <div className="pb-8 pl-[25px] pr-0 pt-6">
+        <div className="pt-6 pr-0 pb-8 pl-[25px]">
           <div className="rounded-l-xl border border-effects-highlight bg-background-default p-1 shadow-md shadow-shadow-shadow-5 backdrop-blur-[5px]">
             <div className="overflow-hidden rounded-l-lg">
               <PipelineScreenShot />

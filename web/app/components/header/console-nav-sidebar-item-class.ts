@@ -3,13 +3,13 @@ import { cn } from '@/utils/classnames'
 /** Shared vertical rail: 8px grid, no asymmetric border that shifts layout on active */
 export const consoleSidebarNavItemClass = cn(
   'flex min-h-10 w-full shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-transparent px-3 py-2',
-  'text-sm font-medium transition-colors select-none outline-none',
-  'focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-components-input-border-hover',
+  'text-sm font-medium transition-colors outline-none select-none',
+  'focus-visible:ring-1 focus-visible:ring-components-input-border-hover focus-visible:outline-hidden focus-visible:ring-inset',
 )
 
 /** Active row: left accent bar only (no mixed pill background + edge bar). */
-export const consoleSidebarNavItemActiveVerticalClass =
-  "relative text-text-primary before:absolute before:inset-y-2 before:left-0 before:block before:w-[3px] before:rounded-r-full before:bg-text-accent before:content-['']"
+export const consoleSidebarNavItemActiveVerticalClass
+  = 'relative text-text-primary before:absolute before:inset-y-2 before:left-0 before:block before:w-[3px] before:rounded-r-full before:bg-text-accent before:content-[\'\']'
 
 /** Same left accent when the nav row sits inside an expanded group container. */
 export const consoleSidebarNavItemActiveVerticalAccentClass = consoleSidebarNavItemActiveVerticalClass

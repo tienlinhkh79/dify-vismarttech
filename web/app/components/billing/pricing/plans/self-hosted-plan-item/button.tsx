@@ -35,7 +35,7 @@ const Button = ({
     <button
       type="button"
       className={cn(
-        'system-xl-semibold flex items-center gap-x-2 py-3 pl-5 pr-4',
+        'flex items-center gap-x-2 py-3 pr-4 pl-5 system-xl-semibold',
         BUTTON_CLASSNAME[plan],
         isPremiumPlan && 'py-2',
       )}
@@ -44,7 +44,7 @@ const Button = ({
       <div className="flex grow items-center gap-x-2">
         <span>{t(`${i18nPrefix}.btnText`, { ns: 'billing' })}</span>
         {isPremiumPlan && (
-          <span className="pb-px pt-[7px]">
+          <span className="pt-[7px] pb-px">
             <AwsMarketplace className="h-6" />
           </span>
         )}

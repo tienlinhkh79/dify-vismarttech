@@ -44,7 +44,7 @@ const AppTypeSelector = ({ value, onChange }: AppSelectorProps) => {
           <button
             type="button"
             aria-label={t('operation.clear', { ns: 'common' })}
-            className="group absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2"
+            className="group absolute top-1/2 right-2 h-4 w-4 -translate-y-1/2"
             onClick={() => onChange([])}
           >
             <RiCloseCircleFill
@@ -137,7 +137,7 @@ function AppTypeSelectTrigger({ values }: { readonly values: AppSelectorProps['v
       )}
       >
         <RiFilter3Line className="h-4 w-4 text-text-tertiary" />
-        <div className="system-sm-medium min-w-[65px] grow text-center text-text-tertiary">{t('typeSelector.all', { ns: 'app' })}</div>
+        <div className="min-w-[65px] grow text-center system-sm-medium text-text-tertiary">{t('typeSelector.all', { ns: 'app' })}</div>
         <RiArrowDownSLine className="h-4 w-4 text-text-tertiary" />
       </div>
     )
@@ -175,7 +175,7 @@ function AppTypeSelectorItem({ checked, type, onClick }: AppTypeSelectorItemProp
     <li>
       <button
         type="button"
-        className="flex w-full items-center space-x-2 rounded-lg py-1 pl-2 pr-1 text-left hover:bg-state-base-hover"
+        className="flex w-full items-center space-x-2 rounded-lg py-1 pr-1 pl-2 text-left hover:bg-state-base-hover"
         aria-pressed={checked}
         onClick={onClick}
       >

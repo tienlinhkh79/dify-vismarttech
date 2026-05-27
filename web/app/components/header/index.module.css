@@ -1,11 +1,23 @@
-.consoleTopBar {
-  background-color: #063e91;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+.consoleTopBar,
+.consoleTopBarMobile {
+  --console-topbar-bg: #0c2138;
+  --console-topbar-bg-end: #081a2e;
+  --console-topbar-border: rgba(255, 255, 255, 0.12);
+  --console-logo-surface: rgba(255, 255, 255, 0.97);
+  --console-logo-surface-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  background: linear-gradient(
+    180deg,
+    var(--console-topbar-bg) 0%,
+    var(--console-topbar-bg-end) 100%
+  );
+  border-bottom: 1px solid var(--console-topbar-border);
 }
 
-.consoleTopBarMobile {
-  background-color: #063e91;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+.consoleLogoSurface {
+  border-radius: 0.5rem;
+  background-color: var(--console-logo-surface);
+  box-shadow: var(--console-logo-surface-shadow);
+  padding: 0.25rem 0.625rem;
 }
 
 .header-DEVELOPMENT {

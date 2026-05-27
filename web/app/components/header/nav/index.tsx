@@ -55,7 +55,7 @@ const Nav = ({
 
   const verticalLinkClass = cn(
     consoleSidebarNavItemClass,
-    isVerticalExpanded && 'rounded-b-none rounded-t-lg',
+    isVerticalExpanded && 'rounded-t-lg rounded-b-none',
     isActivated && !isVerticalExpanded && consoleSidebarNavItemActiveVerticalClass,
     isActivated && isVerticalExpanded && consoleSidebarNavItemActiveVerticalAccentClass,
     !isActivated && 'text-text-secondary hover:bg-state-base-hover hover:text-text-primary',
@@ -63,8 +63,8 @@ const Nav = ({
   )
 
   const horizontalRowClass = cn(
-    'flex h-7 cursor-pointer select-none items-center gap-2 rounded-lg px-2.5 outline-none',
-    'focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-components-input-border-hover',
+    'flex h-7 cursor-pointer items-center gap-2 rounded-lg px-2.5 outline-none select-none',
+    'focus-visible:ring-1 focus-visible:ring-components-input-border-hover focus-visible:outline-hidden focus-visible:ring-inset',
     isActivated && 'text-components-main-nav-nav-button-text-active',
     !isActivated && 'text-components-main-nav-nav-button-text',
     curNav && isActivated && 'hover:bg-components-main-nav-nav-button-bg-active-hover',
@@ -90,7 +90,7 @@ const Nav = ({
         href={link}
         onClick={handleMainRowClick}
         className={cn(
-          isVertical && cn('min-w-0 w-full no-underline', verticalLinkClass),
+          isVertical && cn('w-full min-w-0 no-underline', verticalLinkClass),
           !isVertical && 'flex min-w-0 items-center',
         )}
         onMouseEnter={isVertical ? () => setHovered(true) : undefined}

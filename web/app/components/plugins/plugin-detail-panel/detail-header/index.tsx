@@ -176,7 +176,7 @@ const DetailHeader = ({
                     text={(
                       <>
                         <div>{isFromGitHub ? (meta?.version ?? version ?? '') : version}</div>
-                        {isFromMarketplace && !isReadmeView && <span aria-hidden className="i-ri-arrow-left-right-line ml-1 h-3 w-3 text-text-tertiary" />}
+                        {isFromMarketplace && !isReadmeView && <span aria-hidden className="ml-1 i-ri-arrow-left-right-line h-3 w-3 text-text-tertiary" />}
                       </>
                     )}
                     hasRedCornerMark={hasNewVersion}
@@ -269,7 +269,7 @@ const DetailHeader = ({
       )}
 
       {/* Description */}
-      {!isReadmeView && <Description className="mb-2 mt-3 h-auto" text={description[locale]} descriptionLineRows={2} />}
+      {!isReadmeView && <Description className="mt-3 mb-2 h-auto" text={description[locale]} descriptionLineRows={2} />}
 
       {/* Plugin Auth for Tools */}
       {category === PluginCategoryEnum.tool && !isReadmeView && (

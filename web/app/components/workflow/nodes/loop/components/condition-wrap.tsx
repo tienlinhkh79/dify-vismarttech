@@ -76,7 +76,7 @@ const ConditionWrap: FC<Props> = ({
         <div
           className={cn(
             'group relative radius-lg bg-components-panel-bg',
-            !isSubVariable && 'min-h-[40px] px-3 py-1 ',
+            !isSubVariable && 'min-h-[40px] px-3 py-1',
             isSubVariable && 'px-1 py-2',
           )}
         >

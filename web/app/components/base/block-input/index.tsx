@@ -63,7 +63,7 @@ const BlockInput: FC<IBlockInputProps> = ({
   }, [isEditing])
 
   const style = cn({
-    'block h-full w-full break-all border-0 px-4 py-2 text-sm text-gray-900 outline-0': true,
+    'block h-full w-full border-0 px-4 py-2 text-sm break-all text-gray-900 outline-0': true,
     'block-input--editing': isEditing,
   })
 

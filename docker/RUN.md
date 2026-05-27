@@ -124,3 +124,33 @@ docker compose up -d
 
 - **`the --chmod option requires BuildKit`**: script build dùng `DOCKER_BUILDKIT=0`; `web/Dockerfile` đã tách `chmod` ra `RUN` để tương thích. Kéo bản `web/Dockerfile` mới nhất rồi build lại.
 - **`Can't add file ... to tar: io: read/write on closed pipe`**: lỗi gửi context tạm thời — đóng build/build khác đang chạy, thử lại `.\build-web.cmd --no-cache`; nếu vẫn lỗi, tạm tắt quét real-time của antivirus trên thư mục repo hoặc thêm repo vào exclusion.
+
+## 6. Docker Desktop Start / lỗi `init_permissions`
+
+Service **`init_permissions`** trong `docker-compose.yaml` là container **chạy một lần** (`image: busybox:latest`, `restart: "no"`) để `chown` thư mục `./volumes/app/storage` trước khi `api` / `worker` / `worker_beat` chạy. Đây là **image kéo từ registry**, không phải build local và không nằm trong profile tắt.
+
+**Nguyên nhân lỗi** (`could not find init_permissions`, `api is missing dependency init_permissions`, hoặc `compose [start] exit status 1`):
+
+- Nút **Start** trên Docker Desktop (và lệnh `docker compose start`) chỉ **bật lại container đã tồn tại**, không tạo container mới.
+- Sau `docker compose down`, lần `up --build` thất bại giữa chừng, hoặc container `docker-init_permissions-1` bị xóa, stack không còn container init → `start` không thể thỏa `depends_on: service_completed_successfully`.
+
+Lỗi này **không** có nghĩa thiếu `dify-web:local` hay build `web` thất bại (dù trên Windows vẫn nên dùng `.\build-web.cmd` với `DOCKER_BUILDKIT=0` trước khi `up` lần đầu).
+
+**Cách xử lý (PowerShell, trong thư mục `docker`):**
+
+```powershell
+cd c:\chatbot\dify\docker
+docker pull busybox:latest
+docker compose up -d init_permissions
+docker compose up -d
+```
+
+Khuyến nghị: dùng **`docker compose up -d`** thay vì chỉ **Start** trên Docker Desktop khi vừa `down` hoặc clone mới. Nếu `pnpm` báo lockfile lệch khi build `web`, chạy `pnpm install` ở root repo rồi `.\build-web.cmd` lại.
+
+Kiểm tra nhanh:
+
+```powershell
+docker compose ps -a init_permissions
+docker images busybox:latest
+```
+

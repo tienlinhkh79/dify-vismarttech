@@ -78,7 +78,7 @@ const Doc = ({ appDetail }: IDocProps) => {
 
   return (
     <div className="flex">
-      <div className={`fixed right-20 top-32 z-10 transition-all duration-150 ease-out ${isTocExpanded ? 'w-[280px]' : 'w-11'}`}>
+      <div className={`fixed top-32 right-20 z-10 transition-all duration-150 ease-out ${isTocExpanded ? 'w-[280px]' : 'w-11'}`}>
         <TocPanel
           toc={toc}
           activeSection={activeSection}

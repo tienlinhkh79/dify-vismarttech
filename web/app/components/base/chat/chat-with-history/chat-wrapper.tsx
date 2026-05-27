@@ -265,7 +265,7 @@ const ChatWrapper = () => {
               imageUrl={appData?.site.icon_url}
             />
             <div className="w-0 grow">
-              <div className="body-lg-regular grow rounded-2xl bg-chat-bubble-bg px-4 py-3 text-text-primary">
+              <div className="grow rounded-2xl bg-chat-bubble-bg px-4 py-3 body-lg-regular text-text-primary">
                 <Markdown content={welcomeMessage.content} />
                 <SuggestedQuestions item={welcomeMessage} />
               </div>

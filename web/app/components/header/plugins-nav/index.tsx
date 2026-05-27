@@ -37,12 +37,11 @@ const PluginsNav = ({
       href="/plugins"
       className={cn(className, 'group', 'plugins-nav-button',
       // used for use-fold-anim-into.ts
-        isVertical && 'block w-full min-w-0',
-      )}
+        isVertical && 'block w-full min-w-0')}
     >
       <div
         className={cn(
-          'system-sm-medium relative flex flex-row items-center gap-0.5 rounded-xl border border-transparent p-1.5',
+          'relative flex flex-row items-center gap-0.5 rounded-xl border border-transparent p-1.5 system-sm-medium',
           isVertical ? 'h-auto min-h-9 w-full justify-start' : 'h-8 justify-center',
           activated && !isOnPrimary && 'border-components-main-nav-nav-button-border bg-components-main-nav-nav-button-bg-active text-components-main-nav-nav-button-text shadow-md',
           activated && isOnPrimary && 'border-white/30 bg-white/15 text-white shadow-md',
@@ -56,7 +55,7 @@ const PluginsNav = ({
           (isFailed || isInstallingWithError) && !activated && (
             <Indicator
               color="red"
-              className="absolute -left-px -top-px"
+              className="absolute -top-px -left-px"
             />
           )
         }

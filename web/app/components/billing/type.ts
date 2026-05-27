@@ -104,9 +104,9 @@ export type CurrentPlanInfoBackend = {
   }
   human_input_email_delivery_enabled: boolean
   /** Fork SaaS: omnichannel channel count vs plan limit (from /features when billing enabled). */
-  omnichannel_channels?: { size: number; limit: number }
+  omnichannel_channels?: { size: number, limit: number }
   /** Fork SaaS: CRM lead count vs plan limit. */
-  crm_leads?: { size: number; limit: number }
+  crm_leads?: { size: number, limit: number }
 }
 
 export type SubscriptionUrlsBackend = {

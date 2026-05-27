@@ -72,7 +72,7 @@ const ResultItem = ({
         {isParentChildRetrieval && (
           <div className="mt-1">
             <div
-              className={cn('inline-flex h-6 cursor-pointer select-none items-center space-x-0.5 rounded-lg text-text-secondary', isFold && 'bg-workflow-process-bg pl-1')}
+              className={cn('inline-flex h-6 cursor-pointer items-center space-x-0.5 rounded-lg text-text-secondary select-none', isFold && 'bg-workflow-process-bg pl-1')}
               onClick={(e) => {
                 e.stopPropagation()
                 toggleFold()

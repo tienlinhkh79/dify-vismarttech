@@ -131,10 +131,10 @@ const MCPModalContent: FC<MCPModalContentProps> = ({
 
   return (
     <>
-      <div className="absolute right-5 top-5 z-10 cursor-pointer p-1.5" onClick={onHide}>
+      <div className="absolute top-5 right-5 z-10 cursor-pointer p-1.5" onClick={onHide}>
         <RiCloseLine className="h-5 w-5 text-text-tertiary" />
       </div>
-      <div className="title-2xl-semi-bold relative pb-3 text-xl text-text-primary">
+      <div className="relative pb-3 title-2xl-semi-bold text-xl text-text-primary">
         {!isCreate ? t('mcp.modal.editTitle', { ns: 'tools' }) : t('mcp.modal.title', { ns: 'tools' })}
       </div>
 
@@ -181,7 +181,7 @@ const MCPModalContent: FC<MCPModalContentProps> = ({
               coverElement={
                 isHovering
                   ? (
-                      <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-2xl bg-background-overlay-alt">
+                      <div className="inset-0 absolute flex items-center justify-center overflow-hidden rounded-2xl bg-background-overlay-alt">
                         <RiEditLine className="size-6 text-text-primary-on-surface" />
                       </div>
                     )
@@ -197,7 +197,7 @@ const MCPModalContent: FC<MCPModalContentProps> = ({
           <div className="flex h-6 items-center">
             <span className="system-sm-medium text-text-secondary">{t('mcp.modal.serverIdentifier', { ns: 'tools' })}</span>
           </div>
-          <div className="body-xs-regular mb-1 text-text-tertiary">{t('mcp.modal.serverIdentifierTip', { ns: 'tools' })}</div>
+          <div className="mb-1 body-xs-regular text-text-tertiary">{t('mcp.modal.serverIdentifierTip', { ns: 'tools' })}</div>
           <Input
             value={state.serverIdentifier}
             onChange={e => actions.setServerIdentifier(e.target.value)}

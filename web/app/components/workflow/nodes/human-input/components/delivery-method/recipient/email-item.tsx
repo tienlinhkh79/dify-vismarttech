@@ -35,7 +35,7 @@ const EmailItem = ({
         <RiErrorWarningFill className="h-4 w-4 text-text-destructive" />
       )}
       {!isError && <Avatar avatar={data.avatar_url} size="xxs" name={data.name || data.email} />}
-      <div title={data.email} className="system-xs-regular max-w-[500px] truncate text-text-primary">
+      <div title={data.email} className="max-w-[500px] truncate system-xs-regular text-text-primary">
         {email === data.email ? data.name : data.email}
         {email === data.email && <span className="system-xs-regular text-text-tertiary">{t('members.you', { ns: 'common' })}</span>}
       </div>

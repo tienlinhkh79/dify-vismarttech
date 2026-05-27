@@ -28,11 +28,11 @@ export default function FullScreenModal({
     <Transition show={open} appear>
       <Dialog as="div" className={cn('modal-dialog', wrapperClassName)} onClose={onClose}>
         <TransitionChild>
-          <div className={cn('fixed inset-0 bg-background-overlay-backdrop backdrop-blur-[6px]', 'duration-300 ease-in data-closed:opacity-0', 'data-enter:opacity-100', 'data-leave:opacity-0')} />
+          <div className={cn('inset-0 fixed bg-background-overlay-backdrop backdrop-blur-[6px]', 'duration-300 ease-in data-closed:opacity-0', 'data-enter:opacity-100', 'data-leave:opacity-0')} />
         </TransitionChild>
 
         <div
-          className="fixed inset-0 h-screen w-screen p-4"
+          className="inset-0 fixed h-screen w-screen p-4"
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
@@ -44,7 +44,7 @@ export default function FullScreenModal({
                 {closable
                   && (
                     <div
-                      className="absolute right-3 top-3 z-50 flex h-9 w-9 cursor-pointer items-center justify-center
+                      className="absolute top-3 right-3 z-50 flex h-9 w-9 cursor-pointer items-center justify-center
                   radius-lg bg-components-button-tertiary-bg hover:bg-components-button-tertiary-bg-hover"
                       onClick={(e) => {
                         e.stopPropagation()

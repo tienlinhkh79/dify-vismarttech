@@ -46,9 +46,9 @@ const StatusAction: FC<Props> = ({
 }) => {
   const { Icon, color } = getIcon(type)
   return (
-    <div className="relative flex h-[34px] items-center rounded-lg border border-components-panel-border bg-components-panel-bg-blur pl-2 pr-3 shadow-xs">
+    <div className="relative flex h-[34px] items-center rounded-lg border border-components-panel-border bg-components-panel-bg-blur pr-3 pl-2 shadow-xs">
       <div className={
-        `absolute inset-0 rounded-lg opacity-40 ${(type === 'success' && 'bg-[linear-gradient(92deg,rgba(23,178,106,0.25)_0%,rgba(255,255,255,0.00)_100%)]')
+        `inset-0 absolute rounded-lg opacity-40 ${(type === 'success' && 'bg-[linear-gradient(92deg,rgba(23,178,106,0.25)_0%,rgba(255,255,255,0.00)_100%)]')
         || (type === 'warning' && 'bg-[linear-gradient(92deg,rgba(247,144,9,0.25)_0%,rgba(255,255,255,0.00)_100%)]')
         || (type === 'error' && 'bg-[linear-gradient(92deg,rgba(240,68,56,0.25)_0%,rgba(255,255,255,0.00)_100%)]')
         || (type === 'info' && 'bg-[linear-gradient(92deg,rgba(11,165,236,0.25)_0%,rgba(255,255,255,0.00)_100%)]')

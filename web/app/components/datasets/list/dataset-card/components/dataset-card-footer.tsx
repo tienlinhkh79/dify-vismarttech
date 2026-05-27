@@ -35,7 +35,7 @@ const DatasetCardFooter = ({ dataset }: DatasetCardFooterProps) => {
   return (
     <div
       className={cn(
-        'flex items-center gap-x-3 px-4 pb-3 pt-2 text-text-tertiary',
+        'flex items-center gap-x-3 px-4 pt-2 pb-3 text-text-tertiary',
         !dataset.embedding_available && 'opacity-30',
       )}
     >

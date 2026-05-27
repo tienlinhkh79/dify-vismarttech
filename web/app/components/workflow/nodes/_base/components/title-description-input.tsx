@@ -33,7 +33,7 @@ export const TitleInput = memo(({
       value={localValue}
       onChange={e => setLocalValue(e.target.value)}
       className={`
-        system-xl-semibold mr-2 h-7 min-w-0 grow appearance-none rounded-md border border-transparent bg-transparent px-1 text-text-primary
+        mr-2 h-7 min-w-0 grow appearance-none rounded-md border border-transparent bg-transparent px-1 system-xl-semibold text-text-primary
         outline-hidden focus:shadow-xs
       `}
       placeholder={t('common.addTitle', { ns: 'workflow' }) || ''}
@@ -63,8 +63,8 @@ export const DescriptionInput = memo(({
   return (
     <div
       className={`
-        leading-0 group flex max-h-[60px] overflow-y-auto rounded-lg bg-components-panel-bg
-        px-2 py-[5px]
+        group flex max-h-[60px] overflow-y-auto rounded-lg bg-components-panel-bg px-2
+        py-[5px] leading-0
         ${focus && 'shadow-xs!'}
       `}
     >

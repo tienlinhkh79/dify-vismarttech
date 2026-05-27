@@ -103,7 +103,7 @@ const AvatarWithEdit = ({ onSave, ...props }: AvatarWithEditProps) => {
         <div className="group relative">
           <Avatar {...props} onLoadingStatusChange={status => setOnAvatarError(status === 'error')} />
           <div
-            className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
+            className="inset-0 absolute flex cursor-pointer items-center justify-center rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
             onClick={() => {
               if (hoverArea === 'right' && !onAvatarError)
                 setIsShowDeleteConfirm(true)
@@ -151,7 +151,7 @@ const AvatarWithEdit = ({ onSave, ...props }: AvatarWithEditProps) => {
 
       <Dialog open={isShowDeleteConfirm} onOpenChange={open => !open && setIsShowDeleteConfirm(false)}>
         <DialogContent className="w-[362px]! p-6!">
-          <div className="mb-3 text-text-primary title-2xl-semi-bold">{t('avatar.deleteTitle', { ns: 'common' })}</div>
+          <div className="mb-3 title-2xl-semi-bold text-text-primary">{t('avatar.deleteTitle', { ns: 'common' })}</div>
           <p className="mb-8 text-text-secondary">{t('avatar.deleteDescription', { ns: 'common' })}</p>
 
           <div className="flex w-full items-center justify-center gap-2">

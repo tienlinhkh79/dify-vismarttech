@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable ts/no-explicit-any -- API-driven credential schema */
 import type { FC } from 'react'
 import type { Collection } from '../../types'
 import { noop } from 'es-toolkit/function'
@@ -245,7 +246,7 @@ const ConfigCredential: FC<Props> = ({
         toast.success('Messenger channel created.')
       }
       else {
-        const updatePayload: Record<string, unknown> = {
+        const updatePayload: Record<string, any> = {
           app_id: payload.app_id,
           name: payload.name,
           page_id: payload.page_id,
@@ -341,13 +342,17 @@ const ConfigCredential: FC<Props> = ({
                         <div className="mt-3">
                           <div className="mb-1 system-xs-regular text-text-tertiary">Select Facebook Page</div>
                           <select
-                            className="w-full rounded-lg border border-components-input-border bg-components-input-bg-normal px-2 py-2 text-text-primary"
+                            className="border-components-input-border w-full rounded-lg border bg-components-input-bg-normal px-2 py-2 text-text-primary"
                             value={String(tempCredential.page_id || '')}
                             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleSelectPage(e.target.value)}
                           >
                             {oauthPages.map((page: MessengerOAuthPage) => (
                               <option key={page.id} value={page.id}>
-                                {page.name} ({page.id})
+                                {page.name}
+                                {' '}
+                                (
+                                {page.id}
+                                )
                               </option>
                             ))}
                           </select>
@@ -362,7 +367,7 @@ const ConfigCredential: FC<Props> = ({
                         <div className="mb-2">
                           <div className="mb-1 system-xs-regular text-text-tertiary">{t('settings.channelsExisting', { ns: 'common' })}</div>
                           <select
-                            className="w-full rounded-lg border border-components-input-border bg-components-input-bg-normal px-2 py-2 text-text-primary"
+                            className="border-components-input-border w-full rounded-lg border bg-components-input-bg-normal px-2 py-2 text-text-primary"
                             value={channelIdInput}
                             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleLoadChannel(e.target.value)}
                           >
@@ -377,25 +382,25 @@ const ConfigCredential: FC<Props> = ({
                       </div>
                       <div className="mb-2 grid grid-cols-1 gap-2">
                         <input
-                          className="w-full rounded-lg border border-components-input-border bg-components-input-bg-normal px-2 py-2 text-text-primary"
+                          className="border-components-input-border w-full rounded-lg border bg-components-input-bg-normal px-2 py-2 text-text-primary"
                           placeholder="channel_id (e.g. fb-main)"
                           value={channelIdInput}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setChannelIdInput(e.target.value)}
                         />
                         <input
-                          className="w-full rounded-lg border border-components-input-border bg-components-input-bg-normal px-2 py-2 text-text-primary"
+                          className="border-components-input-border w-full rounded-lg border bg-components-input-bg-normal px-2 py-2 text-text-primary"
                           placeholder="channel name"
                           value={channelNameInput}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setChannelNameInput(e.target.value)}
                         />
                         <input
-                          className="w-full rounded-lg border border-components-input-border bg-components-input-bg-normal px-2 py-2 text-text-primary"
+                          className="border-components-input-border w-full rounded-lg border bg-components-input-bg-normal px-2 py-2 text-text-primary"
                           placeholder="app_id (Vismarttech app UUID)"
                           value={channelAppIdInput}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setChannelAppIdInput(e.target.value)}
                         />
                         <input
-                          className="w-full rounded-lg border border-components-input-border bg-components-input-bg-normal px-2 py-2 text-text-primary"
+                          className="border-components-input-border w-full rounded-lg border bg-components-input-bg-normal px-2 py-2 text-text-primary"
                           placeholder={existingChannelIds.includes(channelIdInput.trim()) ? 'verify_token (optional to keep current)' : 'verify_token'}
                           value={channelVerifyTokenInput}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setChannelVerifyTokenInput(e.target.value)}
@@ -411,7 +416,9 @@ const ConfigCredential: FC<Props> = ({
                       </div>
                       {callbackUrl && (
                         <div className="mb-3 rounded-lg bg-background-default px-2 py-2 text-xs text-text-secondary">
-                          Callback URL: {callbackUrl}
+                          Callback URL:
+                          {' '}
+                          {callbackUrl}
                         </div>
                       )}
                       <Button
@@ -425,7 +432,7 @@ const ConfigCredential: FC<Props> = ({
                       </Button>
                     </div>
                   )}
-                  <div className={cn((collection.is_team_authorization && !isHideRemoveBtn) ? 'justify-between' : 'justify-end', 'mt-2 flex ')}>
+                  <div className={cn((collection.is_team_authorization && !isHideRemoveBtn) ? 'justify-between' : 'justify-end', 'mt-2 flex')}>
                     {
                       (collection.is_team_authorization && !isHideRemoveBtn) && (
                         <Button onClick={onRemove}>{t('operation.remove', { ns: 'common' })}</Button>

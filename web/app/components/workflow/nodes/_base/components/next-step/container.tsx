@@ -33,7 +33,7 @@ const Container = ({
         branchName && (
           <div
             className={cn(
-              'system-2xs-semibold-uppercase flex items-center truncate px-2 text-text-tertiary',
+              'flex items-center truncate px-2 system-2xs-semibold-uppercase text-text-tertiary',
               isFailBranch && 'text-text-warning',
             )}
             title={branchName}

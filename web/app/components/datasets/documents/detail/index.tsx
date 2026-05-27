@@ -195,7 +195,7 @@ const DocumentDetail: FC<DocumentDetailProps> = ({ datasetId, documentId }) => {
   return (
     <DocumentContext.Provider value={contextValue}>
       <div className="flex h-full flex-col bg-background-default">
-        <div className="flex min-h-16 flex-wrap items-center justify-between border-b border-b-divider-subtle py-2.5 pl-3 pr-4">
+        <div className="flex min-h-16 flex-wrap items-center justify-between border-b border-b-divider-subtle py-2.5 pr-4 pl-3">
           <button
             type="button"
             data-testid="document-detail-back-button"
@@ -270,7 +270,7 @@ const DocumentDetail: FC<DocumentDetailProps> = ({ datasetId, documentId }) => {
           {isDetailLoading
             ? <Loading type="app" />
             : (
-                <div className={cn('flex h-full min-w-0 grow flex-col', !embedding && isFullDocMode && 'relative pl-11 pr-11 pt-4', !embedding && !isFullDocMode && 'relative pl-5 pr-11 pt-3')}>
+                <div className={cn('flex h-full min-w-0 grow flex-col', !embedding && isFullDocMode && 'relative pt-4 pr-11 pl-11', !embedding && !isFullDocMode && 'relative pt-3 pr-11 pl-5')}>
                   {embedding
                     ? (
                         <Embedding
@@ -292,7 +292,7 @@ const DocumentDetail: FC<DocumentDetailProps> = ({ datasetId, documentId }) => {
               )}
           <FloatRightContainer showClose isOpen={showMetadata} onClose={() => setShowMetadata(false)} isMobile={isMobile} panelClassName="justify-start!" footer={null}>
             <Metadata
-              className="mr-2 mt-3"
+              className="mt-3 mr-2"
               datasetId={datasetId}
               documentId={documentId}
               docDetail={docDetail}

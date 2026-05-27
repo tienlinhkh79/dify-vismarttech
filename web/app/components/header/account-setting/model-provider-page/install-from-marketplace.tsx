@@ -45,7 +45,7 @@ const InstallFromMarketplace = ({
       <div className="flex items-center justify-between">
         <button
           type="button"
-          className="flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 text-left text-text-primary system-md-semibold"
+          className="flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 text-left system-md-semibold text-text-primary"
           onClick={() => setCollapse(prev => !prev)}
           aria-expanded={!collapse}
         >
@@ -53,12 +53,12 @@ const InstallFromMarketplace = ({
           {t('modelProvider.installProvider', { ns: 'common' })}
         </button>
         <div className="mb-2 flex items-center pt-2">
-          <span className="pr-1 text-text-tertiary system-sm-regular">{t('modelProvider.discoverMore', { ns: 'common' })}</span>
+          <span className="pr-1 system-sm-regular text-text-tertiary">{t('modelProvider.discoverMore', { ns: 'common' })}</span>
           <Link
             target="_blank"
             rel="noopener noreferrer"
             href={getMarketplaceUrl('', { theme })}
-            className="inline-flex items-center text-text-accent system-sm-medium"
+            className="inline-flex items-center system-sm-medium text-text-accent"
           >
             {t('marketplace.difyMarketplace', { ns: 'plugin' })}
             <span className="i-ri-arrow-right-up-line h-4 w-4" />

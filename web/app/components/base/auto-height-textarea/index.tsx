@@ -69,7 +69,7 @@ const AutoHeightTextarea = (
     (
       <div className={`relative ${wrapperClassName}`}>
         <div
-          className={cn(className, 'invisible overflow-y-auto whitespace-pre-wrap  break-all')}
+          className={cn(className, 'invisible overflow-y-auto break-all whitespace-pre-wrap')}
           style={{
             minHeight,
             maxHeight,
@@ -81,7 +81,7 @@ const AutoHeightTextarea = (
         <textarea
           ref={ref}
           autoFocus={autoFocus}
-          className={cn(className, 'absolute inset-0 resize-none overflow-auto')}
+          className={cn(className, 'inset-0 absolute resize-none overflow-auto')}
           style={{
             paddingRight: (value && value.trim().length > 10000) ? 140 : 130,
           }}

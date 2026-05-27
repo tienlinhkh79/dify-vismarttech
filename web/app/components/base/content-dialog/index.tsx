@@ -19,11 +19,11 @@ const ContentDialog = ({
     <Transition
       show={show}
       as="div"
-      className="absolute left-0 top-0 z-30 box-border h-full w-full p-2"
+      className="absolute top-0 left-0 z-30 box-border h-full w-full p-2"
     >
       <TransitionChild>
         <div
-          className={cn('absolute inset-0 left-0 w-full bg-app-detail-overlay-bg', 'duration-300 ease-in data-closed:opacity-0', 'data-enter:opacity-100', 'data-leave:opacity-0')}
+          className={cn('inset-0 absolute left-0 w-full bg-app-detail-overlay-bg', 'duration-300 ease-in data-closed:opacity-0', 'data-enter:opacity-100', 'data-leave:opacity-0')}
           onClick={onClose}
         />
       </TransitionChild>

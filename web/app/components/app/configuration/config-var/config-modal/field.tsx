@@ -20,10 +20,10 @@ const Field: FC<Props> = ({
   const { t } = useTranslation()
   return (
     <div className={cn(className)}>
-      <div className="leading-8! text-text-secondary system-sm-semibold">
+      <div className="system-sm-semibold leading-8! text-text-secondary">
         {title}
         {isOptional && (
-          <span className="ml-1 text-text-tertiary system-xs-regular">
+          <span className="ml-1 system-xs-regular text-text-tertiary">
             (
             {t('variableConfig.optional', { ns: 'appDebug' })}
             )

@@ -23,8 +23,9 @@ export function resolveConsoleApiBaseHref(apiPrefix: string): string {
     && trimmed.startsWith('/')
     && trimmed !== bp
     && !trimmed.startsWith(`${bp}/`)
-  )
+  ) {
     trimmed = `${bp}${trimmed}`.replace(/\/$/, '')
+  }
 
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://'))
     return `${trimmed}/`

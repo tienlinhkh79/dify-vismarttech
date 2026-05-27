@@ -139,12 +139,12 @@ const ViewAnnotationModal: FC<Props> = ({
           <table className={cn('w-full min-w-[440px] border-collapse border-0')}>
             <thead className="system-xs-medium-uppercase text-text-tertiary">
               <tr>
-                <td className="w-5 whitespace-nowrap rounded-l-lg bg-background-section-burn pl-2 pr-1">{t('hitHistoryTable.query', { ns: 'appAnnotation' })}</td>
-                <td className="whitespace-nowrap bg-background-section-burn py-1.5 pl-3">{t('hitHistoryTable.match', { ns: 'appAnnotation' })}</td>
-                <td className="whitespace-nowrap bg-background-section-burn py-1.5 pl-3">{t('hitHistoryTable.response', { ns: 'appAnnotation' })}</td>
-                <td className="whitespace-nowrap bg-background-section-burn py-1.5 pl-3">{t('hitHistoryTable.source', { ns: 'appAnnotation' })}</td>
-                <td className="whitespace-nowrap bg-background-section-burn py-1.5 pl-3">{t('hitHistoryTable.score', { ns: 'appAnnotation' })}</td>
-                <td className="w-[160px] whitespace-nowrap rounded-r-lg bg-background-section-burn py-1.5 pl-3">{t('hitHistoryTable.time', { ns: 'appAnnotation' })}</td>
+                <td className="w-5 rounded-l-lg bg-background-section-burn pr-1 pl-2 whitespace-nowrap">{t('hitHistoryTable.query', { ns: 'appAnnotation' })}</td>
+                <td className="bg-background-section-burn py-1.5 pl-3 whitespace-nowrap">{t('hitHistoryTable.match', { ns: 'appAnnotation' })}</td>
+                <td className="bg-background-section-burn py-1.5 pl-3 whitespace-nowrap">{t('hitHistoryTable.response', { ns: 'appAnnotation' })}</td>
+                <td className="bg-background-section-burn py-1.5 pl-3 whitespace-nowrap">{t('hitHistoryTable.source', { ns: 'appAnnotation' })}</td>
+                <td className="bg-background-section-burn py-1.5 pl-3 whitespace-nowrap">{t('hitHistoryTable.score', { ns: 'appAnnotation' })}</td>
+                <td className="w-[160px] rounded-r-lg bg-background-section-burn py-1.5 pl-3 whitespace-nowrap">{t('hitHistoryTable.time', { ns: 'appAnnotation' })}</td>
               </tr>
             </thead>
             <tbody className="system-sm-regular text-text-secondary">
@@ -154,19 +154,19 @@ const ViewAnnotationModal: FC<Props> = ({
                   className="cursor-pointer border-b border-divider-subtle hover:bg-background-default-hover"
                 >
                   <td
-                    className="max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap p-3 pr-2"
+                    className="max-w-[250px] overflow-hidden p-3 pr-2 text-ellipsis whitespace-nowrap"
                     title={item.question}
                   >
                     {item.question}
                   </td>
                   <td
-                    className="max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap p-3 pr-2"
+                    className="max-w-[250px] overflow-hidden p-3 pr-2 text-ellipsis whitespace-nowrap"
                     title={item.match}
                   >
                     {item.match}
                   </td>
                   <td
-                    className="max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap p-3 pr-2"
+                    className="max-w-[250px] overflow-hidden p-3 pr-2 text-ellipsis whitespace-nowrap"
                     title={item.response}
                   >
                     {item.response}
@@ -226,7 +226,7 @@ const ViewAnnotationModal: FC<Props> = ({
         )}
         foot={id
           ? (
-              <div className="system-sm-medium flex h-16 items-center justify-between rounded-bl-xl rounded-br-xl border-t border-divider-subtle bg-background-section-burn px-4 text-text-tertiary">
+              <div className="flex h-16 items-center justify-between rounded-br-xl rounded-bl-xl border-t border-divider-subtle bg-background-section-burn px-4 system-sm-medium text-text-tertiary">
                 <div
                   className="flex cursor-pointer items-center space-x-2 pl-3"
                   onClick={() => setShowModal(true)}

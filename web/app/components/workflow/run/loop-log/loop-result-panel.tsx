@@ -59,7 +59,7 @@ const LoopResultPanel: FC<Props> = ({
       return <RiErrorWarningLine className="h-4 w-4 text-text-destructive" />
 
     if (isRunning)
-      return <RiLoader2Line className="h-3.5 w-3.5 animate-spin text-primary-600" />
+      return <RiLoader2Line className="text-primary-600 h-3.5 w-3.5 animate-spin" />
 
     return (
       <>
@@ -98,7 +98,7 @@ const LoopResultPanel: FC<Props> = ({
             <div
               className={cn(
                 'flex w-full cursor-pointer items-center justify-between px-3',
-                expandedLoops[index] ? 'pb-2 pt-3' : 'py-3',
+                expandedLoops[index] ? 'pt-3 pb-2' : 'py-3',
                 'rounded-xl text-left',
               )}
               onClick={() => toggleLoop(index)}
@@ -107,7 +107,7 @@ const LoopResultPanel: FC<Props> = ({
                 <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] border-divider-subtle bg-util-colors-cyan-cyan-500">
                   <Loop className="h-3 w-3 text-text-primary-on-surface" />
                 </div>
-                <span className="system-sm-semibold-uppercase grow text-text-primary">
+                <span className="grow system-sm-semibold-uppercase text-text-primary">
                   {t(`${i18nPrefix}.loop`, { ns: 'workflow' })}
                   {' '}
                   {index + 1}

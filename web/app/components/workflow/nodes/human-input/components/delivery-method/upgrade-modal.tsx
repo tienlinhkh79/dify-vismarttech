@@ -37,11 +37,11 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
           <RiMailSendFill className="h-6 w-6 text-text-primary-on-surface" />
         </div>
         <p
-          className="title-3xl-semi-bold bg-[linear-gradient(271deg,var(--components-input-border-active-prompt-1,#155AEF)_-12.85%,var(--components-input-border-active-prompt-2,#0BA5EC)_95.4%)] bg-clip-text text-transparent"
+          className="bg-[linear-gradient(271deg,var(--components-input-border-active-prompt-1,#155AEF)_-12.85%,var(--components-input-border-active-prompt-2,#0BA5EC)_95.4%)] bg-clip-text title-3xl-semi-bold text-transparent"
         >
           {t('nodes.humanInput.deliveryMethod.upgradeTip', { ns: 'workflow' })}
         </p>
-        <p className="system-md-regular mt-2 text-text-tertiary">
+        <p className="mt-2 system-md-regular text-text-tertiary">
           {t('nodes.humanInput.deliveryMethod.upgradeTipContent', { ns: 'workflow' })}
         </p>
       </div>

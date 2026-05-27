@@ -151,7 +151,7 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({
               filterVar={filterVar}
             />
             {shouldShowContextTip && (
-              <div className="text-xs font-normal leading-[18px] text-[#DC6803]">{t(`${i18nPrefix}.notSetContextInPromptTip`, { ns: 'workflow' })}</div>
+              <div className="text-xs leading-[18px] font-normal text-[#DC6803]">{t(`${i18nPrefix}.notSetContextInPromptTip`, { ns: 'workflow' })}</div>
             )}
           </>
         </Field>
@@ -196,22 +196,22 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({
         {/* Memory put place examples. */}
         {isChatMode && isChatModel && !!inputs.memory && (
           <div className="mt-4">
-            <div className="flex h-8 items-center justify-between rounded-lg bg-components-input-bg-normal pl-3 pr-2">
+            <div className="flex h-8 items-center justify-between rounded-lg bg-components-input-bg-normal pr-2 pl-3">
               <div className="flex items-center space-x-1">
-                <div className="text-xs font-semibold uppercase text-text-secondary">{t('nodes.common.memories.title', { ns: 'workflow' })}</div>
+                <div className="text-xs font-semibold text-text-secondary uppercase">{t('nodes.common.memories.title', { ns: 'workflow' })}</div>
                 <Tooltip
                   popupContent={t('nodes.common.memories.tip', { ns: 'workflow' })}
                   triggerClassName="w-4 h-4"
                 />
               </div>
-              <div className="flex h-[18px] items-center rounded-[5px] border border-divider-deep bg-components-badge-bg-dimm px-1 text-xs font-semibold uppercase text-text-tertiary">{t('nodes.common.memories.builtIn', { ns: 'workflow' })}</div>
+              <div className="flex h-[18px] items-center rounded-[5px] border border-divider-deep bg-components-badge-bg-dimm px-1 text-xs font-semibold text-text-tertiary uppercase">{t('nodes.common.memories.builtIn', { ns: 'workflow' })}</div>
             </div>
             {/* Readonly User Query */}
             <div className="mt-4">
               <Editor
                 title={(
                   <div className="flex items-center space-x-1">
-                    <div className="text-xs font-semibold uppercase text-text-secondary">user</div>
+                    <div className="text-xs font-semibold text-text-secondary uppercase">user</div>
                     <Tooltip
                       popupContent={
                         <div className="max-w-[180px]">{t('nodes.llm.roleDescription.user', { ns: 'workflow' })}</div>
@@ -233,7 +233,7 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({
               />
 
               {inputs.memory.query_prompt_template && !inputs.memory.query_prompt_template.includes('{{#sys.query#}}') && (
-                <div className="text-xs font-normal leading-[18px] text-[#DC6803]">{t(`${i18nPrefix}.sysQueryInUser`, { ns: 'workflow' })}</div>
+                <div className="text-xs leading-[18px] font-normal text-[#DC6803]">{t(`${i18nPrefix}.sysQueryInUser`, { ns: 'workflow' })}</div>
               )}
             </div>
           </div>
@@ -282,8 +282,8 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({
                 noDecoration
                 popupContent={(
                   <div className="w-[232px] rounded-xl border-[0.5px] border-components-panel-border bg-components-tooltip-bg px-4 py-3.5 shadow-lg backdrop-blur-[5px]">
-                    <div className="text-text-primary title-xs-semi-bold">{t('structOutput.modelNotSupported', { ns: 'app' })}</div>
-                    <div className="mt-1 text-text-secondary body-xs-regular">{t('structOutput.modelNotSupportedTip', { ns: 'app' })}</div>
+                    <div className="title-xs-semi-bold text-text-primary">{t('structOutput.modelNotSupported', { ns: 'app' })}</div>
+                    <div className="mt-1 body-xs-regular text-text-secondary">{t('structOutput.modelNotSupportedTip', { ns: 'app' })}</div>
                   </div>
                 )}
               >
@@ -292,7 +292,7 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({
                 </div>
               </Tooltip>
             )}
-            <div className="mr-0.5 text-text-tertiary system-xs-medium-uppercase">{t('structOutput.structured', { ns: 'app' })}</div>
+            <div className="mr-0.5 system-xs-medium-uppercase text-text-tertiary">{t('structOutput.structured', { ns: 'app' })}</div>
             <Tooltip popupContent={
               <div className="max-w-[150px]">{t('structOutput.structuredTip', { ns: 'app' })}</div>
             }

@@ -118,7 +118,7 @@ const Authorize = ({
         }
         {
           showDivider && canOAuth && canApiKey && (
-            <div className="system-2xs-medium-uppercase flex shrink-0 flex-col items-center justify-between text-text-tertiary">
+            <div className="flex shrink-0 flex-col items-center justify-between system-2xs-medium-uppercase text-text-tertiary">
               <div className="h-2 w-px bg-divider-subtle"></div>
               or
               <div className="h-2 w-px bg-divider-subtle"></div>

@@ -264,7 +264,7 @@ const ConfigVar: FC<IConfigVarProps> = ({ promptVariables, readonly, onPromptVar
     >
       {!hasVar && (
         <div className="mt-1 px-3 pb-3">
-          <div className="pb-1 pt-2 text-xs text-text-tertiary">{t('notSetVar', { ns: 'appDebug' })}</div>
+          <div className="pt-2 pb-1 text-xs text-text-tertiary">{t('notSetVar', { ns: 'appDebug' })}</div>
         </div>
       )}
       {hasVar && (

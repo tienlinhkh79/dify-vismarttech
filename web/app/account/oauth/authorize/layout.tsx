@@ -39,7 +39,7 @@ export default function SignInLayout({ children }: any) {
             </div>
           </div>
           {showDifyOfficialChrome(systemFeatures.branding.enabled) && (
-            <div className="px-8 py-6 text-text-tertiary system-xs-regular">
+            <div className="px-8 py-6 system-xs-regular text-text-tertiary">
               ©
               {' '}
               {new Date().getFullYear()}

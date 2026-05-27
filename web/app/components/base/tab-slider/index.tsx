@@ -52,7 +52,7 @@ const TabSlider: FC<TabSliderProps> = ({
     >
       <div
         data-testid="tab-slider-bg"
-        className="shadows-shadow-xs absolute bottom-0.5 left-0 right-0 top-0.5 radius-lg bg-components-panel-bg transition-transform duration-300 ease-in-out"
+        className="shadows-shadow-xs absolute top-0.5 right-0 bottom-0.5 left-0 radius-lg bg-components-panel-bg transition-transform duration-300 ease-in-out"
         style={sliderStyle}
       />
       {options.map((option, index) => (

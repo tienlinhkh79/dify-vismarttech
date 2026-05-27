@@ -130,14 +130,14 @@ export const SegmentedControl = <T extends string | number | symbol>({
               <div className={cn('inline-flex items-center gap-x-1', ItemTextWrapperVariants({ size }))}>
                 <span>{text}</span>
                 {!!(count && size === 'large') && (
-                  <div className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[5px] border border-divider-deep bg-components-badge-bg-dimm px-[5px] text-text-tertiary system-2xs-medium-uppercase">
+                  <div className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[5px] border border-divider-deep bg-components-badge-bg-dimm px-[5px] system-2xs-medium-uppercase text-text-tertiary">
                     {count}
                   </div>
                 )}
               </div>
             )}
             {!isLast && !isSelected && !isNextSelected && (
-              <div data-testid={`segmented-control-divider-${index}`} className="absolute -right-px top-0 flex h-full items-center">
+              <div data-testid={`segmented-control-divider-${index}`} className="absolute top-0 -right-px flex h-full items-center">
                 <Divider type="vertical" className="mx-0 h-3.5" />
               </div>
             )}

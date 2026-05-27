@@ -32,7 +32,7 @@ const OptionCard = ({
       className={cn(
         'flex cursor-pointer flex-col gap-1 rounded-xl border border-components-option-card-option-border bg-components-option-card-option-bg p-2.5 shadow-shadow-shadow-3',
         selected
-          ? 'border-components-option-card-option-selected-border bg-components-option-card-option-selected-bg shadow-xs ring-[0.5px] ring-inset ring-components-option-card-option-selected-border'
+          ? 'border-components-option-card-option-selected-border bg-components-option-card-option-selected-bg shadow-xs ring-[0.5px] ring-components-option-card-option-selected-border ring-inset'
           : 'hover:bg-components-option-card-bg-hover hover:border-components-option-card-option-border-hover hover:shadow-xs',
       )}
       onClick={handleClickCard}
@@ -44,7 +44,7 @@ const OptionCard = ({
         />
       </div>
       <div
-        className={cn('system-sm-medium line-clamp-2 grow text-text-secondary', selected && 'text-text-primary')}
+        className={cn('line-clamp-2 grow system-sm-medium text-text-secondary', selected && 'text-text-primary')}
         title={label}
       >
         {label}

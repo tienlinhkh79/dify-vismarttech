@@ -29,7 +29,7 @@ type Props = {
 const Field = ({ title, isRequired, children }: { title: string, isRequired?: boolean, children: React.JSX.Element }) => {
   return (
     <div>
-      <div className="text-[13px] font-medium leading-8 text-text-secondary">
+      <div className="text-[13px] leading-8 font-medium text-text-secondary">
         {title}
         {isRequired && <span className="ml-0.5 text-text-destructive">*</span>}
       </div>

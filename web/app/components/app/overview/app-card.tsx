@@ -180,7 +180,7 @@ function AppCard({
 
   return (
     <div
-      className={`${isInPanel ? 'border-l-[0.5px] border-t' : 'border-[0.5px] shadow-xs'} w-full max-w-full rounded-xl border-effects-highlight ${className ?? ''} ${cardState.isMinimalState ? 'h-12' : ''}`}
+      className={`${isInPanel ? 'border-t border-l-[0.5px]' : 'border-[0.5px] shadow-xs'} w-full max-w-full rounded-xl border-effects-highlight ${className ?? ''} ${cardState.isMinimalState ? 'h-12' : ''}`}
     >
       <div className={`${customBgColor ?? 'bg-background-default'} relative rounded-xl ${triggerModeDisabled ? 'opacity-60' : ''}`}>
         {triggerModeDisabled && (
@@ -191,10 +191,10 @@ function AppCard({
                   popupClassName="max-w-64 rounded-xl bg-components-panel-bg px-3 py-2 text-xs text-text-secondary shadow-lg"
                   position="right"
                 >
-                  <div className="absolute inset-0 z-10 cursor-not-allowed rounded-xl" aria-hidden="true" />
+                  <div className="inset-0 absolute z-10 cursor-not-allowed rounded-xl" aria-hidden="true" />
                 </Tooltip>
               )
-            : <div className="absolute inset-0 z-10 cursor-not-allowed rounded-xl" aria-hidden="true" />
+            : <div className="inset-0 absolute z-10 cursor-not-allowed rounded-xl" aria-hidden="true" />
         )}
         <div className={`flex w-full flex-col items-start justify-center gap-3 self-stretch p-3 ${cardState.isMinimalState ? 'border-0' : 'border-b-[0.5px] border-divider-subtle'}`}>
           <div className="flex w-full items-center gap-3 self-stretch">

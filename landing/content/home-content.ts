@@ -55,10 +55,15 @@ export type HomeCopy = {
     }>
   }
   industries: {
-    title: string
+    titlePrefix: string
+    titleEmphasis: string
     tabs: Record<IndustryId, string>
     tryNow: string
-    items: Record<IndustryId, { title: string; description: string; messages: Array<{ role: 'user' | 'bot' | 'ai'; text: string; time?: string; label?: string }> }>
+    items: Record<IndustryId, {
+      title: string
+      paragraphs: string[]
+      messages: Array<{ role: 'user' | 'bot'; text: string; time?: string }>
+    }>
   }
   partners: { title: string; pressTitle: string; pressSubtitle: string }
   contact: {
@@ -191,7 +196,8 @@ export const homeContentVi: HomeCopy = {
     ],
   },
   industries: {
-    title: 'Giải pháp AI bán hàng tối ưu cho mọi ngành',
+    titlePrefix: 'Giải pháp AI bán hàng',
+    titleEmphasis: 'tối ưu cho mọi ngành',
     tabs: {
       fashion: 'THỜI TRANG',
       education: 'GIÁO DỤC',
@@ -203,49 +209,67 @@ export const homeContentVi: HomeCopy = {
     items: {
       fashion: {
         title: 'THỜI TRANG',
-        description:
-          'AI Chatbot tư vấn sản phẩm bằng hình ảnh, gợi ý size và màu, giúp khách quyết định mua nhanh hơn.',
+        paragraphs: [
+          'AI Chatbot không chỉ tư vấn bằng text — nó hiểu sản phẩm qua hình ảnh, giúp khách chọn đúng size và màu sắc nhanh hơn.',
+          'Bằng cách thu thập chiều cao, cân nặng và sở thích, AI gợi ý size chính xác, giảm tỷ lệ đổi trả và tăng tốc chốt đơn.',
+        ],
         messages: [
           { role: 'user', text: 'Shop ơi, áo khoác trên fanpage còn hàng không?', time: '16:46' },
-          { role: 'bot', text: 'Dạ còn ạ. Shop kiểm tra size và màu phù hợp cho bạn nhé.', time: '16:46' },
+          { role: 'bot', text: 'Dạ còn ạ. Bạn cho shop biết chiều cao và cân nặng để gợi ý size phù hợp nhé.', time: '16:46' },
           { role: 'user', text: 'Mình cao 165cm, nặng 58kg thì mặc size nào?', time: '16:47' },
-          { role: 'ai', text: 'Theo chiều cao và cân nặng, shop gợi ý size M — vừa vặn và thoải mái.', time: '16:48', label: 'Gợi ý size' },
+          { role: 'bot', text: 'Theo số đo của bạn, shop gợi ý size M — vừa vặn và thoải mái khi mặc.', time: '16:48' },
         ],
       },
       education: {
         title: 'GIÁO DỤC',
-        description: 'Thu thập trình độ, mục tiêu học và gợi ý lộ trình khóa học phù hợp.',
+        paragraphs: [
+          'AI Chatbot thu thập trình độ, mục tiêu học và lịch rảnh của học viên để gợi ý khóa học phù hợp ngay trong cuộc trò chuyện.',
+          'Tự động trả lời lịch khai giảng, học phí và điều kiện đầu vào — giảm tải cho tư vấn viên và tăng tỷ lệ đăng ký.',
+        ],
         messages: [
-          { role: 'user', text: 'Cho mình hỏi khóa dành cho người mới bắt đầu.', time: '11:00' },
-          { role: 'bot', text: 'Trung tâm có khóa thiết kế riêng cho người mới. Mình tư vấn thêm nhé.', time: '11:00' },
-          { role: 'ai', text: 'Có đánh giá đầu vào miễn phí trước khi xếp lớp phù hợp.', time: '11:03', label: 'Đánh giá đầu vào' },
+          { role: 'user', text: 'Chào trung tâm, mình muốn tìm lớp thiết kế đồ họa. Có lịch buổi tối không?', time: '11:00' },
+          { role: 'bot', text: 'Bạn đang ở khu vực nào để trung tâm gửi lịch phù hợp nhé?', time: '11:00' },
+          { role: 'user', text: 'Mình ở Quận 1. Có lớp nào học thứ 3 và thứ 5 không?', time: '11:02' },
+          { role: 'bot', text: 'Dạ có lớp thứ 3 và thứ 5, từ 19:30–21:30. Bạn muốn đăng ký buổi học thử không?', time: '11:04' },
         ],
       },
       health: {
         title: 'Y TẾ & PHÒNG KHÁM',
-        description: 'Xác định nhu cầu ban đầu và gợi ý dịch vụ phù hợp trước khi đến phòng khám.',
+        paragraphs: [
+          'AI Chatbot xác định nhu cầu ban đầu từ triệu chứng và hướng dẫn khách chọn dịch vụ phù hợp trước khi đến phòng khám.',
+          'Hỗ trợ đặt lịch khám, nhắc lịch tái khám và trả lời câu hỏi thường gặp — giảm quá tải cho lễ tân và tăng trải nghiệm bệnh nhân.',
+        ],
         messages: [
           { role: 'user', text: 'Phòng khám có khám răng tổng quát không ạ?', time: '09:10' },
-          { role: 'bot', text: 'Dạ có. Phòng khám cung cấp khám tổng quát và tư vấn ban đầu.', time: '09:10' },
-          { role: 'ai', text: 'Tùy mức độ, bác sĩ có thể trám, trám ê buốt hoặc điều trị sâu răng.', time: '09:14', label: 'Gợi ý điều trị' },
+          { role: 'bot', text: 'Dạ có ạ. Phòng khám cung cấp khám tổng quát và tư vấn ban đầu miễn phí.', time: '09:10' },
+          { role: 'user', text: 'Răng mình hay ê buốt khi uống lạnh, cần điều trị gì?', time: '09:12' },
+          { role: 'bot', text: 'Tùy mức độ, bác sĩ có thể trám răng, trám ê buốt hoặc điều trị sâu răng. Bạn đặt lịch khám sớm nhất lúc 14:00 hôm nay nhé.', time: '09:14' },
         ],
       },
       restaurants: {
         title: 'NHÀ HÀNG',
-        description: 'Hỗ trợ đặt bàn theo giờ, số khách và khu vực ngồi.',
+        paragraphs: [
+          'AI Chatbot hỗ trợ đặt bàn theo giờ, số khách và khu vực ngồi — phản hồi tức thì trên mọi kênh chat.',
+          'Gợi ý món theo sở thích, thông báo khuyến mãi và xác nhận đặt bàn tự động — giúp nhân viên tập trung phục vụ tại chỗ.',
+        ],
         messages: [
-          { role: 'user', text: 'Tối nay nhà hàng còn bàn trống không?', time: '18:45' },
-          { role: 'bot', text: 'Dạ còn bàn cho tối nay ạ.', time: '18:45' },
-          { role: 'ai', text: '7 giờ tối vẫn còn chỗ — mình giữ bàn cho bạn nhé.', time: '18:48', label: 'Giữ bàn 19:00' },
+          { role: 'user', text: 'Tối nay nhà hàng còn bàn trống không ạ?', time: '18:45' },
+          { role: 'bot', text: 'Dạ còn bàn cho tối nay. Bạn đi mấy người và muốn ngồi khu vực nào?', time: '18:45' },
+          { role: 'user', text: '4 người, khu trong nhà. Khoảng 7 giờ được không?', time: '18:47' },
+          { role: 'bot', text: '7 giờ tối vẫn còn chỗ khu trong nhà — mình giữ bàn cho 4 người nhé.', time: '18:48' },
         ],
       },
       spa: {
         title: 'SPA & MỸ PHẨM',
-        description: 'Đánh giá tình trạng da và gợi ý liệu trình spa phù hợp.',
+        paragraphs: [
+          'AI Chatbot đánh giá tình trạng da qua mô tả của khách và gợi ý liệu trình spa phù hợp.',
+          'Tư vấn sản phẩm chăm sóc, đặt lịch hẹn và nhắc lịch tái khám — tăng doanh thu dịch vụ và sản phẩm mỹ phẩm.',
+        ],
         messages: [
           { role: 'user', text: 'Mình bị mụn ẩn và thâm, spa có liệu trình phù hợp không?', time: '10:10' },
-          { role: 'bot', text: 'Dạ có liệu trình chuyên sâu làm sạch và cải thiện sắc tố da.', time: '10:10' },
-          { role: 'ai', text: 'Thường 4–6 buổi tùy tình trạng da hiện tại.', time: '10:14', label: 'Liệu trình mụn ẩn' },
+          { role: 'bot', text: 'Dạ có liệu trình chuyên sâu làm sạch và cải thiện sắc tố da cho mụn ẩn.', time: '10:10' },
+          { role: 'user', text: 'Mất bao lâu thì thấy cải thiện?', time: '10:12' },
+          { role: 'bot', text: 'Thường 4–6 buổi tùy tình trạng da hiện tại. Bạn muốn đặt lịch tư vấn miễn phí tuần này không?', time: '10:14' },
         ],
       },
     },
@@ -414,7 +438,8 @@ export const homeContentEn: HomeCopy = {
     ],
   },
   industries: {
-    title: "Vismarttech's AI sales solution is optimized for every industry",
+    titlePrefix: "Vismarttech's AI sales solution is",
+    titleEmphasis: 'optimized for every industry',
     tabs: {
       fashion: 'FASHION',
       education: 'EDUCATION',
@@ -426,49 +451,67 @@ export const homeContentEn: HomeCopy = {
     items: {
       fashion: {
         title: 'FASHION',
-        description:
-          'Visual product consultations with image-based recommendations help customers decide faster.',
+        paragraphs: [
+          'AI Chatbots go beyond text — they understand products from images and help customers pick the right size and color faster.',
+          'By collecting height, weight, and preferences, AI recommends accurate sizing, reducing returns and speeding up checkout.',
+        ],
         messages: [
           { role: 'user', text: 'Hi shop, is the jacket on your page still available?', time: '16:46' },
-          { role: 'bot', text: 'Yes, it is in stock. I can help check the right size and color for you.', time: '16:46' },
+          { role: 'bot', text: 'Yes, it is in stock. Share your height and weight so we can recommend the right size.', time: '16:46' },
           { role: 'user', text: "I'm 165cm and 58kg. Which size fits best?", time: '16:47' },
-          { role: 'ai', text: 'Based on your height and weight, I recommend size M for a comfortable fit.', time: '16:48', label: 'Size recommendation' },
+          { role: 'bot', text: 'Based on your measurements, we recommend size M for a comfortable fit.', time: '16:48' },
         ],
       },
       education: {
         title: 'EDUCATION',
-        description: 'Collects learner level and goals, then recommends personalized learning paths.',
+        paragraphs: [
+          'AI Chatbots collect learner level, goals, and availability to recommend the right course during the conversation.',
+          'Automatically answers schedules, tuition, and entry requirements — reducing counselor workload and boosting enrollments.',
+        ],
         messages: [
-          { role: 'user', text: "Hello, I'm looking for a course for beginners.", time: '11:00' },
-          { role: 'bot', text: 'We offer courses designed for beginners. Happy to advise you.', time: '11:00' },
-          { role: 'ai', text: 'We provide a free level assessment before placing you in a suitable class.', time: '11:03', label: 'Free assessment' },
+          { role: 'user', text: "Hello, I'm looking for a graphic design class. Do you have an evening schedule?", time: '11:00' },
+          { role: 'bot', text: 'Which area are you in? Let us know so we can share a schedule that fits.', time: '11:00' },
+          { role: 'user', text: "I'm in District 1. Are there classes on Tue and Thu?", time: '11:02' },
+          { role: 'bot', text: 'Yes, we have a class on Tue and Thu from 7:30–9:30 PM. Would you like a trial session?', time: '11:04' },
         ],
       },
       health: {
         title: 'HEALTH & CLINIC',
-        description: 'Identifies initial needs from symptoms and suggests appropriate services.',
+        paragraphs: [
+          'AI Chatbots identify initial needs from symptoms and guide patients to the right services before visiting the clinic.',
+          'Supports appointment booking, follow-up reminders, and FAQs — reducing front-desk load and improving patient experience.',
+        ],
         messages: [
           { role: 'user', text: 'Do you offer general dental check-ups?', time: '09:10' },
-          { role: 'bot', text: 'Yes, we provide general check-ups and initial consultations.', time: '09:10' },
-          { role: 'ai', text: 'Treatment may include desensitizing, fillings, or cavity care depending on severity.', time: '09:14', label: 'Treatment plan' },
+          { role: 'bot', text: 'Yes, we provide general check-ups and free initial consultations.', time: '09:10' },
+          { role: 'user', text: 'My teeth are sensitive to cold drinks. What treatment do I need?', time: '09:12' },
+          { role: 'bot', text: 'Depending on severity, treatment may include desensitizing, fillings, or cavity care. We have an opening at 2:00 PM today.', time: '09:14' },
         ],
       },
       restaurants: {
         title: 'RESTAURANTS',
-        description: 'Supports table reservations by time, party size, and seating area.',
+        paragraphs: [
+          'AI Chatbots handle table reservations by time, party size, and seating area — with instant replies on every chat channel.',
+          'Suggests dishes by preference, shares promotions, and confirms bookings automatically so staff can focus on in-house service.',
+        ],
         messages: [
           { role: 'user', text: 'Hello, are there tables available tonight?', time: '18:45' },
-          { role: 'bot', text: 'Yes, we have availability for tonight.', time: '18:45' },
-          { role: 'ai', text: 'We still have space at 7:00 PM — I can reserve a table for you.', time: '18:48', label: '7:00 PM reservation' },
+          { role: 'bot', text: 'Yes, we have availability tonight. How many guests and which seating area do you prefer?', time: '18:45' },
+          { role: 'user', text: 'Four people, indoor seating. Around 7 PM works?', time: '18:47' },
+          { role: 'bot', text: 'We still have indoor seating at 7:00 PM — I can reserve a table for four.', time: '18:48' },
         ],
       },
       spa: {
         title: 'SPA & COSMETICS',
-        description: 'Assesses skin conditions and recommends suitable spa treatments.',
+        paragraphs: [
+          'AI Chatbots assess skin concerns from customer descriptions and recommend suitable spa treatments.',
+          'Advises on skincare products, books appointments, and sends reminders — boosting service and cosmetics revenue.',
+        ],
         messages: [
           { role: 'user', text: 'I have closed comedones and dark spots. Do you have a treatment plan?', time: '10:10' },
-          { role: 'bot', text: 'Yes, we offer intensive plans to cleanse skin and improve tone.', time: '10:10' },
-          { role: 'ai', text: 'Typically 4–6 sessions depending on your current skin condition.', time: '10:14', label: 'Skincare plan' },
+          { role: 'bot', text: 'Yes, we offer intensive plans to cleanse skin and improve tone for comedonal acne.', time: '10:10' },
+          { role: 'user', text: 'How long until I see improvement?', time: '10:12' },
+          { role: 'bot', text: 'Typically 4–6 sessions depending on your skin condition. Would you like a free consultation this week?', time: '10:14' },
         ],
       },
     },

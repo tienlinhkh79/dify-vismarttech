@@ -1,12 +1,12 @@
 'use client'
 
+import type { TFunction } from 'i18next'
 import type { DuplicateAppModalProps } from '@/app/components/app/duplicate-modal'
 import type { HtmlContentProps } from '@/app/components/base/popover'
 import type { Tag } from '@/app/components/base/tag-management/constant'
 import type { CreateAppModalProps } from '@/app/components/explore/create-app-modal'
 import type { EnvironmentVariable } from '@/app/components/workflow/types'
 import type { App } from '@/types/app'
-import type { TFunction } from 'i18next'
 import { RiBuildingLine, RiGlobalLine, RiLockLine, RiMoreFill, RiVerifiedBadgeLine } from '@remixicon/react'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -116,14 +116,14 @@ const AppCardOperations = ({
   return (
     <div className="relative flex w-full flex-col py-1" onMouseLeave={() => onClose?.()}>
       <button type="button" className="mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 hover:bg-state-base-hover" onClick={e => runAction(e, onEdit)}>
-        <span className="text-text-secondary system-sm-regular">{t('editApp', { ns: 'app' })}</span>
+        <span className="system-sm-regular text-text-secondary">{t('editApp', { ns: 'app' })}</span>
       </button>
       <Divider className="my-1" />
       <button type="button" className="mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 hover:bg-state-base-hover" onClick={e => runAction(e, onDuplicate)}>
-        <span className="text-text-secondary system-sm-regular">{t('duplicate', { ns: 'app' })}</span>
+        <span className="system-sm-regular text-text-secondary">{t('duplicate', { ns: 'app' })}</span>
       </button>
       <button type="button" className="mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 hover:bg-state-base-hover" onClick={e => runAction(e, onExport)}>
-        <span className="text-text-secondary system-sm-regular">{t('export', { ns: 'app' })}</span>
+        <span className="system-sm-regular text-text-secondary">{t('export', { ns: 'app' })}</span>
       </button>
       {(app.mode === AppModeEnum.COMPLETION || app.mode === AppModeEnum.CHAT) && (
         <>
@@ -141,7 +141,7 @@ const AppCardOperations = ({
         <>
           <Divider className="my-1" />
           <button type="button" className="mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 hover:bg-state-base-hover" onClick={e => runAction(e, openInstalledApp)}>
-            <span className="text-text-secondary system-sm-regular">{t('openInExplore', { ns: 'app' })}</span>
+            <span className="system-sm-regular text-text-secondary">{t('openInExplore', { ns: 'app' })}</span>
           </button>
         </>
       )}
@@ -159,7 +159,7 @@ const AppCardOperations = ({
         className="group mx-1 flex h-8 cursor-pointer items-center gap-2 rounded-lg px-3 py-[6px] hover:bg-state-destructive-hover"
         onClick={e => runAction(e, onDelete)}
       >
-        <span className="text-text-secondary system-sm-regular group-hover:text-text-destructive">
+        <span className="system-sm-regular text-text-secondary group-hover:text-text-destructive">
           {t('operation.delete', { ns: 'common' })}
         </span>
       </button>
@@ -347,7 +347,7 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
         }}
         className="group relative col-span-1 inline-flex h-[160px] cursor-pointer flex-col rounded-xl border border-solid border-components-card-border bg-components-card-bg shadow-sm transition-all duration-200 ease-in-out hover:shadow-lg"
       >
-        <div className="flex h-[66px] shrink-0 grow-0 items-center gap-3 px-[14px] pb-3 pt-[14px]">
+        <div className="flex h-[66px] shrink-0 grow-0 items-center gap-3 px-[14px] pt-[14px] pb-3">
           <div className="relative shrink-0">
             <AppIcon
               size="large"
@@ -359,10 +359,10 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
             <AppTypeIcon type={app.mode} wrapperClassName="absolute -bottom-0.5 -right-0.5 w-4 h-4 shadow-sm" className="h-3 w-3" />
           </div>
           <div className="w-0 grow py-px">
-            <div className="flex items-center text-sm font-semibold leading-5 text-text-secondary">
+            <div className="flex items-center text-sm leading-5 font-semibold text-text-secondary">
               <div className="truncate" title={app.name}>{app.name}</div>
             </div>
-            <div className="flex items-center gap-1 text-[10px] font-medium leading-[18px] text-text-tertiary">
+            <div className="flex items-center gap-1 text-[10px] leading-[18px] font-medium text-text-tertiary">
               <div className="truncate" title={app.author_name}>{app.author_name}</div>
               <div>·</div>
               <div className="truncate" title={EditTimeText}>{EditTimeText}</div>
@@ -399,7 +399,7 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
             {app.description}
           </div>
         </div>
-        <div className="absolute bottom-1 left-0 right-0 flex h-[42px] shrink-0 items-center pb-[6px] pl-[14px] pr-[6px] pt-1">
+        <div className="absolute right-0 bottom-1 left-0 flex h-[42px] shrink-0 items-center pt-1 pr-[6px] pb-[6px] pl-[14px]">
           {isCurrentWorkspaceEditor && (
             <>
               <div
@@ -505,20 +505,20 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
       )}
       <AlertDialog open={showConfirmDelete} onOpenChange={onDeleteDialogOpenChange}>
         <AlertDialogContent>
-          <div className="flex flex-col gap-2 px-6 pb-4 pt-6">
-            <AlertDialogTitle className="text-text-primary title-2xl-semi-bold">
+          <div className="flex flex-col gap-2 px-6 pt-6 pb-4">
+            <AlertDialogTitle className="title-2xl-semi-bold text-text-primary">
               {t('deleteAppConfirmTitle', { ns: 'app' })}
             </AlertDialogTitle>
-            <AlertDialogDescription className="w-full whitespace-pre-wrap wrap-break-word text-text-tertiary system-md-regular">
+            <AlertDialogDescription className="w-full system-md-regular wrap-break-word whitespace-pre-wrap text-text-tertiary">
               {t('deleteAppConfirmContent', { ns: 'app' })}
             </AlertDialogDescription>
             <div className="mt-2">
-              <label className="mb-1 block text-text-secondary system-sm-regular">
+              <label className="mb-1 block system-sm-regular text-text-secondary">
                 {t('deleteAppConfirmInputLabel', { ns: 'app', appName: app.name })}
               </label>
               <input
                 type="text"
-                className="border-components-input-border bg-components-input-bg focus:border-components-input-border-focus focus:ring-components-input-border-focus h-9 w-full rounded-lg border px-3 text-sm text-text-primary placeholder:text-text-quaternary focus:outline-hidden focus:ring-1"
+                className="border-components-input-border bg-components-input-bg focus:border-components-input-border-focus focus:ring-components-input-border-focus h-9 w-full rounded-lg border px-3 text-sm text-text-primary placeholder:text-text-quaternary focus:ring-1 focus:outline-hidden"
                 placeholder={t('deleteAppConfirmInputPlaceholder', { ns: 'app' })}
                 value={confirmDeleteInput}
                 onChange={e => setConfirmDeleteInput(e.target.value)}

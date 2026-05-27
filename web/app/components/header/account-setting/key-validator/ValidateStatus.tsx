@@ -15,7 +15,7 @@ export const ValidatedSuccessIcon = () => {
 export const ValidatingTip = () => {
   const { t } = useTranslation()
   return (
-    <div className="mt-2 text-xs font-normal text-primary-600">
+    <div className="text-primary-600 mt-2 text-xs font-normal">
       {t('provider.validating', { ns: 'common' })}
     </div>
   )

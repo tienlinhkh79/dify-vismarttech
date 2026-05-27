@@ -232,14 +232,14 @@ const DatePicker = ({
                 data-testid="date-picker-trigger"
               >
                 <input
-                  className="flex-1 cursor-pointer appearance-none truncate bg-transparent p-1 text-components-input-text-filled
-            outline-hidden system-xs-regular placeholder:text-components-input-text-placeholder"
+                  className="flex-1 cursor-pointer appearance-none truncate bg-transparent p-1 system-xs-regular
+            text-components-input-text-filled outline-hidden placeholder:text-components-input-text-placeholder"
                   readOnly
                   value={isOpen ? '' : displayValue}
                   placeholder={placeholderDate}
                 />
                 <span className={cn('i-ri-calendar-line h-4 w-4 shrink-0 text-text-quaternary', isOpen ? 'text-text-secondary' : 'group-hover:text-text-secondary', (displayValue || (isOpen && selectedDate)) && 'group-hover:hidden')} />
-                <span className={cn('i-ri-close-circle-fill hidden h-4 w-4 shrink-0 text-text-quaternary', (displayValue || (isOpen && selectedDate)) && 'hover:text-text-secondary group-hover:inline-block')} onClick={handleClear} data-testid="date-picker-clear-button" />
+                <span className={cn('i-ri-close-circle-fill hidden h-4 w-4 shrink-0 text-text-quaternary', (displayValue || (isOpen && selectedDate)) && 'group-hover:inline-block hover:text-text-secondary')} onClick={handleClear} data-testid="date-picker-clear-button" />
               </div>
             )}
       </PortalToFollowElemTrigger>

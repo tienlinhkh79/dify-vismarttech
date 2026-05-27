@@ -124,7 +124,7 @@ const AppDetailNav = ({
         />
         {!isMobile && isHoveringSidebar && (
           <ToggleButton
-            className="absolute -right-3 top-[-3.5px] z-20"
+            className="absolute top-[-3.5px] -right-3 z-20"
             expand={expand}
             handleToggle={handleToggle}
           />

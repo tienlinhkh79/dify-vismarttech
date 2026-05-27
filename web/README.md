@@ -49,8 +49,8 @@ docker build -f web/Dockerfile -t vismarttech-web .
 
 ## Quality
 
-- Lint: see [web/docs/lint.md](./docs/lint.md)
-- Tests: see [web/docs/test.md](./docs/test.md)
+- Lint: see [web/docs/lint.md]
+- Tests: see [web/docs/test.md]
 
 ```bash
 pnpm -C web test
@@ -60,3 +60,5 @@ pnpm -C web storybook
 [Corepack]: https://github.com/nodejs/corepack#readme
 [Node.js]: https://nodejs.org
 [pnpm]: https://pnpm.io
+[web/docs/lint.md]: ./docs/lint.md
+[web/docs/test.md]: ./docs/test.md

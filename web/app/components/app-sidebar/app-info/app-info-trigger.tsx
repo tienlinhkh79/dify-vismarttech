@@ -52,9 +52,9 @@ const AppInfoTrigger = ({ appDetail, expand, onClick }: AppInfoTriggerProps) => 
         {expand && (
           <div className="flex flex-col items-start gap-1">
             <div className="flex w-full">
-              <div className="truncate whitespace-nowrap text-text-secondary system-md-semibold">{appDetail.name}</div>
+              <div className="truncate system-md-semibold whitespace-nowrap text-text-secondary">{appDetail.name}</div>
             </div>
-            <div className="whitespace-nowrap text-text-tertiary system-2xs-medium-uppercase">
+            <div className="system-2xs-medium-uppercase whitespace-nowrap text-text-tertiary">
               {getAppModeLabel(appDetail.mode, t)}
             </div>
           </div>

@@ -55,7 +55,7 @@ const Bucket = ({
       >
         {bucketName}
       </button>
-      {showSeparator && <span className="system-xs-regular shrink-0 text-divider-deep">/</span>}
+      {showSeparator && <span className="shrink-0 system-xs-regular text-divider-deep">/</span>}
     </>
   )
 }

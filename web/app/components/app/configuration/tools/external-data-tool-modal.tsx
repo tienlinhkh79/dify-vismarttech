@@ -116,7 +116,7 @@ const ExternalDataToolModal: FC<ExternalDataToolModalProps> = ({
           {`${action} ${t('variableConfig.apiBasedVar', { ns: 'appDebug' })}`}
         </div>
         <div className="py-2">
-          <div className="text-sm font-medium leading-9 text-text-primary">
+          <div className="text-sm leading-9 font-medium text-text-primary">
             {t('apiBasedExtension.type', { ns: 'common' })}
           </div>
           <Select
@@ -136,7 +136,7 @@ const ExternalDataToolModal: FC<ExternalDataToolModalProps> = ({
           </Select>
         </div>
         <div className="py-2">
-          <div className="text-sm font-medium leading-9 text-text-primary">
+          <div className="text-sm leading-9 font-medium text-text-primary">
             {t('feature.tools.modal.name.title', { ns: 'appDebug' })}
           </div>
           <div className="flex items-center">
@@ -156,7 +156,7 @@ const ExternalDataToolModal: FC<ExternalDataToolModalProps> = ({
           </div>
         </div>
         <div className="py-2">
-          <div className="text-sm font-medium leading-9 text-text-primary">
+          <div className="text-sm leading-9 font-medium text-text-primary">
             {t('feature.tools.modal.variableName.title', { ns: 'appDebug' })}
           </div>
           <input

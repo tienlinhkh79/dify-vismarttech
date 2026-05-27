@@ -9,9 +9,9 @@ import {
   EDUCATION_VERIFYING_LOCALSTORAGE_ITEM,
 } from '@/app/education-apply/constants'
 import { usePathname, useRouter, useSearchParams } from '@/next/navigation'
+import { clearChunkLoadRecoveryFlag, installChunkLoadRecovery } from '@/utils/chunk-load-recovery'
 import { sendGAEvent } from '@/utils/gtag'
 import { fetchSetupStatusWithCache } from '@/utils/setup-status'
-import { clearChunkLoadRecoveryFlag, installChunkLoadRecovery } from '@/utils/chunk-load-recovery'
 import { resolvePostLoginRedirect } from '../signin/utils/post-login-redirect'
 import { trackEvent } from './base/amplitude'
 

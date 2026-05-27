@@ -35,7 +35,7 @@ const InvitedModal = ({
         backdropProps={{ forceRender: true }}
         className="w-[480px] p-8"
       >
-        <DialogCloseButton className="right-8 top-8" />
+        <DialogCloseButton className="top-8 right-8" />
         <div className="mb-3 flex justify-between">
           <div className="
             flex h-12 w-12 items-center justify-center rounded-xl

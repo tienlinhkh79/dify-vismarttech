@@ -16,7 +16,7 @@ const VarHighlight: FC<IVarHighlightProps> = ({
   return (
     <div
       key={name}
-      className={`${s.item} ${className} mb-2 inline-flex h-5 items-center justify-center rounded-md px-1 text-xs font-medium text-primary-600`}
+      className={`${s.item} ${className} text-primary-600 mb-2 inline-flex h-5 items-center justify-center rounded-md px-1 text-xs font-medium`}
     >
       <span className="opacity-60">{'{{'}</span>
       <span>{name}</span>

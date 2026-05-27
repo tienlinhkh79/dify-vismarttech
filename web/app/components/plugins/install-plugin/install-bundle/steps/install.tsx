@@ -195,7 +195,7 @@ const Install: FC<Props> = ({
             {canInstall && (
               <div className="flex items-center gap-x-2" onClick={handleClickSelectAll}>
                 <Checkbox checked={isSelectAll} indeterminate={isIndeterminate} />
-                <p className="system-sm-medium cursor-pointer text-text-secondary">{isSelectAll ? t('operation.deSelectAll', { ns: 'common' }) : t('operation.selectAll', { ns: 'common' })}</p>
+                <p className="cursor-pointer system-sm-medium text-text-secondary">{isSelectAll ? t('operation.deSelectAll', { ns: 'common' }) : t('operation.selectAll', { ns: 'common' })}</p>
               </div>
             )}
           </div>
