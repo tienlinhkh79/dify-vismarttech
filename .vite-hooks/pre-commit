@@ -38,14 +38,39 @@ done
 
 # run linters based on the modified modules
 
+# Git Bash on Windows often lacks uv in PATH; use the default install location.
+if ! command -v uv >/dev/null 2>&1; then
+    if [ -n "$USERPROFILE" ] && [ -f "$USERPROFILE/.local/bin/uv.exe" ]; then
+        PATH="$USERPROFILE/.local/bin:$PATH"
+        export PATH
+    elif [ -f "$HOME/.local/bin/uv" ] || [ -f "$HOME/.local/bin/uv.exe" ]; then
+        PATH="$HOME/.local/bin:$PATH"
+        export PATH
+    fi
+fi
+
 if $api_modified; then
-    echo "Running Ruff linter on api module"
+    if ! command -v uv >/dev/null 2>&1; then
+        echo "uv not found. Install: https://docs.astral.sh/uv/getting-started/installation/"
+        echo "Then add %USERPROFILE%\\.local\\bin to your PATH and restart the terminal."
+        exit 1
+    fi
 
-    # run Ruff linter auto-fixing
-    uv run --project api --dev ruff check --fix ./api
+    staged_api_files=$(git diff --cached --name-only --diff-filter=ACM | grep '^api/.*\.py$' || true)
+    if [ -z "$staged_api_files" ]; then
+        echo "No staged Python files under api/, skipping Ruff"
+    else
+        echo "Running Ruff linter on staged api files"
 
-    # run Ruff linter checks
-    uv run --project api --dev ruff check  ./api || status=$?
+        # Dev group only: avoids building vdb wheels (e.g. chroma-hnswlib) on Windows without MSVC.
+        UV_RUN="uv run --project api --only-group dev --no-default-groups"
+
+        # run Ruff linter auto-fixing
+        $UV_RUN ruff check --fix $staged_api_files
+
+        # run Ruff linter checks
+        $UV_RUN ruff check $staged_api_files || status=$?
+    fi
 
     status=${status:-0}
 
@@ -76,8 +101,15 @@ if $web_modified; then
         fi
     fi
 
+    repo_root="$(git rev-parse --show-toplevel)"
+    vp_cli="$repo_root/node_modules/.bin/vp"
+    if [ ! -f "$vp_cli" ]; then
+        echo "vp (vite-plus) not found at $vp_cli. From the repository root run: pnpm install"
+        exit 1
+    fi
+
     cd ./web || exit 1
-    vp staged
+    "$vp_cli" staged
 
     if $web_ts_modified; then
         echo "Running TypeScript type-check:tsgo"

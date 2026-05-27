@@ -35,6 +35,7 @@ http {
         default web;
         ~*"/(apps|explore|omnichannel|mini-crm|datasets|tools|plugins|signin|install|account|activate|reset-password|education-apply)(/|\?|$)" web;
         ~*"/(features|pricing|contact|privacy|terms)(/|\?|$)" landing;
+        ~*^https?://[^/]+/?(\?|#|$) landing;
     }
 
     map $cookie__next_app $next_static_upstream_cookie {

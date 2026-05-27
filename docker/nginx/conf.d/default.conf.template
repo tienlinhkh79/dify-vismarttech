@@ -80,6 +80,17 @@ server {
       include proxy.conf;
     }
 
+    # Landing static assets (industry portraits, brand icons).
+    location ^~ /industries/ {
+      proxy_pass http://landing:3001;
+      include proxy.conf;
+    }
+
+    location ^~ /brands/ {
+      proxy_pass http://landing:3001;
+      include proxy.conf;
+    }
+
     # Serve landing page on root without exposing port 3001.
     location = / {
       add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=3600; SameSite=Lax" always;

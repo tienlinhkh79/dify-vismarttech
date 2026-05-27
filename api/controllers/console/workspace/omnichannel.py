@@ -10,6 +10,15 @@ from graphon.model_runtime.utils.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, field_validator, model_validator
 from werkzeug.exceptions import BadRequest, NotFound, Unauthorized
 
+import services
+from controllers.common.errors import (
+    BlockedFileExtensionError,
+    FilenameNotExistsError,
+    FileTooLargeError,
+    NoFileUploadedError,
+    TooManyFilesError,
+    UnsupportedFileTypeError,
+)
 from controllers.common.schema import register_schema_models
 from controllers.console import console_ns
 from controllers.console.wraps import account_initialization_required, is_admin_or_owner_required, setup_required
@@ -19,6 +28,7 @@ from models.account import AccountStatus
 from services.omnichannel.channel_management_service import ChannelInput, ChannelManagementService
 from services.omnichannel.kiotviet_connection_service import KiotVietConnectionInput, KiotVietConnectionService
 from services.omnichannel.omnichannel_agent_reply_service import OmnichannelAgentReplyService
+from services.omnichannel.omnichannel_media_storage_service import OmnichannelMediaStorageService
 from services.omnichannel.omnichannel_ops_service import OmnichannelOpsService
 from services.omnichannel.omnichannel_realtime import omnichannel_pubsub_topic
 from services.omnichannel.providers.registry import ChannelProviderRegistry
@@ -226,7 +236,8 @@ class ChannelCollectionApi(Resource):
         _, tenant_id = current_account_with_tenant()
         raw_flag = (request.args.get("include_branding") or "").strip().lower()
         include_branding = raw_flag in {"1", "true", "yes", "on"}
-        return jsonable_encoder({"data": ChannelManagementService.list_channels(tenant_id, include_branding=include_branding)})
+        channels = ChannelManagementService.list_channels(tenant_id, include_branding=include_branding)
+        return jsonable_encoder({"data": channels})
 
     @console_ns.expect(console_ns.models[ChannelCreatePayload.__name__])
     @setup_required
@@ -396,6 +407,41 @@ class ChannelConversationParticipantRefreshApi(Resource):
                 raise NotFound(msg) from exc
             raise BadRequest(msg) from exc
         return jsonable_encoder({"data": data}), 200
+
+
+@console_ns.route("/workspaces/current/omnichannel/media-upload")
+class OmnichannelMediaUploadApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def post(self):
+        current_user, _ = current_account_with_tenant()
+        if "file" not in request.files:
+            raise NoFileUploadedError()
+
+        if len(request.files) > 1:
+            raise TooManyFilesError()
+        file = request.files["file"]
+        if not file.filename:
+            raise FilenameNotExistsError
+
+        try:
+            data = OmnichannelMediaStorageService.upload(
+                filename=file.filename,
+                content=file.read(),
+                mimetype=file.mimetype or "",
+                user=current_user,
+            )
+        except services.errors.file.FileTooLargeError as file_too_large_error:
+            raise FileTooLargeError(file_too_large_error.description) from file_too_large_error
+        except services.errors.file.UnsupportedFileTypeError as exc:
+            raise UnsupportedFileTypeError() from exc
+        except services.errors.file.BlockedFileExtensionError as blocked_extension_error:
+            raise BlockedFileExtensionError(blocked_extension_error.description) from blocked_extension_error
+        except ValueError as exc:
+            raise BadRequest(str(exc)) from exc
+
+        return jsonable_encoder({"data": data}), 201
 
 
 @console_ns.route("/workspaces/current/channels/<string:channel_id>/conversations/<string:conversation_id>/messages")
