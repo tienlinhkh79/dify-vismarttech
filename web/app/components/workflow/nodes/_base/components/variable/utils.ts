@@ -14,6 +14,7 @@ import type { ParameterExtractorNodeType } from '../../../parameter-extractor/ty
 import type { QuestionClassifierNodeType } from '../../../question-classifier/types'
 import type { TemplateTransformNodeType } from '../../../template-transform/types'
 import type { ToolNodeType } from '../../../tool/types'
+import type { AssignerNodeType } from '@/app/components/workflow/nodes/assigner/types'
 import type { DataSourceNodeType } from '@/app/components/workflow/nodes/data-source/types'
 import type { HumanInputNodeType } from '@/app/components/workflow/nodes/human-input/types'
 import type { CaseItem, Condition } from '@/app/components/workflow/nodes/if-else/types'
@@ -1447,6 +1448,19 @@ export const getNodeUsedVars = (node: Node): ValueSelector[] => {
           .map(key => payload.datasource_parameters[key].value as string)
           || []
       res = [...(mixVars as ValueSelector[]), ...(vars as any)]
+      break
+    }
+
+    case BlockEnum.Assigner: {
+      const payload = data as AssignerNodeType
+      res = (payload.items || []).flatMap((item) => {
+        const selectors: ValueSelector[] = []
+        if (item.variable_selector?.length)
+          selectors.push(item.variable_selector)
+        if (Array.isArray(item.value) && item.value.length)
+          selectors.push(item.value as ValueSelector)
+        return selectors
+      })
       break
     }
 

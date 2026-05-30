@@ -330,12 +330,23 @@ export type MiniCrmLeadRow = {
   external_user_id: string
   participant_display_name?: string | null
   last_message_at?: string | null
+  last_message_preview?: string | null
   stage: string
   owner_account_id?: string | null
   notes?: string | null
   source_override?: string | null
   source_display: string
+  tags?: string[]
+  contact_phone?: string | null
+  contact_email?: string | null
   crm_updated_at?: string | null
+}
+
+export type MiniCrmStageCounts = {
+  new: number
+  qualified: number
+  won: number
+  lost: number
 }
 
 export type MiniCrmLeadsResponse = {
@@ -343,6 +354,12 @@ export type MiniCrmLeadsResponse = {
   total: number
   offset: number
   limit: number
+  page: number
+  page_size: number
+  total_pages: number
+  has_next: boolean
+  has_prev: boolean
+  stage_counts?: MiniCrmStageCounts
 }
 
 export const listMiniCrmLeads = (params?: {
@@ -350,19 +367,28 @@ export const listMiniCrmLeads = (params?: {
   stage?: string
   /** Plain-text filter; sent as query param ``q`` for backward-compatible REST. */
   search_query?: string
-  page_offset?: number
+  /** 1-based page number (preferred). */
+  page?: number
   page_size?: number
+  /** Legacy offset-based pagination. Ignored when ``page`` is set. */
+  page_offset?: number
 }) => {
-  const { search_query, page_offset, page_size, channel_type, stage } = params ?? {}
+  const { search_query, page, page_size, page_offset, channel_type, stage } = params ?? {}
   return get<MiniCrmLeadsResponse>('/workspaces/current/mini-crm/leads', {
     params: {
       channel_type,
       stage,
       q: search_query,
-      offset: page_offset,
+      page,
+      page_size,
+      offset: page !== undefined ? undefined : page_offset,
       limit: page_size,
     },
   })
+}
+
+export const getMiniCrmLead = (conversationId: string) => {
+  return get<{ data: MiniCrmLeadRow }>(`/workspaces/current/mini-crm/leads/${encodeURIComponent(conversationId)}`)
 }
 
 export const patchMiniCrmLead = (conversationId: string, body: {
@@ -371,10 +397,134 @@ export const patchMiniCrmLead = (conversationId: string, body: {
   notes?: string | null
   notes_append?: string | null
   source_override?: string | null
+  tags?: string[] | null
+  contact_phone?: string | null
+  contact_email?: string | null
 }) => {
   return patch<{ data: MiniCrmLeadRow }>(`/workspaces/current/mini-crm/leads/${encodeURIComponent(conversationId)}`, {
     body,
   })
+}
+
+export const bulkPatchMiniCrmLeads = (body: {
+  conversation_ids: string[]
+  stage?: string
+  owner_account_id?: string | null
+  tags?: string[] | null
+}) => {
+  return patch<{ data: MiniCrmLeadRow[], count: number }>('/workspaces/current/mini-crm/leads/bulk', {
+    body,
+  })
+}
+
+export const exportMiniCrmLeadsCsv = async (params?: {
+  channel_type?: string
+  stage?: string
+  search_query?: string
+}) => {
+  const { search_query, channel_type, stage } = params ?? {}
+  const response = await get<Response>(
+    '/workspaces/current/mini-crm/leads/export',
+    {
+      params: {
+        channel_type,
+        stage,
+        q: search_query,
+      },
+    },
+    { needAllResponseContent: true },
+  )
+  if (!response.ok)
+    throw new Error('export failed')
+  return response.text()
+}
+
+export type MiniCrmTimelineItem = {
+  kind: 'activity' | 'message'
+  id: string
+  activity_type: string
+  summary: string
+  payload?: Record<string, unknown> | null
+  actor_account_id?: string | null
+  at?: string | null
+}
+
+export type MiniCrmDailyPipelinePoint = {
+  date: string
+  won: number
+  lost: number
+  qualified: number
+}
+
+export type MiniCrmChannelBreakdownItem = {
+  channel_type: string
+  count: number
+}
+
+export type MiniCrmFunnelAnalytics = {
+  stage_counts: MiniCrmStageCounts
+  total: number
+  period_days: number
+  recent_won: number
+  recent_lost: number
+  conversion: {
+    new_to_qualified_pct: number
+    qualified_to_won_pct: number
+    overall_win_pct: number
+  }
+  funnel_steps: Array<{ stage: string, count: number }>
+  daily_pipeline: MiniCrmDailyPipelinePoint[]
+  channel_breakdown: MiniCrmChannelBreakdownItem[]
+}
+
+export type MiniCrmRemarketingSegment = {
+  key: string
+  title_key?: string
+  description_key?: string
+  lead_count?: number
+}
+
+export const listMiniCrmLeadTimeline = (conversationId: string, params?: { limit?: number }) => {
+  return get<{ data: MiniCrmTimelineItem[] }>(
+    `/workspaces/current/mini-crm/leads/${encodeURIComponent(conversationId)}/timeline`,
+    { params: { limit: params?.limit } },
+  )
+}
+
+export const getMiniCrmFunnelAnalytics = (params?: {
+  channel_type?: string
+  period_days?: number
+}) => {
+  return get<MiniCrmFunnelAnalytics>('/workspaces/current/mini-crm/analytics/funnel', {
+    params: {
+      channel_type: params?.channel_type,
+      period_days: params?.period_days,
+    },
+  })
+}
+
+export const listMiniCrmRemarketingSegments = (params?: { channel_type?: string }) => {
+  return get<{ data: MiniCrmRemarketingSegment[] }>('/workspaces/current/mini-crm/remarketing/segments', {
+    params: { channel_type: params?.channel_type },
+  })
+}
+
+export const exportMiniCrmRemarketingSegmentCsv = async (
+  segmentKey: string,
+  params?: { channel_type?: string },
+) => {
+  const response = await get<Response>(
+    `/workspaces/current/mini-crm/remarketing/segments/${encodeURIComponent(segmentKey)}/export`,
+    {
+      params: {
+        channel_type: params?.channel_type,
+      },
+    },
+    { needAllResponseContent: true },
+  )
+  if (!response.ok)
+    throw new Error('export failed')
+  return response.text()
 }
 
 export const listOmnichannelConversations = (channelId: string, params?: {

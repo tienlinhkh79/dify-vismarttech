@@ -102,6 +102,32 @@ describe('var-reference-picker.helpers', () => {
       startNode,
       value: ['missing-node', 'answer'],
     })).toBeNull()
+
+    expect(getOutputVarNode({
+      availableNodes: [normalNode],
+      hasValue: true,
+      isConstant: false,
+      isIterationVar: false,
+      isLoopVar: false,
+      iterationNode: null,
+      loopNode: null,
+      outputVarNodeId: 'conversation',
+      startNode,
+      value: ['conversation', 'desired_role'],
+    })).toMatchObject({ title: 'CONVERSATION', type: 'conversation' })
+
+    expect(getOutputVarNode({
+      availableNodes: [normalNode],
+      hasValue: true,
+      isConstant: false,
+      isIterationVar: false,
+      isLoopVar: false,
+      iterationNode: null,
+      loopNode: null,
+      outputVarNodeId: 'env',
+      startNode,
+      value: ['env', 'API_KEY'],
+    })).toMatchObject({ title: 'ENVIRONMENT', type: 'env' })
   })
 
   it('should format display names and output node ids correctly', () => {

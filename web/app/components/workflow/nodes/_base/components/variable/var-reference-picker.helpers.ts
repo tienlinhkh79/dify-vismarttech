@@ -86,6 +86,18 @@ export const getOutputVarNode = ({
   if (isSystemVar(value as ValueSelector))
     return startNode?.data ?? null
 
+  if (isConversationVar(value as ValueSelector))
+    return { title: 'CONVERSATION', type: 'conversation' }
+
+  if (isENV(value as ValueSelector))
+    return { title: 'ENVIRONMENT', type: 'env' }
+
+  if (isGlobalVar(value as ValueSelector))
+    return { title: 'GLOBAL', type: 'global' }
+
+  if (isRagVariableVar(value as ValueSelector))
+    return { title: 'RAG', type: 'rag' }
+
   const node = getNodeInfoById(availableNodes, outputVarNodeId)?.data
   if (!node)
     return null

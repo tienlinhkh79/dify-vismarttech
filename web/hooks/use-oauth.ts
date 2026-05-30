@@ -51,21 +51,31 @@ export const openOAuthPopup = (url: string, callback: (data?: any) => void) => {
     `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`,
   )
 
-  const handleMessage = (event: MessageEvent) => {
+  let resolved = false
+  let checkClosed: ReturnType<typeof setInterval> | undefined
+
+  function cleanup() {
+    if (checkClosed !== undefined)
+      clearInterval(checkClosed)
+    window.removeEventListener('message', handleMessage)
+  }
+
+  function handleMessage(event: MessageEvent) {
     if (event.data?.type === 'oauth_callback') {
-      window.removeEventListener('message', handleMessage)
+      resolved = true
+      cleanup()
       callback(event.data)
     }
   }
 
   window.addEventListener('message', handleMessage)
 
-  // Fallback for window close detection
-  const checkClosed = setInterval(() => {
+  // Fallback when popup closes without postMessage (user cancelled, origin mismatch, etc.)
+  checkClosed = setInterval(() => {
     if (popup?.closed) {
-      clearInterval(checkClosed)
-      window.removeEventListener('message', handleMessage)
-      callback()
+      cleanup()
+      if (!resolved)
+        callback()
     }
   }, 1000)
 

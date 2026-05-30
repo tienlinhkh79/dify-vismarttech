@@ -27,6 +27,7 @@ import {
 import { toast } from '@/app/components/base/ui/toast'
 import { ProviderLogo } from '@/app/components/header/account-setting/channels-ui'
 import { ACCOUNT_SETTING_TAB } from '@/app/components/header/account-setting/constants'
+import { OmnichannelCrmPanel } from '@/app/components/mini-crm/omnichannel-crm-panel'
 import { API_PREFIX } from '@/config'
 import { useAccountSettingModal } from '@/hooks/use-query-params'
 import Link from '@/next/link'
@@ -1697,7 +1698,7 @@ const OmnichannelPageContent = () => {
                         <div className="mb-4 flex items-center justify-between gap-2">
                           <h2 className="text-xs font-semibold tracking-wide text-text-quaternary uppercase">{t('settings.omnichannelProfileTitle')}</h2>
                           <Link
-                            href="/mini-crm"
+                            href={`/mini-crm?conversation_id=${encodeURIComponent(selectedConversation.id)}&channel_id=${encodeURIComponent(selectedConversation.channel_id)}`}
                             className="text-xs font-medium text-text-accent-secondary hover:opacity-80"
                           >
                             {t('settings.omnichannelViewDetails')}
@@ -1719,6 +1720,13 @@ const OmnichannelPageContent = () => {
                           </div>
                         </div>
                       </section>
+                    )}
+
+                    {selectedConversation && selectedConversationId && (
+                      <OmnichannelCrmPanel
+                        conversationId={selectedConversationId}
+                        channelId={selectedConversation.channel_id}
+                      />
                     )}
 
                     <section className="border-t border-divider-subtle pt-8">

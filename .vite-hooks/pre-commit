@@ -49,6 +49,28 @@ if ! command -v uv >/dev/null 2>&1; then
     fi
 fi
 
+# Git Bash on Windows often lacks pnpm in PATH; fall back to corepack or npm global install.
+run_pnpm() {
+    if command -v pnpm >/dev/null 2>&1; then
+        pnpm "$@"
+        return $?
+    fi
+    if command -v corepack >/dev/null 2>&1; then
+        corepack pnpm "$@"
+        return $?
+    fi
+    if [ -n "$APPDATA" ] && [ -f "$APPDATA/npm/pnpm.cmd" ]; then
+        "$APPDATA/npm/pnpm.cmd" "$@"
+        return $?
+    fi
+    if [ -n "$APPDATA" ] && [ -f "$APPDATA/npm/pnpm" ]; then
+        "$APPDATA/npm/pnpm" "$@"
+        return $?
+    fi
+    echo "pnpm not found. From the repository root run: corepack enable && corepack pnpm install"
+    return 127
+}
+
 if $api_modified; then
     if ! command -v uv >/dev/null 2>&1; then
         echo "uv not found. Install: https://docs.astral.sh/uv/getting-started/installation/"
@@ -113,7 +135,7 @@ if $web_modified; then
 
     if $web_ts_modified; then
         echo "Running TypeScript type-check:tsgo"
-        if ! pnpm run type-check:tsgo; then
+        if ! run_pnpm run type-check:tsgo; then
             echo "Type check failed. Please run 'pnpm run type-check:tsgo' to fix the errors."
             exit 1
         fi
@@ -122,7 +144,7 @@ if $web_modified; then
     fi
 
     echo "Running knip"
-    if ! pnpm run knip; then
+    if ! run_pnpm run knip; then
         echo "Knip check failed. Please run 'pnpm run knip' to fix the errors."
         exit 1
     fi
@@ -138,7 +160,7 @@ if $web_modified; then
             # check if the test file exists
             if [ -f "../$test_file" ]; then
                 echo "Detected changes in $file, running corresponding unit tests..."
-                pnpm run test "../$test_file"
+                run_pnpm run test "../$test_file"
 
                 if [ $? -ne 0 ]; then
                     echo "Unit tests failed. Please fix the errors before committing."

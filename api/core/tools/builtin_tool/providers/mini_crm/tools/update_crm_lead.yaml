@@ -1,0 +1,104 @@
+identity:
+  name: update_crm_lead
+  author: Vismarttech
+  label:
+    en_US: Save CRM Lead
+    vi_VN: Luu lead CRM
+description:
+  human:
+    en_US: Save or update a Mini CRM lead after AI consultation. Syncs stage, contact info, tags, and notes to the omnichannel lead record.
+    vi_VN: Luu hoac cap nhat lead Mini CRM sau tu van AI. Dong bo giai doan, lien he, tag va ghi chu vao ban ghi lead da kenh.
+  llm: Save or update the Mini CRM lead for the current omnichannel conversation. Use when the customer finishes consultation or you extract contact details and pipeline stage. conversation_id comes from the current chat context when omitted.
+parameters:
+  - name: conversation_id
+    type: string
+    required: false
+    label:
+      en_US: Conversation ID
+      vi_VN: Ma hoi thoai
+    human_description:
+      en_US: Omnichannel conversation id. Leave empty to use the current chat conversation.
+      vi_VN: Ma hoi thoai da kenh. De trong de dung hoi thoai hien tai.
+    llm_description: Omnichannel conversation UUID. Optional when the runtime provides the current conversation id.
+    form: llm
+  - name: stage
+    type: select
+    required: false
+    label:
+      en_US: Stage
+      vi_VN: Giai doan
+    human_description:
+      en_US: Pipeline stage for the lead.
+      vi_VN: Giai doan pipeline cua lead.
+    form: form
+    options:
+      - value: new
+        label:
+          en_US: New
+          vi_VN: Moi
+      - value: qualified
+        label:
+          en_US: Qualified
+          vi_VN: Tiem nang
+      - value: won
+        label:
+          en_US: Won
+          vi_VN: Chot
+      - value: lost
+        label:
+          en_US: Lost
+          vi_VN: Mat
+  - name: notes_append
+    type: string
+    required: false
+    label:
+      en_US: Append note
+      vi_VN: Them ghi chu
+    human_description:
+      en_US: Append an internal note with timestamp.
+      vi_VN: Them ghi chu noi bo kem thoi gian.
+    form: llm
+  - name: tags
+    type: string
+    required: false
+    label:
+      en_US: Tags
+      vi_VN: Tag
+    human_description:
+      en_US: Comma-separated tags (e.g. VIP,Ticket).
+      vi_VN: Tag cach nhau boi dau phay (vd. VIP,Ticket).
+    form: llm
+  - name: source_override
+    type: string
+    required: false
+    label:
+      en_US: Source override
+      vi_VN: Ghi de nguon
+    form: llm
+  - name: owner_account_id
+    type: string
+    required: false
+    label:
+      en_US: Owner account ID
+      vi_VN: Ma nhan vien phu trach
+    form: llm
+  - name: contact_phone
+    type: string
+    required: false
+    label:
+      en_US: Contact phone
+      vi_VN: So dien thoai
+    human_description:
+      en_US: Customer phone number extracted from the conversation.
+      vi_VN: So dien thoai khach hang trich tu hoi thoai.
+    form: llm
+  - name: contact_email
+    type: string
+    required: false
+    label:
+      en_US: Contact email
+      vi_VN: Email lien he
+    human_description:
+      en_US: Customer email extracted from the conversation.
+      vi_VN: Email khach hang trich tu hoi thoai.
+    form: llm

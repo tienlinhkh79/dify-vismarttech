@@ -793,7 +793,10 @@ services:
       - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
       - ../api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py
       - ../api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py
+      - ../api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py:/app/api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py
+      - ../api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py:/app/api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py
       - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
+      - ../api/core/tools/builtin_tool/providers/mini_crm:/app/api/core/tools/builtin_tool/providers/mini_crm
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
       - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
       - ../api/services/omnichannel:/app/api/services/omnichannel
@@ -860,7 +863,10 @@ services:
       - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
       - ../api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py
       - ../api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py
+      - ../api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py:/app/api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py
+      - ../api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py:/app/api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py
       - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
+      - ../api/core/tools/builtin_tool/providers/mini_crm:/app/api/core/tools/builtin_tool/providers/mini_crm
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
       - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
       - ../api/services/omnichannel:/app/api/services/omnichannel
@@ -920,7 +926,10 @@ services:
       - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
       - ../api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py
       - ../api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py
+      - ../api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py:/app/api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py
+      - ../api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py:/app/api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py
       - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
+      - ../api/core/tools/builtin_tool/providers/mini_crm:/app/api/core/tools/builtin_tool/providers/mini_crm
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
       - ../api/tasks/omnichannel_tasks.py:/app/api/tasks/omnichannel_tasks.py
       - ../api/services/omnichannel:/app/api/services/omnichannel

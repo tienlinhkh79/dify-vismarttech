@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import logging
 from collections.abc import Iterable
 from datetime import UTC, datetime
-import logging
 from typing import Any, NotRequired, TypedDict
 
 from sqlalchemy import Select, and_, func, select
@@ -110,7 +110,10 @@ class OmnichannelOpsService:
             query = query.where(OmniChannelConversation.last_message_at >= since)
         if until is not None:
             query = query.where(OmniChannelConversation.last_message_at <= until)
-        return query.order_by(OmniChannelConversation.last_message_at.desc().nullslast(), OmniChannelConversation.id.desc())
+        return query.order_by(
+            OmniChannelConversation.last_message_at.desc().nullslast(),
+            OmniChannelConversation.id.desc(),
+        )
 
     @classmethod
     def list_conversations(
@@ -129,7 +132,11 @@ class OmnichannelOpsService:
         until = cls._normalize_dt(until)
 
         with Session(db.engine, expire_on_commit=False) as session:
-            query = cls._conversation_query(tenant_id, channel_id, since, until).offset(cursor_value).limit(page_size + 1)
+            query = (
+                cls._conversation_query(tenant_id, channel_id, since, until)
+                .offset(cursor_value)
+                .limit(page_size + 1)
+            )
             rows = session.scalars(query).all()
             preview_fallbacks = cls._load_preview_fallbacks(
                 session=session,
@@ -523,6 +530,11 @@ class OmnichannelOpsService:
             tenant_id=payload["tenant_id"],
             conversation_id=conv_row_id,
         )
+        if direction == OmniChannelMessageDirection.INBOUND:
+            MiniCrmService.maybe_auto_qualify_from_inbound(
+                tenant_id=payload["tenant_id"],
+                conversation_id=conv_row_id,
+            )
         return {
             "id": msg_row_id,
             "conversation_id": conv_row_id,
@@ -893,10 +905,16 @@ class OmnichannelOpsService:
                         from_obj = message.get("from") or {}
                         from_id = str(from_obj.get("id") or "").strip() if isinstance(from_obj, dict) else ""
                         from_name = str(from_obj.get("name") or "").strip() if isinstance(from_obj, dict) else ""
-                        from_pic = extract_graph_picture_url(from_obj.get("picture")) if isinstance(from_obj, dict) else ""
+                        from_pic = (
+                            extract_graph_picture_url(from_obj.get("picture"))
+                            if isinstance(from_obj, dict)
+                            else ""
+                        )
 
                         direction = (
-                            OmniChannelMessageDirection.OUTBOUND if from_id and from_id == page_id else OmniChannelMessageDirection.INBOUND
+                            OmniChannelMessageDirection.OUTBOUND
+                            if from_id and from_id == page_id
+                            else OmniChannelMessageDirection.INBOUND
                         )
                         external_user_id = ""
                         if direction == OmniChannelMessageDirection.INBOUND and from_id:
@@ -972,7 +990,9 @@ class OmnichannelOpsService:
         where_clause = and_(*conditions)
 
         with Session(db.engine, expire_on_commit=False) as session:
-            total_messages = session.scalar(select(func.count()).select_from(OmniChannelMessage).where(where_clause)) or 0
+            total_messages = session.scalar(
+                select(func.count()).select_from(OmniChannelMessage).where(where_clause)
+            ) or 0
             inbound_count = (
                 session.scalar(
                     select(func.count()).select_from(OmniChannelMessage).where(
@@ -1043,7 +1063,10 @@ class OmnichannelOpsService:
                 "channel_type": config.channel_type.value,
                 "last_inbound_at": latest_inbound,
                 "last_outbound_at": latest_outbound,
-                "webhook_path": f"/triggers/{cls._CHANNEL_TO_WEBHOOK_PROVIDER.get(config.channel_type, 'messenger')}/webhook/{config.channel_id}",
+                "webhook_path": (
+                    f"/triggers/{cls._CHANNEL_TO_WEBHOOK_PROVIDER.get(config.channel_type, 'messenger')}"
+                    f"/webhook/{config.channel_id}"
+                ),
             }
 
     @staticmethod

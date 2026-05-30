@@ -11,11 +11,11 @@ import sqlalchemy as sa
 from sqlalchemy import DateTime, Index, Integer, String, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
+from core.helper import encrypter
 from core.plugin.entities.plugin_daemon import CredentialType
 from core.trigger.entities.api_entities import TriggerProviderSubscriptionApiEntity
 from core.trigger.entities.entities import Subscription
 from core.trigger.utils.endpoint import generate_plugin_trigger_endpoint_url, generate_webhook_trigger_endpoint
-from core.helper import encrypter
 from libs.datetime_utils import naive_utc_now
 from libs.uuid_utils import uuidv7
 
@@ -46,6 +46,18 @@ class OmniChannelCrmLeadStage(StrEnum):
     QUALIFIED = "qualified"
     WON = "won"
     LOST = "lost"
+
+
+class OmniChannelCrmLeadActivityType(StrEnum):
+    STAGE_CHANGED = "stage_changed"
+    NOTES_UPDATED = "notes_updated"
+    NOTES_APPENDED = "notes_appended"
+    OWNER_CHANGED = "owner_changed"
+    TAGS_UPDATED = "tags_updated"
+    SOURCE_UPDATED = "source_updated"
+    CONTACT_UPDATED = "contact_updated"
+    AUTO_QUALIFIED = "auto_qualified"
+    MESSAGE_INBOUND = "message_inbound"
 
 
 class OmniChannelMessageSource(StrEnum):
@@ -298,6 +310,9 @@ class OmniChannelCrmLead(TypeBase, kw_only=True):
     owner_account_id: Mapped[str | None] = mapped_column(String(36), nullable=True, default=None)
     notes: Mapped[str | None] = mapped_column(LongText, nullable=True, default=None)
     source_override: Mapped[str | None] = mapped_column(String(512), nullable=True, default=None)
+    tags: Mapped[str | None] = mapped_column(LongText, nullable=True, default=None)
+    contact_phone: Mapped[str | None] = mapped_column(String(32), nullable=True, default=None)
+    contact_email: Mapped[str | None] = mapped_column(String(320), nullable=True, default=None)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=func.current_timestamp(), init=False
     )
@@ -307,6 +322,32 @@ class OmniChannelCrmLead(TypeBase, kw_only=True):
         server_default=func.current_timestamp(),
         server_onupdate=func.current_timestamp(),
         init=False,
+    )
+
+
+class OmniChannelCrmLeadActivity(TypeBase, kw_only=True):
+    """Audit/timeline entry for Mini CRM lead changes and related conversation events."""
+
+    __tablename__ = "omnichannel_crm_lead_activities"
+    __table_args__ = (
+        sa.PrimaryKeyConstraint("id", name="omnichannel_crm_lead_activity_pkey"),
+        Index("idx_omni_crm_activity_tenant_conversation", "tenant_id", "conversation_id", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(
+        String(36), insert_default=lambda: str(uuidv7()), default_factory=lambda: str(uuidv7()), init=False
+    )
+    tenant_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    conversation_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    activity_type: Mapped[OmniChannelCrmLeadActivityType] = mapped_column(
+        EnumText(OmniChannelCrmLeadActivityType, length=64),
+        nullable=False,
+    )
+    summary: Mapped[str] = mapped_column(String(512), nullable=False)
+    payload: Mapped[str | None] = mapped_column(LongText, nullable=True, default=None)
+    actor_account_id: Mapped[str | None] = mapped_column(String(36), nullable=True, default=None)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp(), init=False
     )
 
 
@@ -331,7 +372,9 @@ class OmniChannelMessage(TypeBase):
     direction: Mapped[OmniChannelMessageDirection] = mapped_column(
         EnumText(OmniChannelMessageDirection, length=30), nullable=False
     )
-    source: Mapped[OmniChannelMessageSource] = mapped_column(EnumText(OmniChannelMessageSource, length=30), nullable=False)
+    source: Mapped[OmniChannelMessageSource] = mapped_column(
+        EnumText(OmniChannelMessageSource, length=30), nullable=False
+    )
     content: Mapped[str] = mapped_column(LongText, nullable=False, default="")
     attachments: Mapped[list[dict[str, Any]]] = mapped_column(sa.JSON, nullable=False, default=list)
     message_metadata: Mapped[dict[str, Any]] = mapped_column("metadata", sa.JSON, nullable=False, default=dict)
