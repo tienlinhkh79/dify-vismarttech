@@ -45,6 +45,7 @@ ASSIGN_DETAIL = "178100004004"
 
 IF_JOB_READY = "178100005001"
 IF_LEAD_READY = "178100005002"
+IF_JOB_HAS_NEW = "178100005003"
 
 A_JOB_ASK = "178100006001"
 A_LEAD_ASK = "178100006002"
@@ -450,6 +451,9 @@ def transform_graph(graph: dict[str, Any]) -> dict[str, Any]:
         "- Kinh nghiệm: {{#conversation.experience_years#}} năm\n"
         "- Tiếng Nhật: {{#conversation.japanese_level#}}\n"
         "- Lương mong muốn: {{#conversation.salary_expectation#}}\n\n"
+        "Quy tắc hội thoại:\n"
+        "- Ưu tiên dùng hồ sơ đã lưu, không hỏi lại thông tin đã có.\n"
+        "- Chỉ hỏi thêm trường còn thiếu khi thật sự cần để lọc job.\n\n"
         "Liệt kê 1–3 tin phù hợp nhất (tên, địa điểm, yêu cầu chính, link nếu có). "
         "Cuối cùng gợi ý để lại SĐT để em chuyển tư vấn viên."
     )
@@ -517,6 +521,13 @@ def transform_graph(graph: dict[str, Any]) -> dict[str, Any]:
                 {"name": "salary_expectation", "type": "string", "required": False, "description": "Mức lương mong muốn"},
             ],
         ), 680, 340, 88),
+        canvas(IF_JOB_HAS_NEW, if_else("Có profile mới trong tin nhắn?", [
+            {"variable_selector": [PE_JOB, "desired_role"], "comparison_operator": "not empty"},
+            {"variable_selector": [PE_JOB, "location"], "comparison_operator": "not empty"},
+            {"variable_selector": [PE_JOB, "experience_years"], "comparison_operator": "not empty"},
+            {"variable_selector": [PE_JOB, "japanese_level"], "comparison_operator": "not empty"},
+            {"variable_selector": [PE_JOB, "salary_expectation"], "comparison_operator": "not empty"},
+        ], logical="or"), 850, 340, 140),
         canvas(ASSIGN_JOB, assigner("Lưu hồ sơ tìm việc", [
             assign_item("user_type", [PE_JOB, "desired_role"]),  # placeholder overwritten below
             assign_item("desired_role", [PE_JOB, "desired_role"]),
@@ -524,10 +535,10 @@ def transform_graph(graph: dict[str, Any]) -> dict[str, Any]:
             assign_item("experience_years", [PE_JOB, "experience_years"]),
             assign_item("japanese_level", [PE_JOB, "japanese_level"]),
             assign_item("salary_expectation", [PE_JOB, "salary_expectation"]),
-        ]), 1020, 340, 86),
+        ]), 1190, 250, 86),
         canvas(IF_JOB_READY, if_else("Đủ info tìm việc?", [
-            {"variable_selector": [PE_JOB, "desired_role"], "comparison_operator": "not empty"},
-            {"variable_selector": [PE_JOB, "location"], "comparison_operator": "not empty"},
+            {"variable_selector": ["conversation", "desired_role"], "comparison_operator": "not empty"},
+            {"variable_selector": ["conversation", "location"], "comparison_operator": "not empty"},
         ], logical="or"), 1360, 340, 140),
         canvas(A_JOB_ASK, answer_node(
             "Answer Hỏi thêm tìm việc",
@@ -643,8 +654,10 @@ def transform_graph(graph: dict[str, Any]) -> dict[str, Any]:
         edge(QC, PE_EMPLOYER, CLS_EMPLOYER),
         edge(QC, PE_LEAD, CLS_LEAD),
         edge(QC, KB_GENERAL, CLS_GENERAL),
-        edge(PE_JOB, ASSIGN_JOB),
-        edge(ASSIGN_JOB, IF_JOB_READY),
+        edge(PE_JOB, IF_JOB_HAS_NEW),
+        edge(IF_JOB_HAS_NEW, ASSIGN_JOB, "true"),
+        edge(IF_JOB_HAS_NEW, IF_JOB_READY, "false"),
+        edge(ASSIGN_JOB, KB_JOB),
         edge(IF_JOB_READY, KB_JOB, "true"),
         edge(IF_JOB_READY, A_JOB_ASK, "false"),
         edge(KB_JOB, LLM_JOB),

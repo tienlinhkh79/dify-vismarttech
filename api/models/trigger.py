@@ -34,11 +34,19 @@ class OmniChannelType(StrEnum):
     INSTAGRAM_DM = "instagram_dm"
     TIKTOK_MESSAGING = "tiktok_messaging"
     ZALO_OA = "zalo_oa"
+    ZALO_PERSONAL = "zalo_personal"
 
 
 class OmniChannelMessageDirection(StrEnum):
     INBOUND = "inbound"
     OUTBOUND = "outbound"
+
+
+class OmniChannelConversationStatus(StrEnum):
+    OPEN = "open"
+    RESOLVED = "resolved"
+    PENDING = "pending"
+    SNOOZED = "snoozed"
 
 
 class OmniChannelCrmLeadStage(StrEnum):
@@ -64,6 +72,8 @@ class OmniChannelMessageSource(StrEnum):
     WEBHOOK = "webhook"
     SYNC = "sync"
     SYSTEM = "system"
+    INTERNAL_NOTE = "internal_note"
+    AGENT = "agent"
 
 
 class OmniChannelSyncJobStatus(StrEnum):
@@ -226,6 +236,15 @@ class OmniChannelConfig(TypeBase):
     encrypted_oa_refresh_token: Mapped[str | None] = mapped_column(LongText, nullable=True)
     oa_token_expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     enabled: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, server_default=sa.text("true"), default=True)
+    zalo_auto_reply_enabled: Mapped[bool] = mapped_column(
+        sa.Boolean, nullable=False, server_default=sa.text("false"), default=False
+    )
+    zalo_info_card_enabled: Mapped[bool] = mapped_column(
+        sa.Boolean, nullable=False, server_default=sa.text("false"), default=False
+    )
+    zalo_info_card_title: Mapped[str | None] = mapped_column(String(255), nullable=True, default=None)
+    zalo_info_card_subtitle: Mapped[str | None] = mapped_column(String(512), nullable=True, default=None)
+    zalo_info_card_image_url: Mapped[str | None] = mapped_column(String(2048), nullable=True, default=None)
     graph_api_version: Mapped[str] = mapped_column(String(32), nullable=False, server_default="v23.0", default="v23.0")
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=func.current_timestamp(), init=False
@@ -261,6 +280,7 @@ class OmniChannelConversation(TypeBase, kw_only=True):
         sa.PrimaryKeyConstraint("id", name="omnichannel_conversation_pkey"),
         Index("idx_omni_conversation_tenant_channel", "tenant_id", "channel_id"),
         Index("idx_omni_conversation_external_user", "tenant_id", "external_user_id"),
+        Index("idx_omni_conversation_tenant_last_msg", "tenant_id", "last_message_at"),
         UniqueConstraint("tenant_id", "channel_id", "external_user_id", name="uniq_omni_conversation_user_channel"),
     )
 
@@ -275,6 +295,41 @@ class OmniChannelConversation(TypeBase, kw_only=True):
     last_message_preview: Mapped[str | None] = mapped_column(String(512), nullable=True, default=None)
     participant_display_name: Mapped[str | None] = mapped_column(String(512), nullable=True)
     participant_profile_pic_url: Mapped[str | None] = mapped_column(LongText, nullable=True)
+    status: Mapped[OmniChannelConversationStatus] = mapped_column(
+        EnumText(OmniChannelConversationStatus, length=32),
+        nullable=False,
+        default=OmniChannelConversationStatus.OPEN,
+    )
+    assignee_account_id: Mapped[str | None] = mapped_column(String(36), nullable=True, default=None)
+    unread_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    agent_last_seen_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, default=None)
+    snoozed_until: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, default=None)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp(), init=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.current_timestamp(),
+        server_onupdate=func.current_timestamp(),
+        init=False,
+    )
+
+
+class OmniChannelCannedResponse(TypeBase, kw_only=True):
+    __tablename__ = "omnichannel_canned_responses"
+    __table_args__ = (
+        sa.PrimaryKeyConstraint("id", name="omnichannel_canned_response_pkey"),
+        Index("idx_omni_canned_tenant", "tenant_id"),
+    )
+
+    id: Mapped[str] = mapped_column(
+        String(36), insert_default=lambda: str(uuidv7()), default_factory=lambda: str(uuidv7()), init=False
+    )
+    tenant_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    content: Mapped[str] = mapped_column(LongText, nullable=False, default="")
+    shortcut: Mapped[str | None] = mapped_column(String(64), nullable=True, default=None)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=func.current_timestamp(), init=False
     )
@@ -380,6 +435,81 @@ class OmniChannelMessage(TypeBase):
     message_metadata: Mapped[dict[str, Any]] = mapped_column("metadata", sa.JSON, nullable=False, default=dict)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=func.current_timestamp(), init=False
+    )
+
+
+class OmniChannelZaloJobStatus(StrEnum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    DONE = "done"
+    FAILED = "failed"
+
+
+class OmniChannelZaloJobKind(StrEnum):
+    INBOUND = "inbound"
+    SHARED_INFO = "shared_info"
+    BACKFILL = "backfill"
+
+
+class OmniChannelZaloMessageMap(TypeBase):
+    """Maps Zalo OA message ids to omnichannel rows for echo/loop suppression."""
+
+    __tablename__ = "omnichannel_zalo_message_maps"
+    __table_args__ = (
+        sa.PrimaryKeyConstraint("id", name="omnichannel_zalo_message_map_pkey"),
+        sa.UniqueConstraint("channel_id", "zalo_msg_id", name="uniq_omni_zalo_msg_map"),
+        Index("idx_omni_zalo_msg_map_message", "omnichannel_message_id"),
+    )
+
+    id: Mapped[str] = mapped_column(
+        String(36), insert_default=lambda: str(uuidv7()), default_factory=lambda: str(uuidv7()), init=False
+    )
+    channel_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    zalo_msg_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    omnichannel_message_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    direction: Mapped[str] = mapped_column(String(16), nullable=False)
+    zalo_thread_id: Mapped[str | None] = mapped_column(String(255), nullable=True, default=None)
+    quote_zalo_msg_id: Mapped[str | None] = mapped_column(String(255), nullable=True, default=None)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp(), init=False
+    )
+
+
+class OmniChannelZaloJob(TypeBase):
+    """Durable Zalo OA bridge job queue (store-then-process, ported from zca-bridge job_queue)."""
+
+    __tablename__ = "omnichannel_zalo_jobs"
+    __table_args__ = (
+        sa.PrimaryKeyConstraint("id", name="omnichannel_zalo_job_pkey"),
+        sa.UniqueConstraint("kind", "dedup_key", name="uniq_omni_zalo_job_dedup"),
+        Index("idx_omni_zalo_job_status_next", "status", "next_attempt_at"),
+    )
+
+    id: Mapped[str] = mapped_column(
+        String(36), insert_default=lambda: str(uuidv7()), default_factory=lambda: str(uuidv7()), init=False
+    )
+    channel_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    kind: Mapped[OmniChannelZaloJobKind] = mapped_column(EnumText(OmniChannelZaloJobKind, length=32), nullable=False)
+    dedup_key: Mapped[str] = mapped_column(String(512), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(sa.JSON, nullable=False, default=dict)
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    max_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=8, server_default="8")
+    status: Mapped[OmniChannelZaloJobStatus] = mapped_column(
+        EnumText(OmniChannelZaloJobStatus, length=32), nullable=False, default=OmniChannelZaloJobStatus.PENDING
+    )
+    last_error: Mapped[str | None] = mapped_column(LongText, nullable=True, default=None)
+    next_attempt_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp(), init=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp(), init=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.current_timestamp(),
+        server_onupdate=func.current_timestamp(),
+        init=False,
     )
 
 

@@ -61,6 +61,12 @@ export type Channel = {
   access_token_masked?: string
   api_version: string
   enabled: boolean
+  zalo_auto_reply_enabled?: boolean
+  zalo_info_card_enabled?: boolean
+  zalo_info_card_title?: string | null
+  zalo_info_card_subtitle?: string | null
+  zalo_info_card_image_url?: string | null
+  personal_login_status?: string
   webhook_path?: string
   created_at?: string
   updated_at?: string
@@ -97,6 +103,20 @@ export type OmnichannelConversation = {
   last_message_preview?: string | null
   channel_id: string
   channel_type: string
+  status?: 'open' | 'resolved' | 'pending' | 'snoozed'
+  assignee_account_id?: string | null
+  unread_count?: number
+  agent_last_seen_at?: string | null
+  snoozed_until?: string | null
+  created_at?: string
+  updated_at?: string
+}
+
+export type OmnichannelCannedResponse = {
+  id: string
+  title: string
+  content: string
+  shortcut?: string | null
   created_at?: string
   updated_at?: string
 }
@@ -107,7 +127,7 @@ export type OmnichannelMessage = {
   external_user_id: string
   external_message_id?: string
   direction: 'inbound' | 'outbound'
-  source: 'webhook' | 'sync' | 'system'
+  source: 'webhook' | 'sync' | 'system' | 'internal_note' | 'agent'
   content: string
   attachments: Array<Record<string, unknown>>
   metadata: Record<string, unknown>
@@ -115,7 +135,26 @@ export type OmnichannelMessage = {
   sender_profile_pic_url?: string | null
   channel_actor_name?: string | null
   channel_actor_picture_url?: string | null
+  quote_preview?: {
+    zalo_msg_id?: string
+    omnichannel_message_id?: string
+    content?: string
+    direction?: string
+  } | null
+  system_note?: boolean
   created_at?: string
+}
+
+export type ZaloBridgeFailedJob = {
+  id: string
+  channel_id: string
+  kind: string
+  dedup_key: string
+  attempts: number
+  max_attempts: number
+  last_error?: string
+  created_at?: string
+  updated_at?: string
 }
 
 export type OmnichannelSyncJob = {
@@ -532,8 +571,26 @@ export const listOmnichannelConversations = (channelId: string, params?: {
   until?: string
   cursor?: string
   limit?: number
+  status?: OmnichannelConversation['status']
+  assignee_account_id?: string
+  unassigned_only?: boolean
 }) => {
   return get<OmnichannelListResponse<OmnichannelConversation>>(`/workspaces/current/channels/${channelId}/conversations`, {
+    params,
+  })
+}
+
+export const listAllOmnichannelConversations = (params?: {
+  channel_id?: string
+  since?: string
+  until?: string
+  cursor?: string
+  limit?: number
+  status?: OmnichannelConversation['status']
+  assignee_account_id?: string
+  unassigned_only?: boolean
+}) => {
+  return get<OmnichannelListResponse<OmnichannelConversation>>('/workspaces/current/omnichannel/conversations', {
     params,
   })
 }
@@ -577,12 +634,67 @@ export const uploadOmnichannelMedia = (
 export const sendOmnichannelAgentMessage = (
   channelId: string,
   conversationId: string,
-  body: { text: string, attachment_url?: string, attachment_type?: 'image' | 'video' | 'audio' | 'file' },
+  body: {
+    text: string
+    attachment_url?: string
+    attachment_type?: 'image' | 'video' | 'audio' | 'file'
+    quote_message_id?: string
+  },
 ) => {
   return post<OmnichannelItemResponse<{ id: string, conversation_id: string, channel_type: string }>>(
     `/workspaces/current/channels/${encodeURIComponent(channelId)}/conversations/${encodeURIComponent(conversationId)}/messages`,
     { body },
   )
+}
+
+export const patchOmnichannelConversation = (
+  channelId: string,
+  conversationId: string,
+  body: {
+    status?: OmnichannelConversation['status']
+    assignee_account_id?: string | null
+    clear_assignee?: boolean
+  },
+) => {
+  return patch<OmnichannelItemResponse<OmnichannelConversation>>(
+    `/workspaces/current/channels/${encodeURIComponent(channelId)}/conversations/${encodeURIComponent(conversationId)}`,
+    { body },
+  )
+}
+
+export const markOmnichannelConversationSeen = (channelId: string, conversationId: string) => {
+  return post<OmnichannelItemResponse<OmnichannelConversation>>(
+    `/workspaces/current/channels/${encodeURIComponent(channelId)}/conversations/${encodeURIComponent(conversationId)}/mark-seen`,
+    { body: {} },
+    { silent: true },
+  )
+}
+
+export const sendOmnichannelInternalNote = (
+  channelId: string,
+  conversationId: string,
+  body: { text: string },
+) => {
+  return post<OmnichannelItemResponse<{ id: string }>>(
+    `/workspaces/current/channels/${encodeURIComponent(channelId)}/conversations/${encodeURIComponent(conversationId)}/internal-notes`,
+    { body },
+  )
+}
+
+export const listOmnichannelCannedResponses = () => {
+  return get<{ data: OmnichannelCannedResponse[] }>('/workspaces/current/omnichannel/canned-responses')
+}
+
+export const createOmnichannelCannedResponse = (body: {
+  title: string
+  content: string
+  shortcut?: string
+}) => {
+  return post<{ data: OmnichannelCannedResponse }>('/workspaces/current/omnichannel/canned-responses', { body })
+}
+
+export const deleteOmnichannelCannedResponse = (responseId: string) => {
+  return del<{ result: string }>(`/workspaces/current/omnichannel/canned-responses/${encodeURIComponent(responseId)}`)
 }
 
 export const listOmnichannelMessages = (channelId: string, conversationId: string, params?: {
@@ -594,6 +706,57 @@ export const listOmnichannelMessages = (channelId: string, conversationId: strin
   return get<OmnichannelListResponse<OmnichannelMessage>>(
     `/workspaces/current/channels/${channelId}/conversations/${conversationId}/messages`,
     { params },
+  )
+}
+
+export const listZaloBridgeFailedJobs = (channelId: string, params?: { limit?: number }) => {
+  return get<{ data: ZaloBridgeFailedJob[] }>(
+    `/workspaces/current/channels/${encodeURIComponent(channelId)}/zalo-bridge-jobs/failed`,
+    { params },
+  )
+}
+
+export const retryZaloBridgeJob = (channelId: string, jobId: string) => {
+  return post<{ result: string }>(
+    `/workspaces/current/channels/${encodeURIComponent(channelId)}/zalo-bridge-jobs/${encodeURIComponent(jobId)}/retry`,
+    { body: {} },
+  )
+}
+
+export const provisionZaloPersonalChannel = () => {
+  return post<{ data: Channel }>(
+    '/workspaces/current/channels/zalo-personal/provision',
+    { body: {} },
+  )
+}
+
+export const provisionZaloOaChannel = (payload: {
+  oauth_application_id: string
+  client_secret: string
+}) => {
+  return post<{ data: Channel }>(
+    '/workspaces/current/channels/zalo-oa/provision',
+    { body: payload },
+  )
+}
+
+export const provisionOAuthChannel = (payload: { channel_type: string }) => {
+  return post<{ data: Channel }>(
+    '/workspaces/current/channels/oauth/provision',
+    { body: payload },
+  )
+}
+
+export const startZaloPersonalLogin = (channelId: string) => {
+  return post<{ data: { qr_data_uri: string, status: string } }>(
+    `/workspaces/current/channels/zalo-personal/${encodeURIComponent(channelId)}/login/start`,
+    { body: {} },
+  )
+}
+
+export const getZaloPersonalLoginStatus = (channelId: string) => {
+  return get<{ data: { status: string, connected: boolean } }>(
+    `/workspaces/current/channels/zalo-personal/${encodeURIComponent(channelId)}/login/status`,
   )
 }
 

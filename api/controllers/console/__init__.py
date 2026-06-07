@@ -138,6 +138,8 @@ from .workspace import (
     zalo_oauth,
 )
 
+import_module("controllers.console.workspace.zalo_personal")
+
 api.add_namespace(console_ns)
 
 __all__ = [
@@ -183,17 +185,16 @@ __all__ = [
     "login",
     "mcp_server",
     "members",
-    "mini_crm",
     "message",
     "metadata",
+    "mini_crm",
     "model_config",
     "model_providers",
     "models",
     "notification",
-    "omnichannel",
-    "zalo_oauth",
     "oauth",
     "oauth_server",
+    "omnichannel",
     "ops_trace",
     "parameter",
     "ping",
@@ -222,4 +223,5 @@ __all__ = [
     "workflow_statistic",
     "workflow_trigger",
     "workspace",
+    "zalo_oauth",
 ]

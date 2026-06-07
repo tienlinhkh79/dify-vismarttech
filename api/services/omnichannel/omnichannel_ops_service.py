@@ -13,6 +13,7 @@ from extensions.ext_database import db
 from models.trigger import (
     OmniChannelConfig,
     OmniChannelConversation,
+    OmniChannelConversationStatus,
     OmniChannelMessage,
     OmniChannelMessageDirection,
     OmniChannelMessageSource,
@@ -52,6 +53,7 @@ class OmnichannelOpsService:
         OmniChannelType.INSTAGRAM_DM: "messenger",
         OmniChannelType.TIKTOK_MESSAGING: "messenger",
         OmniChannelType.ZALO_OA: "zalo",
+        OmniChannelType.ZALO_PERSONAL: "zalo_personal",
     }
     _MAX_SYNC_MESSAGES = 500
     _GRAPH_PAGE_LIMIT = 50
@@ -94,22 +96,58 @@ class OmnichannelOpsService:
             pass
         return None
 
+    @staticmethod
+    def _conversation_to_dict(
+        item: OmniChannelConversation,
+        *,
+        preview_fallback: str | None = None,
+    ) -> dict[str, Any]:
+        return {
+            "id": item.id,
+            "external_user_id": item.external_user_id,
+            "participant_display_name": item.participant_display_name,
+            "participant_profile_pic_url": item.participant_profile_pic_url,
+            "last_message_at": item.last_message_at,
+            "last_message_preview": item.last_message_preview or preview_fallback,
+            "channel_id": item.channel_id,
+            "channel_type": item.channel_type.value,
+            "status": item.status.value,
+            "assignee_account_id": item.assignee_account_id,
+            "unread_count": item.unread_count,
+            "agent_last_seen_at": item.agent_last_seen_at,
+            "snoozed_until": item.snoozed_until,
+            "created_at": item.created_at,
+            "updated_at": item.updated_at,
+        }
+
     @classmethod
     def _conversation_query(
         cls,
         tenant_id: str,
-        channel_id: str,
+        channel_id: str | None,
         since: datetime | None,
         until: datetime | None,
+        status: str | None = None,
+        assignee_account_id: str | None = None,
+        unassigned_only: bool = False,
     ) -> Select[tuple[OmniChannelConversation]]:
-        query = select(OmniChannelConversation).where(
-            OmniChannelConversation.tenant_id == tenant_id,
-            OmniChannelConversation.channel_id == channel_id,
-        )
+        query = select(OmniChannelConversation).where(OmniChannelConversation.tenant_id == tenant_id)
+        if channel_id:
+            query = query.where(OmniChannelConversation.channel_id == channel_id)
         if since is not None:
             query = query.where(OmniChannelConversation.last_message_at >= since)
         if until is not None:
             query = query.where(OmniChannelConversation.last_message_at <= until)
+        if status:
+            try:
+                status_enum = OmniChannelConversationStatus(status)
+            except ValueError as exc:
+                raise ValueError("Invalid conversation status") from exc
+            query = query.where(OmniChannelConversation.status == status_enum)
+        if unassigned_only:
+            query = query.where(OmniChannelConversation.assignee_account_id.is_(None))
+        elif assignee_account_id:
+            query = query.where(OmniChannelConversation.assignee_account_id == assignee_account_id)
         return query.order_by(
             OmniChannelConversation.last_message_at.desc().nullslast(),
             OmniChannelConversation.id.desc(),
@@ -120,11 +158,14 @@ class OmnichannelOpsService:
         cls,
         *,
         tenant_id: str,
-        channel_id: str,
+        channel_id: str | None,
         since: datetime | None,
         until: datetime | None,
         cursor: str | None,
         limit: int | None,
+        status: str | None = None,
+        assignee_account_id: str | None = None,
+        unassigned_only: bool = False,
     ) -> dict[str, Any]:
         cursor_value = cls._parse_cursor(cursor)
         page_size = cls._normalize_limit(limit)
@@ -133,40 +174,178 @@ class OmnichannelOpsService:
 
         with Session(db.engine, expire_on_commit=False) as session:
             query = (
-                cls._conversation_query(tenant_id, channel_id, since, until)
+                cls._conversation_query(
+                    tenant_id,
+                    channel_id,
+                    since,
+                    until,
+                    status=status,
+                    assignee_account_id=assignee_account_id,
+                    unassigned_only=unassigned_only,
+                )
                 .offset(cursor_value)
                 .limit(page_size + 1)
             )
             rows = session.scalars(query).all()
-            preview_fallbacks = cls._load_preview_fallbacks(
-                session=session,
-                tenant_id=tenant_id,
-                channel_id=channel_id,
-                conversations=rows,
-            )
+            preview_channel_id = channel_id or (rows[0].channel_id if rows else None)
+            preview_fallbacks: dict[str, str] = {}
+            if preview_channel_id:
+                preview_fallbacks = cls._load_preview_fallbacks(
+                    session=session,
+                    tenant_id=tenant_id,
+                    channel_id=preview_channel_id,
+                    conversations=rows,
+                )
 
         has_more = len(rows) > page_size
         data = rows[:page_size]
         next_cursor = str(cursor_value + page_size) if has_more else None
         return {
             "data": [
-                {
-                    "id": item.id,
-                    "external_user_id": item.external_user_id,
-                    "participant_display_name": item.participant_display_name,
-                    "participant_profile_pic_url": item.participant_profile_pic_url,
-                    "last_message_at": item.last_message_at,
-                    "last_message_preview": item.last_message_preview or preview_fallbacks.get(str(item.id)),
-                    "channel_id": item.channel_id,
-                    "channel_type": item.channel_type.value,
-                    "created_at": item.created_at,
-                    "updated_at": item.updated_at,
-                }
+                cls._conversation_to_dict(
+                    item,
+                    preview_fallback=preview_fallbacks.get(str(item.id)),
+                )
                 for item in data
             ],
             "has_more": has_more,
             "next_cursor": next_cursor,
         }
+
+    @classmethod
+    def update_conversation(
+        cls,
+        *,
+        tenant_id: str,
+        channel_id: str,
+        conversation_id: str,
+        status: str | None = None,
+        assignee_account_id: str | None = None,
+        clear_assignee: bool = False,
+        snoozed_until: datetime | None = None,
+    ) -> dict[str, Any]:
+        sync_assignee = clear_assignee or assignee_account_id is not None
+        with Session(db.engine, expire_on_commit=False) as session:
+            row = session.scalar(
+                select(OmniChannelConversation).where(
+                    OmniChannelConversation.tenant_id == tenant_id,
+                    OmniChannelConversation.channel_id == channel_id,
+                    OmniChannelConversation.id == conversation_id,
+                )
+            )
+            if not row:
+                raise ValueError("Conversation not found")
+            if status is not None:
+                try:
+                    row.status = OmniChannelConversationStatus(status)
+                except ValueError as exc:
+                    raise ValueError("Invalid conversation status") from exc
+            if clear_assignee:
+                row.assignee_account_id = None
+            elif assignee_account_id is not None:
+                row.assignee_account_id = assignee_account_id.strip() or None
+            if snoozed_until is not None:
+                row.snoozed_until = cls._normalize_dt(snoozed_until)
+            session.commit()
+            session.refresh(row)
+            out = cls._conversation_to_dict(row)
+            resolved_assignee = None if clear_assignee else row.assignee_account_id
+        if status is not None:
+            from services.omnichannel.mini_crm_service import MiniCrmService
+
+            MiniCrmService.sync_inbox_conversation_status(
+                tenant_id=tenant_id,
+                conversation_id=conversation_id,
+                status=status,
+            )
+        if sync_assignee:
+            from services.omnichannel.mini_crm_service import MiniCrmService
+
+            MiniCrmService.sync_inbox_assignee(
+                tenant_id=tenant_id,
+                conversation_id=conversation_id,
+                assignee_account_id=resolved_assignee,
+            )
+        publish_omnichannel_change(
+            tenant_id=tenant_id,
+            channel_id=channel_id,
+            conversation_id=conversation_id,
+            kind="conversations",
+        )
+        return out
+
+    @classmethod
+    def mark_conversation_seen(
+        cls,
+        *,
+        tenant_id: str,
+        channel_id: str,
+        conversation_id: str,
+    ) -> dict[str, Any]:
+        now = datetime.utcnow()
+        with Session(db.engine, expire_on_commit=False) as session:
+            row = session.scalar(
+                select(OmniChannelConversation).where(
+                    OmniChannelConversation.tenant_id == tenant_id,
+                    OmniChannelConversation.channel_id == channel_id,
+                    OmniChannelConversation.id == conversation_id,
+                )
+            )
+            if not row:
+                raise ValueError("Conversation not found")
+            row.agent_last_seen_at = now
+            row.unread_count = 0
+            session.commit()
+            session.refresh(row)
+            out = cls._conversation_to_dict(row)
+        publish_omnichannel_change(
+            tenant_id=tenant_id,
+            channel_id=channel_id,
+            conversation_id=conversation_id,
+            kind="conversations",
+        )
+        return out
+
+    @classmethod
+    def add_internal_note(
+        cls,
+        *,
+        tenant_id: str,
+        channel_id: str,
+        conversation_id: str,
+        text: str,
+        author_account_id: str,
+    ) -> dict[str, Any]:
+        body = (text or "").strip()
+        if not body:
+            raise ValueError("Note text is required")
+        with Session(db.engine, expire_on_commit=False) as session:
+            conv = session.scalar(
+                select(OmniChannelConversation).where(
+                    OmniChannelConversation.tenant_id == tenant_id,
+                    OmniChannelConversation.channel_id == channel_id,
+                    OmniChannelConversation.id == conversation_id,
+                )
+            )
+            if not conv:
+                raise ValueError("Conversation not found")
+            external_user_id = conv.external_user_id
+            channel_type = conv.channel_type
+        payload: MessageWritePayload = {
+            "tenant_id": tenant_id,
+            "channel_id": channel_id,
+            "external_user_id": external_user_id,
+            "direction": OmniChannelMessageDirection.OUTBOUND,
+            "source": OmniChannelMessageSource.INTERNAL_NOTE,
+            "content": body,
+            "external_message_id": None,
+            "attachments": [],
+            "metadata": {"author_account_id": author_account_id, "internal_note": True},
+            "created_at": None,
+        }
+        saved = cls.record_message(payload)
+        saved["channel_type"] = channel_type.value
+        return saved
 
     @classmethod
     def create_or_get_conversation(
@@ -206,18 +385,7 @@ class OmnichannelOpsService:
                 session.refresh(row)
                 created = True
 
-            out = {
-                "id": row.id,
-                "external_user_id": row.external_user_id,
-                "participant_display_name": row.participant_display_name,
-                "participant_profile_pic_url": row.participant_profile_pic_url,
-                "last_message_at": row.last_message_at,
-                "last_message_preview": row.last_message_preview,
-                "channel_id": row.channel_id,
-                "channel_type": row.channel_type.value,
-                "created_at": row.created_at,
-                "updated_at": row.updated_at,
-            }
+            out = cls._conversation_to_dict(row)
 
         from services.omnichannel.mini_crm_service import MiniCrmService
 
@@ -409,6 +577,8 @@ class OmnichannelOpsService:
                     "sender_profile_pic_url": (item.message_metadata or {}).get("sender_profile_pic_url"),
                     "channel_actor_name": (item.message_metadata or {}).get("channel_actor_name"),
                     "channel_actor_picture_url": (item.message_metadata or {}).get("channel_actor_picture_url"),
+                    "quote_preview": (item.message_metadata or {}).get("quote_preview"),
+                    "system_note": bool((item.message_metadata or {}).get("system_note")),
                     "created_at": item.created_at,
                 }
                 for item in data
@@ -495,6 +665,10 @@ class OmnichannelOpsService:
                     conversation.participant_display_name = pname
                 if purl:
                     conversation.participant_profile_pic_url = purl
+                if payload["source"] != OmniChannelMessageSource.INTERNAL_NOTE:
+                    conversation.unread_count = max(int(conversation.unread_count or 0), 0) + 1
+                    if conversation.status == OmniChannelConversationStatus.RESOLVED:
+                        conversation.status = OmniChannelConversationStatus.OPEN
             message = OmniChannelMessage(
                 tenant_id=payload["tenant_id"],
                 channel_id=payload["channel_id"],
@@ -633,6 +807,27 @@ class OmnichannelOpsService:
                     raise ValueError("Channel not found")
                 if not config.enabled:
                     raise ValueError("Channel is disabled")
+
+                if config.channel_type == OmniChannelType.ZALO_OA:
+                    from services.omnichannel.channel_config_service import ChannelConfigService
+                    from services.omnichannel.zalo_oa_backfill_service import ZaloOaBackfillService
+
+                    zcfg = ChannelConfigService.get_zalo_channel_config(channel_id)
+                    if not zcfg:
+                        raise ValueError("Zalo channel credentials are not ready")
+                    imported = ZaloOaBackfillService.run_job_payload(
+                        channel_id=channel_id,
+                        payload={"user_id": None},
+                        channel_config=zcfg,
+                    )
+                    row.total_messages = imported
+                    row.synced_messages = imported
+                    row.progress = 100
+                    row.status = OmniChannelSyncJobStatus.SUCCEEDED
+                    row.last_error = None
+                    row.finished_at = datetime.utcnow()
+                    session.commit()
+                    return
 
                 if config.channel_type not in (OmniChannelType.FACEBOOK_MESSENGER, OmniChannelType.INSTAGRAM_DM):
                     raise ValueError(f"Sync history is not implemented for channel type: {config.channel_type.value}")

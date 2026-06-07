@@ -45,6 +45,41 @@ class ChannelProviderRegistry:
             "status": "active",
             "setup_kind": "oauth_zalo",
         },
+        {
+            "provider": "zalo_personal",
+            "channel_type": "zalo_personal",
+            "display_name": "Zalo Personal",
+            "status": "active",
+            "setup_kind": "qr_zalo_personal",
+        },
+        {
+            "provider": "website",
+            "channel_type": "website_widget",
+            "display_name": "Website Live Chat",
+            "status": "coming_soon",
+            "setup_kind": "embed_script",
+        },
+        {
+            "provider": "whatsapp",
+            "channel_type": "whatsapp_cloud",
+            "display_name": "WhatsApp Business",
+            "status": "coming_soon",
+            "setup_kind": "embedded_signup",
+        },
+        {
+            "provider": "email",
+            "channel_type": "email_imap",
+            "display_name": "Email",
+            "status": "coming_soon",
+            "setup_kind": "oauth_email",
+        },
+        {
+            "provider": "telegram",
+            "channel_type": "telegram_bot",
+            "display_name": "Telegram",
+            "status": "coming_soon",
+            "setup_kind": "bot_token",
+        },
     ]
 
     @classmethod

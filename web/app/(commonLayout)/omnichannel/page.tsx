@@ -1,12 +1,13 @@
 'use client'
 
-import type { Channel, OmnichannelConversation, OmnichannelMessage, OmnichannelSyncJob } from '@/service/tools'
+import type { Channel, OmnichannelConversation, OmnichannelMessage, OmnichannelSyncJob, ZaloBridgeFailedJob } from '@/service/tools'
 import { useTranslation } from '#i18n'
 import {
   RiAddLine,
   RiAttachmentLine,
   RiDownloadLine,
   RiMore2Fill,
+  RiReplyLine,
   RiSearchLine,
   RiSendPlane2Fill,
 } from '@remixicon/react'
@@ -27,8 +28,10 @@ import {
 import { toast } from '@/app/components/base/ui/toast'
 import { ProviderLogo } from '@/app/components/header/account-setting/channels-ui'
 import { ACCOUNT_SETTING_TAB } from '@/app/components/header/account-setting/constants'
+import MemberSelector from '@/app/components/header/account-setting/members-page/transfer-ownership-modal/member-selector'
 import { OmnichannelCrmPanel } from '@/app/components/mini-crm/omnichannel-crm-panel'
 import { API_PREFIX } from '@/config'
+import { useAppContext } from '@/context/app-context'
 import { useAccountSettingModal } from '@/hooks/use-query-params'
 import Link from '@/next/link'
 import { useSearchParams } from '@/next/navigation'
@@ -38,13 +41,19 @@ import {
   getOmnichannelHealth,
   getOmnichannelStats,
   getOmnichannelSyncJob,
+  listAllOmnichannelConversations,
   listChannels,
+  listOmnichannelCannedResponses,
   listOmnichannelConversations,
   listOmnichannelMessages,
-
+  listZaloBridgeFailedJobs,
+  markOmnichannelConversationSeen,
   patchMiniCrmLead,
+  patchOmnichannelConversation,
   refreshOmnichannelConversationParticipant,
+  retryZaloBridgeJob,
   sendOmnichannelAgentMessage,
+  sendOmnichannelInternalNote,
   startOmnichannelHistorySync,
   testOmnichannelWebhook,
   uploadOmnichannelMedia,
@@ -52,6 +61,7 @@ import {
 import { cn } from '@/utils/classnames'
 import { resolveConsoleApiBaseHref } from '@/utils/console-api-base'
 import { OmnichannelInboxLayout } from './omnichannel-inbox-layout'
+import { ALL_INBOXES_ID, OmnichannelInboxSidebar } from './omnichannel-inbox-sidebar'
 
 function omnichannelSseUrl(channelId: string): string {
   const segment = `workspaces/current/channels/${encodeURIComponent(channelId)}/stream`
@@ -80,6 +90,67 @@ const OmnichannelSectionLoading = () => (
     <Loading type="area" />
   </div>
 )
+
+function ZaloFailedBridgeJobsSection({ channelId }: { channelId: string }) {
+  const { t } = useTranslation()
+  const [failedBridgeJobs, setFailedBridgeJobs] = useState<ZaloBridgeFailedJob[]>([])
+  const [isLoadingFailedJobs, setIsLoadingFailedJobs] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    listZaloBridgeFailedJobs(channelId, { limit: 20 })
+      .then((res) => {
+        if (!cancelled)
+          setFailedBridgeJobs(res.data || [])
+      })
+      .catch(() => {
+        if (!cancelled)
+          setFailedBridgeJobs([])
+      })
+      .finally(() => {
+        if (!cancelled)
+          setIsLoadingFailedJobs(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [channelId])
+
+  return (
+    <section className="border-t border-divider-subtle pt-8">
+      <h2 className="mb-3 text-xs font-semibold tracking-wide text-text-quaternary uppercase">{t('settings.omnichannelZaloFailedJobs')}</h2>
+      {isLoadingFailedJobs && <p className="text-xs text-text-tertiary">{t('settings.omnichannelZaloFailedJobsLoading')}</p>}
+      {!isLoadingFailedJobs && !failedBridgeJobs.length && (
+        <p className="text-xs text-text-tertiary">{t('settings.omnichannelZaloFailedJobsEmpty')}</p>
+      )}
+      {!!failedBridgeJobs.length && (
+        <ul className="space-y-2">
+          {failedBridgeJobs.map(job => (
+            <li key={job.id} className="rounded-lg bg-background-default px-3 py-2 text-xs ring-1 ring-divider-subtle">
+              <div className="font-medium text-text-primary">{job.kind}</div>
+              <div className="mt-1 line-clamp-2 text-text-tertiary">{job.last_error || '—'}</div>
+              <Button
+                className="mt-2"
+                size="small"
+                variant="secondary"
+                onClick={() => {
+                  void retryZaloBridgeJob(channelId, job.id).then(() => {
+                    toast.success(t('settings.omnichannelZaloFailedJobRetryQueued'))
+                    return listZaloBridgeFailedJobs(channelId, { limit: 20 })
+                  }).then((res) => {
+                    setFailedBridgeJobs(res.data || [])
+                  })
+                }}
+              >
+                {t('settings.omnichannelZaloFailedJobRetry')}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
 
 const terminalSyncStatuses = new Set(['succeeded', 'failed'])
 
@@ -137,6 +208,7 @@ function OmnichannelAvatar({
  *  Fallback poll when SSE is unavailable; primary updates use Redis → SSE.
  */
 const OMNICHANNEL_FALLBACK_POLL_MS = 45_000
+const OMNICHANNEL_ALL_INBOXES_POLL_MS = 30_000
 const OMNICHANNEL_MESSAGES_PAGE_SIZE = 50
 const SCROLL_LOAD_OLDER_THRESHOLD_PX = 120
 const JUMP_TO_LATEST_DISTANCE_PX = 220
@@ -198,12 +270,7 @@ const messageMatchesSearch = (message: OmnichannelMessage, q: string) => {
   return parts.join('\n').toLowerCase().includes(needle)
 }
 
-type ConversationTab = 'all' | 'new' | 'progress' | 'waiting' | 'completed'
-
-const conversationLastMs = (iso?: string) => {
-  const n = new Date(iso || '').getTime()
-  return Number.isNaN(n) ? null : n
-}
+type ConversationTab = 'all' | 'open' | 'resolved' | 'pending' | 'snoozed'
 
 const formatOmnichannelListSnippet = (raw: string | undefined | null) => {
   const text = (raw || '').trim().replace(/\s+/g, ' ')
@@ -213,31 +280,34 @@ const formatOmnichannelListSnippet = (raw: string | undefined | null) => {
 }
 
 const conversationMatchesTab = (tab: ConversationTab, c: OmnichannelConversation) => {
-  const now = Date.now()
-  const last = conversationLastMs(c.last_message_at)
   if (tab === 'all')
     return true
-  if (tab === 'new')
-    return last != null && now - last < 86400000
-  if (tab === 'progress')
-    return last != null && now - last >= 86400000 && now - last < 7 * 86400000
-  if (tab === 'waiting')
-    return last == null || (now - last >= 7 * 86400000 && now - last < 30 * 86400000)
-  if (tab === 'completed')
-    return last != null && now - last >= 30 * 86400000
-  return true
+  return (c.status || 'open') === tab
 }
+
+const conversationStatusLabelKey = (status?: string) => {
+  const value = status || 'open'
+  const map: Record<string, string> = {
+    open: 'settings.omnichannelStatusOpen',
+    resolved: 'settings.omnichannelStatusResolved',
+    pending: 'settings.omnichannelStatusPending',
+    snoozed: 'settings.omnichannelStatusSnoozed',
+  }
+  return map[value] || 'settings.omnichannelStatusOpen'
+}
+
+const isLikelyConversationId = (id: string) => /^[0-9a-f-]{36}$/i.test((id || '').trim())
 
 const OMNICHANNEL_TAB_DEFS: {
   id: ConversationTab
   labelKey: string
-  countKey?: keyof { all: number, new: number, progress: number, waiting: number, completed: number }
+  countKey?: keyof { all: number, open: number, resolved: number, pending: number, snoozed: number }
 }[] = [
   { id: 'all', labelKey: 'settings.omnichannelTabAll', countKey: 'all' },
-  { id: 'new', labelKey: 'settings.omnichannelTabNew', countKey: 'new' },
-  { id: 'progress', labelKey: 'settings.omnichannelTabInProgress', countKey: 'progress' },
-  { id: 'waiting', labelKey: 'settings.omnichannelTabWaiting', countKey: 'waiting' },
-  { id: 'completed', labelKey: 'settings.omnichannelTabCompleted', countKey: 'completed' },
+  { id: 'open', labelKey: 'settings.omnichannelTabOpen', countKey: 'open' },
+  { id: 'resolved', labelKey: 'settings.omnichannelTabResolved', countKey: 'resolved' },
+  { id: 'pending', labelKey: 'settings.omnichannelTabPending', countKey: 'pending' },
+  { id: 'snoozed', labelKey: 'settings.omnichannelTabSnoozed', countKey: 'snoozed' },
 ]
 
 const OmnichannelPageContent = () => {
@@ -245,6 +315,7 @@ const OmnichannelPageContent = () => {
   const urlChannelId = searchParams.get('channel_id') ?? ''
   const urlConversationId = searchParams.get('conversation_id') ?? ''
   const { t, i18n } = useTranslation('common')
+  const { userProfile } = useAppContext()
   const [, setAccountSettings] = useAccountSettingModal()
   const dateLocale = i18n.language?.replace('_', '-') || undefined
   const toLocaleText = (value?: string) => {
@@ -302,6 +373,7 @@ const OmnichannelPageContent = () => {
   const [composerAttachmentName, setComposerAttachmentName] = useState('')
   const [isUploadingComposerAttachment, setIsUploadingComposerAttachment] = useState(false)
   const [composerAttachmentUploadProgress, setComposerAttachmentUploadProgress] = useState<number | null>(null)
+  const [replyToMessage, setReplyToMessage] = useState<OmnichannelMessage | null>(null)
   const composerAttachmentInputRef = useRef<HTMLInputElement | null>(null)
   const [newChatOpen, setNewChatOpen] = useState(false)
   const [newChatUserId, setNewChatUserId] = useState('')
@@ -324,7 +396,12 @@ const OmnichannelPageContent = () => {
   const [showJumpToLatest, setShowJumpToLatest] = useState(false)
   const [messageSearchQuery, setMessageSearchQuery] = useState('')
   const [conversationSearchQuery, setConversationSearchQuery] = useState('')
-  const [conversationTab, setConversationTab] = useState<ConversationTab>('all')
+  const [conversationTab, setConversationTab] = useState<ConversationTab>('open')
+  const [assigneeFilter, setAssigneeFilter] = useState<'all' | 'mine' | 'unassigned'>('all')
+  const [crmRefreshKey, setCrmRefreshKey] = useState(0)
+  const [composerInternalNote, setComposerInternalNote] = useState(false)
+  const [cannedResponses, setCannedResponses] = useState<Array<{ id: string, title: string, content: string }>>([])
+  const [channelHealthById, setChannelHealthById] = useState<Record<string, ChannelHealth>>({})
   const messengerParticipantRefreshAttemptedRef = useRef('')
   const selectedChannelIdRef = useRef('')
   const selectedConversationIdRef = useRef('')
@@ -403,7 +480,7 @@ const OmnichannelPageContent = () => {
             pendingDeepConversationIdRef.current = deepConv
         }
         else if (nextChannels.length > 0) {
-          setSelectedChannelId(nextChannels[0].channel_id)
+          setSelectedChannelId(ALL_INBOXES_ID)
         }
       }
       catch {
@@ -415,6 +492,55 @@ const OmnichannelPageContent = () => {
     })()
   }, [t, i18n.language, urlChannelId, urlConversationId])
 
+  const isAllInboxes = selectedChannelId === ALL_INBOXES_ID
+
+  const conversationListParams = useCallback(() => {
+    const status = conversationTab === 'all' ? undefined : conversationTab
+    const base = {
+      limit: 50,
+      status,
+      ...(assigneeFilter === 'unassigned' ? { unassigned_only: true } : {}),
+      ...(assigneeFilter === 'mine' && userProfile.id ? { assignee_account_id: userProfile.id } : {}),
+    }
+    return base
+  }, [assigneeFilter, conversationTab, userProfile.id])
+
+  useEffect(() => {
+    if (!channels.length)
+      return
+    let cancelled = false
+    ;(async () => {
+      const entries = await Promise.all(
+        channels.map(async (ch) => {
+          try {
+            const res = await getOmnichannelHealth(ch.channel_id)
+            return [ch.channel_id, res.data] as const
+          }
+          catch {
+            return [ch.channel_id, undefined] as const
+          }
+        }),
+      )
+      if (!cancelled) {
+        const healthMap: Record<string, ChannelHealth> = {}
+        for (const [channelId, health] of entries) {
+          if (health)
+            healthMap[channelId] = health
+        }
+        setChannelHealthById(healthMap)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [channels])
+
+  useEffect(() => {
+    listOmnichannelCannedResponses()
+      .then(res => setCannedResponses(res.data || []))
+      .catch(() => setCannedResponses([]))
+  }, [])
+
   useEffect(() => {
     if (!selectedChannelId)
       return
@@ -425,11 +551,10 @@ const OmnichannelPageContent = () => {
     })
     ;(async () => {
       try {
-        const [conversationRes, statsRes, healthRes] = await Promise.all([
-          listOmnichannelConversations(selectedChannelId, { limit: 50 }),
-          getOmnichannelStats(selectedChannelId),
-          getOmnichannelHealth(selectedChannelId),
-        ])
+        const listParams = conversationListParams()
+        const conversationRes = isAllInboxes
+          ? await listAllOmnichannelConversations(listParams)
+          : await listOmnichannelConversations(selectedChannelId, listParams)
         const nextConversations = conversationRes.data || []
         setConversations(nextConversations)
         setSelectedConversationId((prev) => {
@@ -442,8 +567,18 @@ const OmnichannelPageContent = () => {
             return prev
           return nextConversations[0]?.id || ''
         })
-        setStats(statsRes.data)
-        setHealth(healthRes.data)
+        if (!isAllInboxes) {
+          const [statsRes, healthRes] = await Promise.all([
+            getOmnichannelStats(selectedChannelId),
+            getOmnichannelHealth(selectedChannelId),
+          ])
+          setStats(statsRes.data)
+          setHealth(healthRes.data)
+        }
+        else {
+          setStats(null)
+          setHealth(null)
+        }
       }
       catch {
         setError(t('settings.omnichannelErrorLoadData'))
@@ -452,10 +587,31 @@ const OmnichannelPageContent = () => {
         setIsPageLoading(false)
       }
     })()
-  }, [selectedChannelId, t, i18n.language])
+  }, [selectedChannelId, t, i18n.language, isAllInboxes, conversationListParams])
+
+  const selectedConversation = useMemo(
+    () => conversations.find(item => item.id === selectedConversationId),
+    [conversations, selectedConversationId],
+  )
+
+  const activeMessageChannelId = useMemo(() => {
+    if (!isAllInboxes)
+      return selectedChannelId
+    return selectedConversation?.channel_id || ''
+  }, [isAllInboxes, selectedChannelId, selectedConversation?.channel_id])
 
   useEffect(() => {
-    if (!selectedChannelId || !selectedConversationId)
+    if (!activeMessageChannelId || !selectedConversationId || !isLikelyConversationId(selectedConversationId))
+      return
+    void markOmnichannelConversationSeen(activeMessageChannelId, selectedConversationId)
+      .then((res) => {
+        setConversations(prev => prev.map(c => c.id === selectedConversationId ? { ...c, ...res.data, unread_count: 0 } : c))
+      })
+      .catch(() => {})
+  }, [activeMessageChannelId, selectedConversationId])
+
+  useEffect(() => {
+    if (!activeMessageChannelId || !selectedConversationId)
       return
 
     initialScrollToBottomRef.current = true
@@ -469,7 +625,7 @@ const OmnichannelPageContent = () => {
       setIsMessagesLoading(true)
     })
 
-    listOmnichannelMessages(selectedChannelId, selectedConversationId, { limit: OMNICHANNEL_MESSAGES_PAGE_SIZE })
+    listOmnichannelMessages(activeMessageChannelId, selectedConversationId, { limit: OMNICHANNEL_MESSAGES_PAGE_SIZE })
       .then((res) => {
         const asc = sortMessagesChronological(res.data || [])
         setMessages(asc)
@@ -486,10 +642,10 @@ const OmnichannelPageContent = () => {
       .finally(() => {
         setIsMessagesLoading(false)
       })
-  }, [selectedChannelId, selectedConversationId])
+  }, [activeMessageChannelId, selectedConversationId])
 
   const loadOlderMessages = useCallback(async () => {
-    if (!selectedChannelId || !selectedConversationId)
+    if (!activeMessageChannelId || !selectedConversationId)
       return
     if (loadOlderInFlightRef.current)
       return
@@ -507,7 +663,7 @@ const OmnichannelPageContent = () => {
     const prevTop = el.scrollTop
 
     try {
-      const res = await listOmnichannelMessages(selectedChannelId, selectedConversationId, {
+      const res = await listOmnichannelMessages(activeMessageChannelId, selectedConversationId, {
         limit: OMNICHANNEL_MESSAGES_PAGE_SIZE,
         cursor: nextCursor,
       })
@@ -533,7 +689,7 @@ const OmnichannelPageContent = () => {
       setIsLoadingOlderMessages(false)
       loadOlderInFlightRef.current = false
     }
-  }, [selectedChannelId, selectedConversationId])
+  }, [activeMessageChannelId, selectedConversationId])
 
   const scrollMessagesToBottom = useCallback((smooth: boolean) => {
     const el = messagesScrollRef.current
@@ -550,13 +706,13 @@ const OmnichannelPageContent = () => {
     if (typeof document !== 'undefined' && document.hidden)
       return
 
+    const allInboxes = channelId === ALL_INBOXES_ID
     let resolvedConversationId = selectedConversationIdRef.current
     try {
-      const [conversationRes, statsRes, healthRes] = await Promise.all([
-        listOmnichannelConversations(channelId, { limit: 50 }),
-        getOmnichannelStats(channelId),
-        getOmnichannelHealth(channelId),
-      ])
+      const listParams = conversationListParams()
+      const conversationRes = allInboxes
+        ? await listAllOmnichannelConversations(listParams)
+        : await listOmnichannelConversations(channelId, listParams)
       const nextConversations = conversationRes.data || []
       const prevSel = selectedConversationIdRef.current
       resolvedConversationId = (prevSel && nextConversations.some(item => item.id === prevSel))
@@ -565,8 +721,14 @@ const OmnichannelPageContent = () => {
       setConversations(nextConversations)
       setSelectedConversationId(resolvedConversationId)
       selectedConversationIdRef.current = resolvedConversationId
-      setStats(statsRes.data)
-      setHealth(healthRes.data)
+      if (!allInboxes) {
+        const [statsRes, healthRes] = await Promise.all([
+          getOmnichannelStats(channelId),
+          getOmnichannelHealth(channelId),
+        ])
+        setStats(statsRes.data)
+        setHealth(healthRes.data)
+      }
     }
     catch {
       // avoid flashing the main error banner on transient failures
@@ -576,6 +738,11 @@ const OmnichannelPageContent = () => {
       return
     const convId = resolvedConversationId
     if (!convId)
+      return
+    const messageChannelId = allInboxes
+      ? (conversations.find(c => c.id === convId)?.channel_id || '')
+      : channelId
+    if (!messageChannelId)
       return
     if (loadOlderInFlightRef.current)
       return
@@ -587,7 +754,7 @@ const OmnichannelPageContent = () => {
       ? el.scrollHeight - el.scrollTop - el.clientHeight < 88
       : true
     try {
-      const res = await listOmnichannelMessages(channelId, convId, {
+      const res = await listOmnichannelMessages(messageChannelId, convId, {
         limit: OMNICHANNEL_MESSAGES_PAGE_SIZE,
       })
       const asc = sortMessagesChronological(res.data || [])
@@ -603,7 +770,7 @@ const OmnichannelPageContent = () => {
     catch {
       // ignore transient errors
     }
-  }, [scrollMessagesToBottom])
+  }, [scrollMessagesToBottom, conversationListParams, conversations])
 
   const scheduleOmnichannelRealtimeRefresh = useCallback(() => {
     if (omnichannelRealtimeDebounceRef.current)
@@ -634,15 +801,18 @@ const OmnichannelPageContent = () => {
   useEffect(() => {
     if (!selectedChannelId)
       return
+    const pollMs = selectedChannelId === ALL_INBOXES_ID
+      ? OMNICHANNEL_ALL_INBOXES_POLL_MS
+      : OMNICHANNEL_FALLBACK_POLL_MS
     const intervalId = window.setInterval(() => {
       void refreshChannelData({ includeMessages: true })
-    }, OMNICHANNEL_FALLBACK_POLL_MS)
+    }, pollMs)
     return () => window.clearInterval(intervalId)
   }, [selectedChannelId, refreshChannelData])
 
-  /** Subscribe to server push for this channel (same session cookies as REST). */
+  /** Subscribe to server push for a single channel (same session cookies as REST). */
   useEffect(() => {
-    if (!selectedChannelId)
+    if (!selectedChannelId || selectedChannelId === ALL_INBOXES_ID)
       return
     if (typeof window === 'undefined' || typeof EventSource === 'undefined')
       return
@@ -761,6 +931,8 @@ const OmnichannelPageContent = () => {
       webhook: 'settings.omnichannelSourceWebhook',
       sync: 'settings.omnichannelSourceSync',
       system: 'settings.omnichannelSourceSystem',
+      internal_note: 'settings.omnichannelSourceInternalNote',
+      agent: 'settings.omnichannelSourceAgent',
     }
     const srcKey = srcMap[source]
     const src = srcKey ? t(srcKey as never) : source
@@ -812,17 +984,27 @@ const OmnichannelPageContent = () => {
     return out
   }, [messages, messageSearchQuery, formatDayDividerLabel])
 
-  const selectedChannel = useMemo(
-    () => channels.find(item => item.channel_id === selectedChannelId),
-    [channels, selectedChannelId],
-  )
+  const selectedChannel = useMemo(() => {
+    if (isAllInboxes) {
+      const convChannelId = selectedConversation?.channel_id
+      if (convChannelId)
+        return channels.find(item => item.channel_id === convChannelId)
+      return undefined
+    }
+    if (selectedChannelId === ALL_INBOXES_ID)
+      return undefined
+    return channels.find(item => item.channel_id === selectedChannelId)
+  }, [channels, isAllInboxes, selectedChannelId, selectedConversation?.channel_id])
+
+  const activeChannelType = selectedConversation?.channel_type || selectedChannel?.channel_type
+  const isZaloOaChannel = activeChannelType === 'zalo_oa'
 
   const isInboxBootstrapLoading = isChannelsLoading || (!!selectedChannelId && isPageLoading)
 
   const supportsComposerAttachments = useMemo(() => {
-    const ct = selectedChannel?.channel_type
-    return ct === 'facebook_messenger' || ct === 'instagram_dm'
-  }, [selectedChannel?.channel_type])
+    const ct = activeChannelType
+    return ct === 'facebook_messenger' || ct === 'instagram_dm' || ct === 'zalo_oa'
+  }, [activeChannelType])
 
   const canSendComposer = useMemo(
     () => !!(composerText.trim() || composerAttachmentUrl.trim()),
@@ -830,14 +1012,19 @@ const OmnichannelPageContent = () => {
   )
 
   const isMetaHistorySyncSupported = useMemo(() => {
-    const ct = selectedChannel?.channel_type
+    const ct = activeChannelType
     return ct === 'facebook_messenger' || ct === 'instagram_dm'
-  }, [selectedChannel?.channel_type])
+  }, [activeChannelType])
 
-  const selectedConversation = useMemo(
-    () => conversations.find(item => item.id === selectedConversationId),
-    [conversations, selectedConversationId],
-  )
+  const unreadByChannelId = useMemo(() => {
+    const out: Record<string, number> = {}
+    for (const c of conversations) {
+      const n = c.unread_count || 0
+      if (n > 0)
+        out[c.channel_id] = (out[c.channel_id] || 0) + n
+    }
+    return out
+  }, [conversations])
 
   const filteredConversations = useMemo(() => {
     const q = conversationSearchQuery.trim().toLowerCase()
@@ -854,10 +1041,10 @@ const OmnichannelPageContent = () => {
 
   const tabCounts = useMemo(() => ({
     all: conversations.length,
-    new: conversations.filter(c => conversationMatchesTab('new', c)).length,
-    progress: conversations.filter(c => conversationMatchesTab('progress', c)).length,
-    waiting: conversations.filter(c => conversationMatchesTab('waiting', c)).length,
-    completed: conversations.filter(c => conversationMatchesTab('completed', c)).length,
+    open: conversations.filter(c => conversationMatchesTab('open', c)).length,
+    resolved: conversations.filter(c => conversationMatchesTab('resolved', c)).length,
+    pending: conversations.filter(c => conversationMatchesTab('pending', c)).length,
+    snoozed: conversations.filter(c => conversationMatchesTab('snoozed', c)).length,
   }), [conversations])
 
   const lastMessagePreview = useMemo(() => {
@@ -983,12 +1170,37 @@ const OmnichannelPageContent = () => {
   }, [selectedChannelId, selectedConversationId, t])
 
   const onSendComposer = async () => {
-    if (!selectedChannelId || !selectedConversationId)
+    if (!activeMessageChannelId || !selectedConversationId)
       return
     const text = composerText.trim()
     const attUrl = composerAttachmentUrl.trim()
     if (!text && !attUrl) {
       toast.error(t('settings.omnichannelComposerValidationEmpty'))
+      return
+    }
+    if (composerInternalNote) {
+      if (!text) {
+        toast.error(t('settings.omnichannelInternalNoteValidationEmpty'))
+        return
+      }
+      setIsSendingMessage(true)
+      setError('')
+      try {
+        await sendOmnichannelInternalNote(activeMessageChannelId, selectedConversationId, { text })
+        setComposerText('')
+        setComposerInternalNote(false)
+        const res = await listOmnichannelMessages(activeMessageChannelId, selectedConversationId, {
+          limit: OMNICHANNEL_MESSAGES_PAGE_SIZE,
+        })
+        setMessages(sortMessagesChronological(res.data || []))
+        toast.success(t('settings.omnichannelInternalNoteSaved'))
+      }
+      catch {
+        toast.error(t('settings.omnichannelSendError'))
+      }
+      finally {
+        setIsSendingMessage(false)
+      }
       return
     }
     if (attUrl && !supportsComposerAttachments) {
@@ -998,18 +1210,20 @@ const OmnichannelPageContent = () => {
     setIsSendingMessage(true)
     setError('')
     try {
-      await sendOmnichannelAgentMessage(selectedChannelId, selectedConversationId, {
+      await sendOmnichannelAgentMessage(activeMessageChannelId, selectedConversationId, {
         text,
         ...(attUrl
           ? { attachment_url: attUrl, attachment_type: composerAttachmentType }
           : {}),
+        ...(replyToMessage?.id ? { quote_message_id: replyToMessage.id } : {}),
       })
       setComposerText('')
+      setReplyToMessage(null)
       setComposerAttachmentUrl('')
       setComposerAttachmentName('')
       setComposerAttachmentUploadProgress(null)
       setComposerAttachmentOpen(false)
-      const res = await listOmnichannelMessages(selectedChannelId, selectedConversationId, {
+      const res = await listOmnichannelMessages(activeMessageChannelId, selectedConversationId, {
         limit: OMNICHANNEL_MESSAGES_PAGE_SIZE,
       })
       setMessages(sortMessagesChronological(res.data || []))
@@ -1027,6 +1241,58 @@ const OmnichannelPageContent = () => {
     }
     finally {
       setIsSendingMessage(false)
+    }
+  }
+
+  const onResolveConversation = async () => {
+    if (!activeMessageChannelId || !selectedConversationId)
+      return
+    try {
+      const res = await patchOmnichannelConversation(activeMessageChannelId, selectedConversationId, {
+        status: 'resolved',
+      })
+      setConversations(prev => prev.map(c => c.id === selectedConversationId ? { ...c, ...res.data } : c))
+      setCrmRefreshKey(prev => prev + 1)
+      toast.success(t('settings.omnichannelResolvedSuccess'))
+    }
+    catch {
+      toast.error(t('settings.omnichannelResolvedError'))
+    }
+  }
+
+  const onReopenConversation = async () => {
+    if (!activeMessageChannelId || !selectedConversationId)
+      return
+    try {
+      const res = await patchOmnichannelConversation(activeMessageChannelId, selectedConversationId, {
+        status: 'open',
+      })
+      setConversations(prev => prev.map(c => c.id === selectedConversationId ? { ...c, ...res.data } : c))
+      setCrmRefreshKey(prev => prev + 1)
+      toast.success(t('settings.omnichannelReopenedSuccess'))
+    }
+    catch {
+      toast.error(t('settings.omnichannelReopenedError'))
+    }
+  }
+
+  const onAssignConversation = async (accountId: string | null) => {
+    if (!activeMessageChannelId || !selectedConversationId)
+      return
+    try {
+      const res = await patchOmnichannelConversation(
+        activeMessageChannelId,
+        selectedConversationId,
+        accountId
+          ? { assignee_account_id: accountId }
+          : { clear_assignee: true },
+      )
+      setConversations(prev => prev.map(c => c.id === selectedConversationId ? { ...c, ...res.data } : c))
+      setCrmRefreshKey(prev => prev + 1)
+      toast.success(t('settings.omnichannelAssigneeUpdated'))
+    }
+    catch {
+      toast.error(t('settings.omnichannelAssigneeUpdateError'))
     }
   }
 
@@ -1146,6 +1412,15 @@ const OmnichannelPageContent = () => {
                 </div>
               )
             : null}
+          inboxSidebar={(
+            <OmnichannelInboxSidebar
+              channels={channels}
+              selectedChannelId={selectedChannelId || ALL_INBOXES_ID}
+              onSelectChannel={setSelectedChannelId}
+              channelHealthById={channelHealthById}
+              unreadByChannelId={unreadByChannelId}
+            />
+          )}
           toolbar={(
             <div className="flex shrink-0 flex-wrap items-end justify-between gap-x-6 gap-y-4 border-b border-divider-subtle bg-background-default px-5 py-5 md:px-6">
               <div className="min-w-0 space-y-1">
@@ -1172,9 +1447,11 @@ const OmnichannelPageContent = () => {
                     <span className="min-w-0 flex-1 truncate text-left system-sm-regular">
                       {isChannelsLoading
                         ? t('settings.omnichannelLoadingConversations')
-                        : selectedChannel
-                          ? `${selectedChannel.name} (${channelTypeLabel(selectedChannel.channel_type)})`
-                          : t('settings.omnichannelNoChannelsOption')}
+                        : selectedChannelId === ALL_INBOXES_ID
+                          ? t('settings.omnichannelAllInboxes')
+                          : selectedChannel
+                            ? `${selectedChannel.name} (${channelTypeLabel(selectedChannel.channel_type)})`
+                            : t('settings.omnichannelNoChannelsOption')}
                     </span>
                     {selectedChannel && (
                       <ProviderLogo
@@ -1192,6 +1469,17 @@ const OmnichannelPageContent = () => {
                     {!channels.length && (
                       <div className="px-2 py-2.5 text-xs text-text-tertiary">{t('settings.omnichannelNoChannelsOption')}</div>
                     )}
+                    <DropdownMenuItem
+                      className="h-auto min-h-11 cursor-pointer gap-3 py-2.5"
+                      onClick={() => setSelectedChannelId(ALL_INBOXES_ID)}
+                    >
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-background-default text-[10px] font-bold text-text-tertiary ring-1 ring-divider-subtle">
+                        ALL
+                      </div>
+                      <div className="min-w-0 flex-1 truncate system-sm-medium text-text-primary">
+                        {t('settings.omnichannelAllInboxes')}
+                      </div>
+                    </DropdownMenuItem>
                     {channels.map(ch => (
                       <DropdownMenuItem
                         key={ch.channel_id}
@@ -1228,7 +1516,7 @@ const OmnichannelPageContent = () => {
                   size="small"
                   variant="secondary"
                   title={t('settings.omnichannelStartNewChatHint')}
-                  disabled={!selectedChannelId}
+                  disabled={!activeMessageChannelId || isAllInboxes}
                   onClick={() => setNewChatOpen(true)}
                   className="h-10 gap-1.5 px-3"
                 >
@@ -1247,7 +1535,7 @@ const OmnichannelPageContent = () => {
                     <RiMore2Fill className="h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
-                    <DropdownMenuItem disabled={!selectedChannelId || isTestingWebhook} onClick={() => void onWebhookTest()}>
+                    <DropdownMenuItem disabled={isAllInboxes || !selectedChannelId || isTestingWebhook} onClick={() => void onWebhookTest()}>
                       {t('settings.omnichannelTestWebhook')}
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -1309,7 +1597,7 @@ const OmnichannelPageContent = () => {
                                   aria-selected={active}
                                 >
                                   <span>{t(def.labelKey as never)}</span>
-                                  {def.id === 'new' && n > 0 && (
+                                  {def.id === 'open' && n > 0 && (
                                     <span className="ml-1 text-[11px] font-semibold text-text-accent tabular-nums">
                                       (
                                       {n}
@@ -1321,6 +1609,29 @@ const OmnichannelPageContent = () => {
                             })}
                           </div>
                         </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1 px-4 pb-2">
+                        {(['all', 'mine', 'unassigned'] as const).map((filter) => {
+                          const active = assigneeFilter === filter
+                          const labelKey = filter === 'all'
+                            ? 'settings.omnichannelAssigneeAll'
+                            : filter === 'mine'
+                              ? 'settings.omnichannelAssigneeMine'
+                              : 'settings.omnichannelAssigneeUnassigned'
+                          return (
+                            <button
+                              key={filter}
+                              type="button"
+                              className={cn(
+                                'rounded-md px-2 py-1 text-[11px] font-medium',
+                                active ? 'bg-state-base-hover text-text-primary' : 'text-text-tertiary hover:text-text-secondary',
+                              )}
+                              onClick={() => setAssigneeFilter(filter)}
+                            >
+                              {t(labelKey as never)}
+                            </button>
+                          )
+                        })}
                       </div>
                       <div className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 pt-1 pb-4">
                         {!filteredConversations.length && (
@@ -1361,6 +1672,11 @@ const OmnichannelPageContent = () => {
                                   <span className="shrink-0 text-xs whitespace-nowrap text-text-quaternary tabular-nums">
                                     {formatListTime(item.last_message_at)}
                                   </span>
+                                  {(item.unread_count || 0) > 0 && (
+                                    <span className="rounded-full bg-text-accent px-1.5 py-0.5 text-[10px] font-semibold text-text-primary-on-surface tabular-nums">
+                                      {item.unread_count}
+                                    </span>
+                                  )}
                                 </div>
                                 <div className="mt-1 line-clamp-2 text-xs leading-relaxed text-text-tertiary">
                                   {rowSnippet || t('settings.omnichannelListSnippetFallback')}
@@ -1388,7 +1704,6 @@ const OmnichannelPageContent = () => {
                                 <span className="truncate text-base font-semibold tracking-tight text-text-primary md:text-lg">
                                   {(selectedConversation.participant_display_name && selectedConversation.participant_display_name.trim()) || selectedConversation.external_user_id}
                                 </span>
-                                <span className="h-2 w-2 shrink-0 rounded-full bg-text-success" title={t('settings.omnichannelOnline')} />
                               </div>
                               <div className="mt-1 truncate text-sm text-text-tertiary">
                                 {lastMessagePreview
@@ -1401,18 +1716,39 @@ const OmnichannelPageContent = () => {
                             </div>
                           </div>
                           <div className="flex shrink-0 flex-wrap items-center gap-2">
+                            <div className="flex min-w-[12rem] flex-col gap-1">
+                              <span className="text-[11px] font-medium text-text-quaternary uppercase">{t('miniCrm.colOwner')}</span>
+                              <MemberSelector
+                                value={selectedConversation.assignee_account_id ?? undefined}
+                                onSelect={(accountId: string) => { void onAssignConversation(accountId) }}
+                              />
+                              {selectedConversation.assignee_account_id && (
+                                <button
+                                  type="button"
+                                  className="text-left text-xs text-text-accent hover:opacity-80"
+                                  onClick={() => { void onAssignConversation(null) }}
+                                >
+                                  {t('miniCrm.ownerClear')}
+                                </button>
+                              )}
+                            </div>
                             <span className="rounded-md bg-state-base-hover px-2.5 py-1 text-xs font-medium text-text-secondary">
                               {t('settings.omnichannelConversationStatus')}
                               :
                               {' '}
-                              {t('settings.omnichannelStatusInProgress')}
+                              {t(conversationStatusLabelKey(selectedConversation.status) as never)}
                             </span>
-                            <span className="rounded-md bg-state-base-hover px-2.5 py-1 text-xs font-medium text-text-secondary">
-                              {t('settings.omnichannelConversationPriority')}
-                              :
-                              {' '}
-                              {t('settings.omnichannelPriorityMedium')}
-                            </span>
+                            {(selectedConversation.status || 'open') === 'resolved'
+                              ? (
+                                  <Button type="button" size="small" variant="secondary" onClick={() => void onReopenConversation()}>
+                                    {t('settings.omnichannelReopen')}
+                                  </Button>
+                                )
+                              : (
+                                  <Button type="button" size="small" variant="secondary" onClick={() => void onResolveConversation()}>
+                                    {t('settings.omnichannelResolve')}
+                                  </Button>
+                                )}
                           </div>
                         </div>
                       )}
@@ -1485,7 +1821,11 @@ const OmnichannelPageContent = () => {
                                     )
                                   }
                                   const message = item.message
-                                  const isOutbound = message.direction === 'outbound'
+                                  const isInternalNote = message.source === 'internal_note'
+                                  const isSystemNote = !!message.system_note || !!(message.metadata as { system_note?: boolean })?.system_note
+                                  const isOutbound = message.direction === 'outbound' && !isInternalNote
+                                  const quotePreview = message.quote_preview
+                                    || (message.metadata as { quote_preview?: { content?: string } })?.quote_preview
                                   const inboundSender = (
                                     (message.sender_display_name && String(message.sender_display_name).trim())
                                     || (selectedConversation?.participant_display_name && String(selectedConversation.participant_display_name).trim())
@@ -1502,52 +1842,95 @@ const OmnichannelPageContent = () => {
                                   const inboundInitialsSeed = omnichannelInitialsSeed(inboundSender)
                                   const outboundInitialsSeed = omnichannelInitialsSeed(outboundSender)
 
+                                  if (isSystemNote) {
+                                    return (
+                                      <div key={item.key} className="flex justify-center px-2 py-1">
+                                        <div className="max-w-[min(92%,640px)] rounded-lg bg-state-warning-hover-alt px-3 py-2 text-center text-xs leading-relaxed text-text-secondary ring-1 ring-divider-subtle">
+                                          {message.content}
+                                        </div>
+                                      </div>
+                                    )
+                                  }
+
+                                  if (isInternalNote) {
+                                    return (
+                                      <div key={item.key} className="flex justify-center px-2 py-1">
+                                        <div className="max-w-[min(92%,640px)] rounded-lg border border-dashed border-divider-subtle bg-state-base-hover px-3 py-2 text-xs leading-relaxed text-text-secondary">
+                                          <div className="mb-1 font-medium text-text-primary">{t('settings.omnichannelInternalNoteLabel')}</div>
+                                          {message.content}
+                                        </div>
+                                      </div>
+                                    )
+                                  }
+
                                   return (
                                     <div
                                       key={item.key}
-                                      className={`flex items-end gap-2 ${isOutbound ? 'justify-end' : 'justify-start'}`}
+                                      className={`group flex items-end gap-2 ${isOutbound ? 'justify-end' : 'justify-start'}`}
                                     >
                                       {!isOutbound && (
                                         <OmnichannelAvatar imageUrl={inboundAvatar} initials={inboundInitialsSeed} size={36} />
                                       )}
-                                      <div
-                                        className={cn(
-                                          'max-w-[min(88%,560px)] rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed shadow-sm',
-                                          isOutbound
-                                            ? 'bg-text-accent text-text-primary-on-surface'
-                                            : 'bg-components-panel-bg text-text-primary ring-1 ring-divider-subtle',
-                                        )}
-                                      >
-                                        <div className="mb-1 space-y-0.5">
-                                          <div className={cn('text-xs font-medium', isOutbound ? 'text-text-primary-on-surface/90' : 'text-text-secondary')}>{actorLabel}</div>
-                                          <div className={cn('flex flex-wrap items-center justify-between gap-x-2 text-[10px]', isOutbound ? 'text-text-primary-on-surface/75' : 'text-text-tertiary')}>
-                                            <span>{messageDirectionAndSource(message.direction, message.source, message.metadata)}</span>
-                                            <span className="shrink-0 tabular-nums">{toLocaleText(message.created_at)}</span>
+                                      <div className="flex max-w-[min(88%,560px)] flex-col gap-1">
+                                        <div
+                                          className={cn(
+                                            'rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed shadow-sm',
+                                            isOutbound
+                                              ? 'bg-text-accent text-text-primary-on-surface'
+                                              : 'bg-components-panel-bg text-text-primary ring-1 ring-divider-subtle',
+                                          )}
+                                        >
+                                          <div className="mb-1 space-y-0.5">
+                                            <div className={cn('text-xs font-medium', isOutbound ? 'text-text-primary-on-surface/90' : 'text-text-secondary')}>{actorLabel}</div>
+                                            <div className={cn('flex flex-wrap items-center justify-between gap-x-2 text-[10px]', isOutbound ? 'text-text-primary-on-surface/75' : 'text-text-tertiary')}>
+                                              <span>{messageDirectionAndSource(message.direction, message.source, message.metadata)}</span>
+                                              <span className="shrink-0 tabular-nums">{toLocaleText(message.created_at)}</span>
+                                            </div>
                                           </div>
-                                        </div>
-                                        <div className={cn('break-words whitespace-pre-wrap', isOutbound ? 'text-text-primary-on-surface' : 'text-text-primary')}>{message.content || t('settings.omnichannelMessageEmpty')}</div>
-                                        {!!message.attachments?.length && (
-                                          <div className="mt-2 grid grid-cols-2 gap-2">
-                                            {message.attachments.slice(0, 4).map((attachment, idx) => {
-                                              const url = typeof attachment.url === 'string' ? attachment.url : ''
-                                              if (url && isImageUrl(url)) {
+                                          {!!quotePreview?.content && (
+                                            <div className={cn(
+                                              'mb-2 rounded-lg border-l-2 px-2 py-1 text-xs opacity-90',
+                                              isOutbound ? 'border-text-primary-on-surface/60 bg-black/10' : 'border-text-accent bg-state-base-hover',
+                                            )}
+                                            >
+                                              <div className="font-medium">{t('settings.omnichannelQuotedMessage')}</div>
+                                              <div className="line-clamp-3">{quotePreview.content}</div>
+                                            </div>
+                                          )}
+                                          <div className={cn('break-words whitespace-pre-wrap', isOutbound ? 'text-text-primary-on-surface' : 'text-text-primary')}>{message.content || t('settings.omnichannelMessageEmpty')}</div>
+                                          {!!message.attachments?.length && (
+                                            <div className="mt-2 grid grid-cols-2 gap-2">
+                                              {message.attachments.slice(0, 4).map((attachment, idx) => {
+                                                const url = typeof attachment.url === 'string' ? attachment.url : ''
+                                                if (url && isImageUrl(url)) {
+                                                  return (
+                                                    <a key={`${message.id}-${idx}`} href={url} target="_blank" rel="noreferrer" className="block">
+                                                      <img
+                                                        src={url}
+                                                        alt={t('settings.omnichannelAttachmentAlt')}
+                                                        className="h-24 w-full rounded-lg border border-divider-subtle object-cover"
+                                                      />
+                                                    </a>
+                                                  )
+                                                }
                                                 return (
-                                                  <a key={`${message.id}-${idx}`} href={url} target="_blank" rel="noreferrer" className="block">
-                                                    <img
-                                                      src={url}
-                                                      alt={t('settings.omnichannelAttachmentAlt')}
-                                                      className="h-24 w-full rounded-lg border border-divider-subtle object-cover"
-                                                    />
-                                                  </a>
+                                                  <div key={`${message.id}-${idx}`} className="rounded-lg border border-divider-subtle bg-background-default p-2 text-xs text-text-tertiary">
+                                                    {t('settings.omnichannelAttachment')}
+                                                  </div>
                                                 )
-                                              }
-                                              return (
-                                                <div key={`${message.id}-${idx}`} className="rounded-lg border border-divider-subtle bg-background-default p-2 text-xs text-text-tertiary">
-                                                  {t('settings.omnichannelAttachment')}
-                                                </div>
-                                              )
-                                            })}
-                                          </div>
+                                              })}
+                                            </div>
+                                          )}
+                                        </div>
+                                        {activeChannelType === 'zalo_oa' && (
+                                          <button
+                                            type="button"
+                                            className="self-end rounded-md px-1 py-0.5 text-[10px] font-medium text-text-tertiary opacity-0 transition-opacity group-hover:opacity-100 hover:text-text-accent"
+                                            onClick={() => setReplyToMessage(message)}
+                                          >
+                                            <RiReplyLine className="mr-0.5 inline h-3 w-3" />
+                                            {t('settings.omnichannelReplyToMessage')}
+                                          </button>
                                         )}
                                       </div>
                                       {isOutbound && (
@@ -1562,9 +1945,52 @@ const OmnichannelPageContent = () => {
                         )}
                       </div>
                       <div className="shrink-0 border-t border-divider-subtle bg-background-default px-4 py-3 md:px-6">
+                        {replyToMessage && !composerInternalNote && (
+                          <div className="mb-2 flex items-start justify-between gap-2 rounded-lg bg-state-base-hover px-3 py-2 text-xs text-text-secondary ring-1 ring-divider-subtle">
+                            <div className="min-w-0">
+                              <div className="font-medium text-text-primary">{t('settings.omnichannelReplyingTo')}</div>
+                              <div className="line-clamp-2">{replyToMessage.content}</div>
+                            </div>
+                            <button type="button" className="shrink-0 text-text-accent hover:opacity-80" onClick={() => setReplyToMessage(null)}>
+                              {t('operation.cancel', { ns: 'common' })}
+                            </button>
+                          </div>
+                        )}
+                        <div className="mb-2 flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            className={cn(
+                              'rounded-md px-2.5 py-1 text-xs font-medium',
+                              composerInternalNote ? 'bg-state-base-hover text-text-primary' : 'text-text-tertiary hover:text-text-secondary',
+                            )}
+                            onClick={() => setComposerInternalNote(v => !v)}
+                          >
+                            {t('settings.omnichannelInternalNoteToggle')}
+                          </button>
+                          {!!cannedResponses.length && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="rounded-md px-2.5 py-1 text-xs font-medium text-text-tertiary hover:text-text-secondary">
+                                {t('settings.omnichannelCannedResponses')}
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="max-h-64 w-72 overflow-y-auto">
+                                {cannedResponses.map(item => (
+                                  <DropdownMenuItem
+                                    key={item.id}
+                                    className="h-auto cursor-pointer flex-col items-start gap-0.5 py-2"
+                                    onClick={() => setComposerText(item.content)}
+                                  >
+                                    <span className="system-sm-medium text-text-primary">{item.title}</span>
+                                    <span className="line-clamp-2 text-xs text-text-tertiary">{item.content}</span>
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
+                        </div>
                         <div
                           className={cn(
                             'flex items-end gap-2 rounded-2xl border border-divider-subtle bg-components-input-bg-normal px-3 py-2 shadow-sm ring-1 ring-divider-subtle ring-inset',
+                            composerInternalNote && 'border-dashed bg-state-base-hover',
                             (!selectedConversationId || isSendingMessage || isUploadingComposerAttachment) && 'opacity-60',
                           )}
                         >
@@ -1575,10 +2001,10 @@ const OmnichannelPageContent = () => {
                             onKeyDown={onComposerKeyDown}
                             disabled={!selectedConversationId || isSendingMessage || isUploadingComposerAttachment}
                             className="max-h-[120px] min-h-[36px] flex-1 resize-none bg-transparent py-1.5 system-sm-regular text-text-primary outline-none placeholder:text-text-quaternary disabled:cursor-not-allowed"
-                            placeholder={t('settings.omnichannelComposerPlaceholder')}
+                            placeholder={composerInternalNote ? t('settings.omnichannelInternalNotePlaceholder') : t('settings.omnichannelComposerPlaceholder')}
                           />
                           <div className="flex shrink-0 items-center gap-1 pb-0.5">
-                            {supportsComposerAttachments && (
+                            {supportsComposerAttachments && !composerInternalNote && (
                               <ActionButton
                                 type="button"
                                 size="l"
@@ -1724,8 +2150,16 @@ const OmnichannelPageContent = () => {
 
                     {selectedConversation && selectedConversationId && (
                       <OmnichannelCrmPanel
+                        key={`${selectedConversationId}-${crmRefreshKey}`}
                         conversationId={selectedConversationId}
                         channelId={selectedConversation.channel_id}
+                        onLeadSaved={(lead) => {
+                          setConversations(prev => prev.map(c => (
+                            c.id === selectedConversationId
+                              ? { ...c, assignee_account_id: lead.owner_account_id ?? null }
+                              : c
+                          )))
+                        }}
                       />
                     )}
 
@@ -1782,13 +2216,17 @@ const OmnichannelPageContent = () => {
                           className="w-full rounded-lg"
                           size="small"
                           loading={isTestingWebhook}
-                          disabled={!selectedChannelId || isTestingWebhook}
+                          disabled={isAllInboxes || !selectedChannelId || isTestingWebhook}
                           onClick={() => void onWebhookTest()}
                         >
                           {t('settings.omnichannelTestWebhook')}
                         </Button>
                       </div>
                     </details>
+
+                    {isZaloOaChannel && activeMessageChannelId && (
+                      <ZaloFailedBridgeJobsSection key={activeMessageChannelId} channelId={activeMessageChannelId} />
+                    )}
 
                     <section className="border-t border-divider-subtle pt-8">
                       <h2 className="mb-3 text-xs font-semibold tracking-wide text-text-quaternary uppercase">{t('settings.omnichannelSyncHistory')}</h2>
@@ -1805,7 +2243,7 @@ const OmnichannelPageContent = () => {
                         className="mt-4 w-full rounded-lg"
                         size="small"
                         loading={isSyncing}
-                        disabled={!selectedChannelId || isSyncing || !isMetaHistorySyncSupported}
+                        disabled={isAllInboxes || !selectedChannelId || isSyncing || !isMetaHistorySyncSupported}
                         onClick={() => void onStartSync()}
                       >
                         {t('settings.omnichannelStartSync')}

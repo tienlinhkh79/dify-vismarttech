@@ -211,6 +211,13 @@ def init_app(app: DifyApp) -> Celery:
             "schedule": timedelta(minutes=dify_config.ZALO_OA_TOKEN_REFRESH_INTERVAL_MINUTES),
         }
 
+    if dify_config.ENABLE_ZALO_BRIDGE_WORKER_TASK:
+        imports.append("tasks.omnichannel_tasks")
+        beat_schedule["process_zalo_bridge_worker"] = {
+            "task": "tasks.omnichannel_tasks.process_zalo_bridge_worker",
+            "schedule": timedelta(seconds=dify_config.ZALO_BRIDGE_WORKER_INTERVAL_SECONDS),
+        }
+
     if dify_config.ENTERPRISE_ENABLED and dify_config.ENTERPRISE_TELEMETRY_ENABLED:
         imports.append("tasks.enterprise_telemetry_task")
     celery_app.conf.update(beat_schedule=beat_schedule, imports=imports)

@@ -7,6 +7,7 @@ export const MINI_CRM_CHANNEL_TYPES = [
   'instagram_dm',
   'tiktok_messaging',
   'zalo_oa',
+  'zalo_personal',
 ] as const
 
 export const MINI_CRM_PRESET_TAGS = [

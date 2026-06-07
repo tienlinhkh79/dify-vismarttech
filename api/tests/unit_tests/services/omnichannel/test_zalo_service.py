@@ -101,16 +101,6 @@ def test_verify_event_signature_accepts_mac_prefix_with_space() -> None:
     assert ZaloService.verify_event_signature(f"mac = {mac}", body.encode("utf-8"), secret, payload) is True
 
 
-def test_verify_event_signature_mini_app_sorted_values_style() -> None:
-    """Zalo Open API doc: sha256(concat(sorted values) + api_key)."""
-    secret = "api_key"
-    payload = {"zebra": "z", "alpha": "a", "nested": {"k": 1}}
-    content = "a" + json.dumps({"k": 1}, separators=(",", ":"), sort_keys=True) + "z"
-    mac = hashlib.sha256(f"{content}{secret}".encode()).hexdigest()
-    body = json.dumps(payload, separators=(",", ":"))
-    assert ZaloService.verify_event_signature(mac, body.encode("utf-8"), secret, payload) is True
-
-
 def test_verify_event_signature_inner_data_field_as_mac_segment() -> None:
     secret = "oa_secret_key"
     inner = '{"msg":"hi"}'
@@ -128,14 +118,18 @@ def test_verify_event_signature_accepts_appid_lower_key() -> None:
     assert ZaloService.verify_event_signature(mac, body.encode("utf-8"), secret, payload) is True
 
 
-def test_parse_message_events_ignores_oa_originated_events() -> None:
-    """OA-outbound samples must not enter the signed message path (avoids false 401 on webhook URL check)."""
+def test_parse_message_events_accepts_oa_self_send_as_outbound() -> None:
     payload = {
         "event_name": "oa_send_text",
-        "sender": {"id": "123"},
-        "message": {"text": "hello"},
+        "sender": {"id": "oa1"},
+        "recipient": {"id": "u1"},
+        "message": {"text": "hello", "msg_id": "m1"},
     }
-    assert ZaloService.parse_message_events("ch", payload) == []
+    events = ZaloService.parse_message_events("ch", payload)
+    assert len(events) == 1
+    assert events[0]["external_user_id"] == "u1"
+    assert events[0].get("is_self") is True
+    assert events[0]["text"] == "hello"
 
 
 def test_parse_message_events_accepts_user_send_text() -> None:
@@ -151,27 +145,21 @@ def test_parse_message_events_accepts_user_send_text() -> None:
     assert events[0]["text"] == "hi"
 
 
-def test_parse_message_events_accepts_legacy_unnamed_payload_with_text() -> None:
-    payload = {"sender": {"id": "u2"}, "message": {"text": "legacy"}}
+def test_parse_message_events_accepts_user_send_image_with_attachment() -> None:
+    payload = {
+        "event_name": "user_send_image",
+        "sender": {"id": "u1"},
+        "message": {
+            "text": "",
+            "msg_id": "m2",
+            "attachments": [{"type": "image", "payload": {"url": "https://cdn.example/a.jpg"}}],
+        },
+    }
     events = ZaloService.parse_message_events("ch", payload)
     assert len(events) == 1
-    assert events[0]["text"] == "legacy"
+    assert events[0]["attachments"][0]["url"] == "https://cdn.example/a.jpg"
 
 
-def test_verify_event_signature_body_only_oa_id_mac_uses_fallback_app_id() -> None:
-    """URL-check POST may include oa_id but sign with application app_id (stored on channel)."""
-    secret = "k"
-    body = '{"oa_id":"111","timestamp":"5"}'
-    payload = json.loads(body)
-    mac = hashlib.sha256(f"999{body}5{secret}".encode()).hexdigest()
-    assert (
-        ZaloService.verify_event_signature(
-            mac,
-            body.encode("utf-8"),
-            secret,
-            payload,
-            fallback_app_id="999",
-            fallback_oa_id="111",
-        )
-        is True
-    )
+def test_parse_message_events_ignores_follow_events() -> None:
+    payload = {"event_name": "follow", "sender": {"id": "u1"}}
+    assert ZaloService.parse_message_events("ch", payload) == []

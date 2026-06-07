@@ -17,6 +17,11 @@ from libs.datetime_utils import naive_utc_now
 from models.trigger import OmniChannelConfig, OmniChannelType
 from services.feature_service import FeatureService
 
+ZALO_PERSONAL_DRAFT_APP_PLACEHOLDER = "00000000-0000-0000-0000-000000000001"
+ZALO_OA_DRAFT_APP_PLACEHOLDER = "00000000-0000-0000-0000-000000000002"
+INSTAGRAM_DRAFT_APP_PLACEHOLDER = "00000000-0000-0000-0000-000000000003"
+TIKTOK_DRAFT_APP_PLACEHOLDER = "00000000-0000-0000-0000-000000000004"
+
 
 def _validate_uuid_field(field_label: str, value: str) -> str:
     """Reject invalid UUIDs before DB insert (avoids opaque SQLAlchemy/DB errors)."""
@@ -56,6 +61,11 @@ class ChannelInput(TypedDict):
     api_version: str
     enabled: bool
     oauth_application_id: NotRequired[str | None]
+    zalo_auto_reply_enabled: NotRequired[bool]
+    zalo_info_card_enabled: NotRequired[bool]
+    zalo_info_card_title: NotRequired[str | None]
+    zalo_info_card_subtitle: NotRequired[str | None]
+    zalo_info_card_image_url: NotRequired[str | None]
 
 
 class ChannelManagementService:
@@ -66,6 +76,7 @@ class ChannelManagementService:
         OmniChannelType.INSTAGRAM_DM.value,
         OmniChannelType.TIKTOK_MESSAGING.value,
         OmniChannelType.ZALO_OA.value,
+        OmniChannelType.ZALO_PERSONAL.value,
     }
 
     _PLATFORM_TO_TYPE = {
@@ -73,6 +84,7 @@ class ChannelManagementService:
         "instagram": OmniChannelType.INSTAGRAM_DM,
         "tiktok": OmniChannelType.TIKTOK_MESSAGING,
         "zalo": OmniChannelType.ZALO_OA,
+        "zalo_personal": OmniChannelType.ZALO_PERSONAL,
     }
 
     _TYPE_TO_PLATFORM = {value: key for key, value in _PLATFORM_TO_TYPE.items()}
@@ -100,8 +112,8 @@ class ChannelManagementService:
     def _resolve_branding_picture(cls, config: OmniChannelConfig) -> str | None:
         """Best-effort Page / OA avatar URL for inbox UI (requires stored access tokens)."""
         from services.omnichannel.messenger_graph_profile import fetch_page_profile
-        from services.omnichannel.zalo_oauth_service import ZaloOAuthService
         from services.omnichannel.zalo_oa_profile import fetch_zalo_oa_display
+        from services.omnichannel.zalo_oauth_service import ZaloOAuthService
 
         try:
             if config.channel_type in (
@@ -160,6 +172,18 @@ class ChannelManagementService:
             row["oauth_status"] = _zalo_oauth_status(config)
             row["oauth_application_id"] = config.oauth_application_id
             row["oauth_callback_url"] = ZaloOAuthService.public_callback_url()
+            row["zalo_auto_reply_enabled"] = bool(config.zalo_auto_reply_enabled)
+            row["zalo_info_card_enabled"] = bool(config.zalo_info_card_enabled)
+            row["zalo_info_card_title"] = config.zalo_info_card_title
+            row["zalo_info_card_subtitle"] = config.zalo_info_card_subtitle
+            row["zalo_info_card_image_url"] = config.zalo_info_card_image_url
+        if config.channel_type == OmniChannelType.ZALO_PERSONAL:
+            try:
+                from services.omnichannel.zalo_personal_session_service import ZaloPersonalSessionService
+
+                row["personal_login_status"] = ZaloPersonalSessionService.get_login_status(config.channel_id)
+            except Exception:
+                row["personal_login_status"] = "unknown"
         return row
 
     @classmethod
@@ -188,16 +212,124 @@ class ChannelManagementService:
         return cls._to_masked_dict(row, include_branding=include_branding)
 
     @staticmethod
+    def provision_zalo_personal_draft(tenant_id: str, user_id: str) -> dict[str, Any]:
+        """Create a disabled draft channel so QR login can start before routing is configured."""
+        channel_id = f"zalo-personal-{uuid.uuid4().hex[:12]}"
+        suffix = channel_id[-12:]
+        return ChannelManagementService.create_channel(
+            tenant_id=tenant_id,
+            user_id=user_id,
+            payload={
+                "channel_type": OmniChannelType.ZALO_PERSONAL.value,
+                "channel_id": channel_id,
+                "app_id": ZALO_PERSONAL_DRAFT_APP_PLACEHOLDER,
+                "name": "Zalo Personal",
+                "external_resource_id": "personal",
+                "verify_token": f"zp_vk_{suffix}",
+                "client_secret": f"zp_sec_{suffix}",
+                "access_token": "",
+                "api_version": "v23.0",
+                "enabled": False,
+            },
+        )
+
+    @staticmethod
+    def provision_zalo_oa_draft(
+        tenant_id: str,
+        user_id: str,
+        *,
+        oauth_application_id: str,
+        client_secret: str,
+    ) -> dict[str, Any]:
+        """Create a disabled Zalo OA draft so OAuth can run before routing is configured."""
+        app_id = (oauth_application_id or "").strip()
+        secret = (client_secret or "").strip()
+        if not app_id:
+            raise ValueError("Zalo app ID is required")
+        if not secret:
+            raise ValueError("OA secret key is required")
+        channel_id = f"zalo-oa-{uuid.uuid4().hex[:12]}"
+        suffix = channel_id[-12:]
+        return ChannelManagementService.create_channel(
+            tenant_id=tenant_id,
+            user_id=user_id,
+            payload={
+                "channel_type": OmniChannelType.ZALO_OA.value,
+                "channel_id": channel_id,
+                "app_id": ZALO_OA_DRAFT_APP_PLACEHOLDER,
+                "name": "Zalo OA",
+                "external_resource_id": "pending",
+                "oauth_application_id": app_id,
+                "verify_token": f"zo_vk_{suffix}",
+                "client_secret": secret,
+                "access_token": "",
+                "api_version": "v23.0",
+                "enabled": False,
+            },
+        )
+
+    @staticmethod
+    def provision_oauth_channel_draft(tenant_id: str, user_id: str, *, channel_type: str) -> dict[str, Any]:
+        """Create a disabled draft channel so credentials can be configured before routing."""
+        normalized = ChannelManagementService._to_channel_type(channel_type)
+        if normalized == OmniChannelType.INSTAGRAM_DM:
+            prefix = "instagram"
+            placeholder = INSTAGRAM_DRAFT_APP_PLACEHOLDER
+            default_name = "Instagram DM"
+        elif normalized == OmniChannelType.TIKTOK_MESSAGING:
+            prefix = "tiktok"
+            placeholder = TIKTOK_DRAFT_APP_PLACEHOLDER
+            default_name = "TikTok Messaging"
+        else:
+            raise ValueError("Unsupported channel type for OAuth draft provisioning")
+        channel_id = f"{prefix}-{uuid.uuid4().hex[:12]}"
+        suffix = channel_id[-12:]
+        return ChannelManagementService.create_channel(
+            tenant_id=tenant_id,
+            user_id=user_id,
+            payload={
+                "channel_type": normalized.value,
+                "channel_id": channel_id,
+                "app_id": placeholder,
+                "name": default_name,
+                "external_resource_id": "pending",
+                "verify_token": f"{prefix[:2]}_vk_{suffix}",
+                "client_secret": f"{prefix[:2]}_sec_{suffix}",
+                "access_token": "",
+                "api_version": "v23.0",
+                "enabled": False,
+            },
+        )
+
+    @staticmethod
     def create_channel(tenant_id: str, user_id: str, payload: ChannelInput) -> dict[str, Any]:
         channel_type = ChannelManagementService._to_channel_type(payload["channel_type"])
         access_token_plain = (payload.get("access_token") or "").strip()
         oauth_application_id = (payload.get("oauth_application_id") or "").strip() or None
 
-        if channel_type != OmniChannelType.ZALO_OA and not access_token_plain:
-            raise ValueError("access_token is required for this channel type")
-
         if channel_type == OmniChannelType.ZALO_OA and not access_token_plain and not oauth_application_id:
             raise ValueError("Zalo OA requires oauth_application_id when access_token is empty")
+        if channel_type == OmniChannelType.ZALO_PERSONAL:
+            access_token_plain = ""
+        elif channel_type != OmniChannelType.ZALO_OA and not access_token_plain:
+            is_disabled_draft = not payload.get("enabled", True)
+            allows_empty_token = channel_type in (
+                OmniChannelType.INSTAGRAM_DM,
+                OmniChannelType.TIKTOK_MESSAGING,
+            )
+            if not (is_disabled_draft and allows_empty_token):
+                raise ValueError("access_token is required for this channel type")
+
+        verify_token_plain = (payload.get("verify_token") or "").strip()
+        client_secret_plain = (payload.get("client_secret") or "").strip()
+        external_resource_id = (payload.get("external_resource_id") or "").strip()
+        if channel_type == OmniChannelType.ZALO_PERSONAL:
+            if not external_resource_id:
+                external_resource_id = "personal"
+            if not verify_token_plain:
+                verify_token_plain = f"zp_vk_{payload['channel_id'][:12]}"
+            if not client_secret_plain:
+                client_secret_plain = f"zp_sec_{payload['channel_id'][:12]}"
 
         tenant_uuid = _validate_uuid_field("tenant_id", tenant_id)
         user_uuid = _validate_uuid_field("user_id", user_id)
@@ -210,7 +342,9 @@ class ChannelManagementService:
             encrypted_access = None
 
         with Session(db.engine, expire_on_commit=False) as session:
-            existed = session.scalar(select(OmniChannelConfig).where(OmniChannelConfig.channel_id == payload["channel_id"]))
+            existed = session.scalar(
+                select(OmniChannelConfig).where(OmniChannelConfig.channel_id == payload["channel_id"])
+            )
             if existed:
                 raise ValueError("Channel ID already exists")
 
@@ -222,6 +356,8 @@ class ChannelManagementService:
                 if 0 < limit_n <= size_n:
                     raise ValueError("The number of omnichannel channels has reached the limit of your subscription.")
 
+            zalo_auto_reply = bool(payload.get("zalo_auto_reply_enabled", False))
+            zalo_info_card = bool(payload.get("zalo_info_card_enabled", False))
             row = OmniChannelConfig(
                 tenant_id=tenant_uuid,
                 app_id=app_uuid,
@@ -230,11 +366,22 @@ class ChannelManagementService:
                 channel_type=channel_type,
                 channel_id=payload["channel_id"],
                 enabled=payload["enabled"],
-                page_id=payload["external_resource_id"],
+                zalo_auto_reply_enabled=zalo_auto_reply if channel_type == OmniChannelType.ZALO_OA else False,
+                zalo_info_card_enabled=zalo_info_card if channel_type == OmniChannelType.ZALO_OA else False,
+                zalo_info_card_title=(payload.get("zalo_info_card_title") or None)
+                if channel_type == OmniChannelType.ZALO_OA
+                else None,
+                zalo_info_card_subtitle=(payload.get("zalo_info_card_subtitle") or None)
+                if channel_type == OmniChannelType.ZALO_OA
+                else None,
+                zalo_info_card_image_url=(payload.get("zalo_info_card_image_url") or None)
+                if channel_type == OmniChannelType.ZALO_OA
+                else None,
+                page_id=external_resource_id,
                 graph_api_version=payload["api_version"],
-                oauth_application_id=oauth_application_id,
-                encrypted_verify_token=encrypter.encrypt_token(tenant_uuid, payload["verify_token"]),
-                encrypted_app_secret=encrypter.encrypt_token(tenant_uuid, payload["client_secret"]),
+                oauth_application_id=oauth_application_id if channel_type == OmniChannelType.ZALO_OA else None,
+                encrypted_verify_token=encrypter.encrypt_token(tenant_uuid, verify_token_plain),
+                encrypted_app_secret=encrypter.encrypt_token(tenant_uuid, client_secret_plain),
                 encrypted_page_access_token=encrypted_access,
                 encrypted_oa_refresh_token=None,
                 oa_token_expires_at=None,
@@ -288,6 +435,17 @@ class ChannelManagementService:
                     row.encrypted_page_access_token = encrypter.encrypt_token(tenant_id, str(at))
             if "channel_type" in payload:
                 row.channel_type = ChannelManagementService._to_channel_type(payload["channel_type"])
+            if "zalo_auto_reply_enabled" in payload and row.channel_type == OmniChannelType.ZALO_OA:
+                row.zalo_auto_reply_enabled = bool(payload["zalo_auto_reply_enabled"])
+            if row.channel_type == OmniChannelType.ZALO_OA:
+                if "zalo_info_card_enabled" in payload:
+                    row.zalo_info_card_enabled = bool(payload["zalo_info_card_enabled"])
+                if "zalo_info_card_title" in payload:
+                    row.zalo_info_card_title = (payload.get("zalo_info_card_title") or None)
+                if "zalo_info_card_subtitle" in payload:
+                    row.zalo_info_card_subtitle = (payload.get("zalo_info_card_subtitle") or None)
+                if "zalo_info_card_image_url" in payload:
+                    row.zalo_info_card_image_url = (payload.get("zalo_info_card_image_url") or None)
 
             session.commit()
             session.refresh(row)

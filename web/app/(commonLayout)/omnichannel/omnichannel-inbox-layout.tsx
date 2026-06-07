@@ -9,6 +9,7 @@ import { cn } from '@/utils/classnames'
 type OmnichannelInboxLayoutProps = {
   errorBanner: ReactNode
   toolbar: ReactNode
+  inboxSidebar?: ReactNode
   conversationRail: ReactNode
   conversationMain: ReactNode
   insightRail: ReactNode
@@ -21,11 +22,12 @@ type OmnichannelInboxLayoutProps = {
 export function OmnichannelInboxLayout({
   errorBanner,
   toolbar,
+  inboxSidebar,
   conversationRail,
   conversationMain,
   insightRail,
 }: OmnichannelInboxLayoutProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('common')
   const [insightOpen, setInsightOpen] = useState(true)
 
   return (
@@ -33,6 +35,7 @@ export function OmnichannelInboxLayout({
       {errorBanner}
       {toolbar}
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden xl:flex-row">
+        {inboxSidebar}
         {conversationRail}
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           {conversationMain}

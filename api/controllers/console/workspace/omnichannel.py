@@ -28,6 +28,7 @@ from models.account import AccountStatus
 from services.omnichannel.channel_management_service import ChannelInput, ChannelManagementService
 from services.omnichannel.kiotviet_connection_service import KiotVietConnectionInput, KiotVietConnectionService
 from services.omnichannel.omnichannel_agent_reply_service import OmnichannelAgentReplyService
+from services.omnichannel.omnichannel_canned_response_service import OmnichannelCannedResponseService
 from services.omnichannel.omnichannel_media_storage_service import OmnichannelMediaStorageService
 from services.omnichannel.omnichannel_ops_service import OmnichannelOpsService
 from services.omnichannel.omnichannel_realtime import omnichannel_pubsub_topic
@@ -76,12 +77,18 @@ class ChannelCreatePayload(BaseModel):
     oauth_application_id: str | None = Field(default=None, max_length=255)
     api_version: str = Field(default="v23.0", min_length=1, max_length=32)
     enabled: bool = True
+    zalo_auto_reply_enabled: bool = False
+    zalo_info_card_enabled: bool = False
+    zalo_info_card_title: str | None = Field(default=None, max_length=255)
+    zalo_info_card_subtitle: str | None = Field(default=None, max_length=512)
+    zalo_info_card_image_url: str | None = Field(default=None, max_length=2048)
 
     @model_validator(mode="after")
     def validate_access_token_by_channel(self):
-        if self.channel_type == "zalo_oa":
-            if not self.access_token.strip() and not (self.oauth_application_id or "").strip():
-                raise ValueError("Zalo OA requires oauth_application_id when access_token is empty")
+        if self.channel_type in ("zalo_oa", "zalo_personal", "facebook_messenger"):
+            if self.channel_type == "zalo_oa":
+                if not self.access_token.strip() and not (self.oauth_application_id or "").strip():
+                    raise ValueError("Zalo OA requires oauth_application_id when access_token is empty")
             return self
         if not self.access_token.strip():
             raise ValueError("access_token is required for this channel type")
@@ -99,6 +106,11 @@ class ChannelUpdatePayload(BaseModel):
     oauth_application_id: str | None = Field(default=None, max_length=255)
     api_version: str | None = Field(default=None, min_length=1, max_length=32)
     enabled: bool | None = None
+    zalo_auto_reply_enabled: bool | None = None
+    zalo_info_card_enabled: bool | None = None
+    zalo_info_card_title: str | None = Field(default=None, max_length=255)
+    zalo_info_card_subtitle: str | None = Field(default=None, max_length=512)
+    zalo_info_card_image_url: str | None = Field(default=None, max_length=2048)
 
     @field_validator("access_token", mode="before")
     @classmethod
@@ -157,6 +169,7 @@ class OmnichannelAgentMessagePayload(BaseModel):
     text: str = Field(default="", max_length=8000)
     attachment_url: str | None = Field(default=None, max_length=2048)
     attachment_type: Literal["image", "video", "audio", "file"] | None = None
+    quote_message_id: str | None = Field(default=None, max_length=36)
 
     @model_validator(mode="after")
     def validate_body(self) -> OmnichannelAgentMessagePayload:
@@ -166,6 +179,33 @@ class OmnichannelAgentMessagePayload(BaseModel):
         if url and self.attachment_type is None:
             raise ValueError("attachment_type is required when attachment_url is set")
         return self
+
+
+class OmnichannelConversationListPayload(ChannelTimeFilterPayload):
+    channel_id: str | None = Field(default=None, max_length=255)
+    status: Literal["open", "resolved", "pending", "snoozed"] | None = None
+    assignee_account_id: str | None = Field(default=None, max_length=36)
+    unassigned_only: bool = False
+
+
+class OmnichannelConversationUpdatePayload(BaseModel):
+    status: Literal["open", "resolved", "pending", "snoozed"] | None = None
+    assignee_account_id: str | None = Field(default=None, max_length=36)
+    clear_assignee: bool = False
+
+
+class OmnichannelInternalNotePayload(BaseModel):
+    text: str = Field(min_length=1, max_length=8000)
+
+
+class OmnichannelMarkSeenPayload(BaseModel):
+    conversation_id: str = Field(min_length=1, max_length=36)
+
+
+class OmnichannelCannedResponsePayload(BaseModel):
+    title: str = Field(min_length=1, max_length=255)
+    content: str = Field(min_length=1, max_length=8000)
+    shortcut: str | None = Field(default=None, max_length=64)
 
 
 register_schema_models(
@@ -180,6 +220,11 @@ register_schema_models(
     ChannelTimeFilterPayload,
     OmnichannelAgentMessagePayload,
     OmnichannelConversationCreatePayload,
+    OmnichannelConversationListPayload,
+    OmnichannelConversationUpdatePayload,
+    OmnichannelInternalNotePayload,
+    OmnichannelMarkSeenPayload,
+    OmnichannelCannedResponsePayload,
 )
 
 
@@ -347,6 +392,31 @@ class ChannelOmnichannelStreamApi(Resource):
         )
 
 
+@console_ns.route("/workspaces/current/omnichannel/conversations")
+class OmnichannelConversationCollectionApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def get(self):
+        _, tenant_id = current_account_with_tenant()
+        filter_payload = OmnichannelConversationListPayload.model_validate(request.args.to_dict())
+        try:
+            result = OmnichannelOpsService.list_conversations(
+                tenant_id=tenant_id,
+                channel_id=(filter_payload.channel_id or "").strip() or None,
+                since=filter_payload.since,
+                until=filter_payload.until,
+                cursor=filter_payload.cursor,
+                limit=filter_payload.limit,
+                status=filter_payload.status,
+                assignee_account_id=filter_payload.assignee_account_id,
+                unassigned_only=filter_payload.unassigned_only,
+            )
+        except ValueError as exc:
+            raise BadRequest(str(exc)) from exc
+        return jsonable_encoder(result)
+
+
 @console_ns.route("/workspaces/current/channels/<string:channel_id>/conversations")
 class ChannelConversationCollectionApi(Resource):
     @setup_required
@@ -355,14 +425,23 @@ class ChannelConversationCollectionApi(Resource):
     def get(self, channel_id: str):
         _, tenant_id = current_account_with_tenant()
         filter_payload = ChannelTimeFilterPayload.model_validate(request.args.to_dict())
-        result = OmnichannelOpsService.list_conversations(
-            tenant_id=tenant_id,
-            channel_id=channel_id,
-            since=filter_payload.since,
-            until=filter_payload.until,
-            cursor=filter_payload.cursor,
-            limit=filter_payload.limit,
-        )
+        status = (request.args.get("status") or "").strip() or None
+        assignee_account_id = (request.args.get("assignee_account_id") or "").strip() or None
+        unassigned_only = (request.args.get("unassigned_only") or "").strip().lower() in {"1", "true", "yes"}
+        try:
+            result = OmnichannelOpsService.list_conversations(
+                tenant_id=tenant_id,
+                channel_id=channel_id,
+                since=filter_payload.since,
+                until=filter_payload.until,
+                cursor=filter_payload.cursor,
+                limit=filter_payload.limit,
+                status=status,
+                assignee_account_id=assignee_account_id,
+                unassigned_only=unassigned_only,
+            )
+        except ValueError as exc:
+            raise BadRequest(str(exc)) from exc
         return jsonable_encoder(result)
 
     @console_ns.expect(console_ns.models[OmnichannelConversationCreatePayload.__name__])
@@ -478,10 +557,156 @@ class ChannelConversationMessageCollectionApi(Resource):
                 text=payload.text,
                 attachment_url=payload.attachment_url,
                 attachment_type=payload.attachment_type,
+                quote_message_id=payload.quote_message_id,
             )
         except ValueError as exc:
             raise BadRequest(str(exc)) from exc
         return jsonable_encoder({"data": data}), 201
+
+
+@console_ns.route(
+    "/workspaces/current/channels/<string:channel_id>/conversations/<string:conversation_id>"
+)
+class ChannelConversationApi(Resource):
+    @console_ns.expect(console_ns.models[OmnichannelConversationUpdatePayload.__name__])
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def patch(self, channel_id: str, conversation_id: str):
+        _, tenant_id = current_account_with_tenant()
+        payload = OmnichannelConversationUpdatePayload.model_validate(console_ns.payload or {})
+        try:
+            data = OmnichannelOpsService.update_conversation(
+                tenant_id=tenant_id,
+                channel_id=channel_id,
+                conversation_id=conversation_id,
+                status=payload.status,
+                assignee_account_id=payload.assignee_account_id,
+                clear_assignee=payload.clear_assignee,
+            )
+        except ValueError as exc:
+            msg = str(exc)
+            if "not found" in msg.lower():
+                raise NotFound(msg) from exc
+            raise BadRequest(msg) from exc
+        return jsonable_encoder({"data": data})
+
+
+@console_ns.route(
+    "/workspaces/current/channels/<string:channel_id>/conversations/<string:conversation_id>/mark-seen"
+)
+class ChannelConversationMarkSeenApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def post(self, channel_id: str, conversation_id: str):
+        _, tenant_id = current_account_with_tenant()
+        try:
+            data = OmnichannelOpsService.mark_conversation_seen(
+                tenant_id=tenant_id,
+                channel_id=channel_id,
+                conversation_id=conversation_id,
+            )
+        except ValueError as exc:
+            msg = str(exc)
+            if "not found" in msg.lower():
+                raise NotFound(msg) from exc
+            raise BadRequest(msg) from exc
+        return jsonable_encoder({"data": data})
+
+
+@console_ns.route("/workspaces/current/channels/<string:channel_id>/conversations/seen")
+class ChannelConversationMarkSeenLegacyApi(Resource):
+    """Legacy path used by older web builds: conversation id in JSON body."""
+
+    @console_ns.expect(console_ns.models[OmnichannelMarkSeenPayload.__name__])
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def post(self, channel_id: str):
+        _, tenant_id = current_account_with_tenant()
+        payload = OmnichannelMarkSeenPayload.model_validate(console_ns.payload or {})
+        try:
+            data = OmnichannelOpsService.mark_conversation_seen(
+                tenant_id=tenant_id,
+                channel_id=channel_id,
+                conversation_id=payload.conversation_id,
+            )
+        except ValueError as exc:
+            msg = str(exc)
+            if "not found" in msg.lower():
+                raise NotFound(msg) from exc
+            raise BadRequest(msg) from exc
+        return jsonable_encoder({"data": data})
+
+
+@console_ns.route(
+    "/workspaces/current/channels/<string:channel_id>/conversations/<string:conversation_id>/internal-notes"
+)
+class ChannelConversationInternalNoteApi(Resource):
+    @console_ns.expect(console_ns.models[OmnichannelInternalNotePayload.__name__])
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def post(self, channel_id: str, conversation_id: str):
+        account, tenant_id = current_account_with_tenant()
+        payload = OmnichannelInternalNotePayload.model_validate(console_ns.payload or {})
+        try:
+            data = OmnichannelOpsService.add_internal_note(
+                tenant_id=tenant_id,
+                channel_id=channel_id,
+                conversation_id=conversation_id,
+                text=payload.text,
+                author_account_id=account.id,
+            )
+        except ValueError as exc:
+            raise BadRequest(str(exc)) from exc
+        return jsonable_encoder({"data": data}), 201
+
+
+@console_ns.route("/workspaces/current/omnichannel/canned-responses")
+class OmnichannelCannedResponseCollectionApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def get(self):
+        _, tenant_id = current_account_with_tenant()
+        rows = OmnichannelCannedResponseService.list_responses(tenant_id=tenant_id)
+        return jsonable_encoder({"data": rows})
+
+    @console_ns.expect(console_ns.models[OmnichannelCannedResponsePayload.__name__])
+    @setup_required
+    @login_required
+    @is_admin_or_owner_required
+    @account_initialization_required
+    def post(self):
+        _, tenant_id = current_account_with_tenant()
+        payload = OmnichannelCannedResponsePayload.model_validate(console_ns.payload or {})
+        try:
+            row = OmnichannelCannedResponseService.create_response(
+                tenant_id=tenant_id,
+                title=payload.title,
+                content=payload.content,
+                shortcut=payload.shortcut,
+            )
+        except ValueError as exc:
+            raise BadRequest(str(exc)) from exc
+        return jsonable_encoder({"data": row}), 201
+
+
+@console_ns.route("/workspaces/current/omnichannel/canned-responses/<string:response_id>")
+class OmnichannelCannedResponseApi(Resource):
+    @setup_required
+    @login_required
+    @is_admin_or_owner_required
+    @account_initialization_required
+    def delete(self, response_id: str):
+        _, tenant_id = current_account_with_tenant()
+        try:
+            OmnichannelCannedResponseService.delete_response(tenant_id=tenant_id, response_id=response_id)
+        except ValueError as exc:
+            raise NotFound(str(exc)) from exc
+        return {"result": "success"}, 200
 
 
 @console_ns.route("/workspaces/current/channels/<string:channel_id>/sync-history")
@@ -706,6 +931,44 @@ class MessengerChannelV2Api(Resource):
         except ValueError:
             raise NotFound("Channel not found")
         return {"result": "success"}, 200
+
+
+@console_ns.route("/workspaces/current/channels/<string:channel_id>/zalo-bridge-jobs/failed")
+class ChannelZaloBridgeFailedJobsApi(Resource):
+    @setup_required
+    @login_required
+    @is_admin_or_owner_required
+    @account_initialization_required
+    def get(self, channel_id: str):
+        _, tenant_id = current_account_with_tenant()
+        channel = ChannelManagementService.get_channel(tenant_id, channel_id)
+        if not channel:
+            raise NotFound("Channel not found")
+        from services.omnichannel.zalo_bridge_job_service import ZaloBridgeJobService
+
+        limit = min(int(request.args.get("limit", 50)), 200)
+        jobs = ZaloBridgeJobService.list_failed(channel_id=channel_id, limit=limit)
+        return jsonable_encoder({"data": jobs})
+
+
+@console_ns.route("/workspaces/current/channels/<string:channel_id>/zalo-bridge-jobs/<string:job_id>/retry")
+class ChannelZaloBridgeJobRetryApi(Resource):
+    @setup_required
+    @login_required
+    @is_admin_or_owner_required
+    @account_initialization_required
+    def post(self, channel_id: str, job_id: str):
+        _, tenant_id = current_account_with_tenant()
+        channel = ChannelManagementService.get_channel(tenant_id, channel_id)
+        if not channel:
+            raise NotFound("Channel not found")
+        from services.omnichannel.zalo_bridge_job_service import ZaloBridgeJobService
+        from tasks.omnichannel_tasks import process_zalo_bridge_worker
+
+        if not ZaloBridgeJobService.retry_failed(job_id):
+            raise NotFound("Failed job not found")
+        process_zalo_bridge_worker.delay()
+        return {"result": "success"}, 202
 
 
 @console_ns.route("/workspaces/current/channels/kiotviet")

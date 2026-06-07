@@ -32,9 +32,22 @@ class ZaloChannelConfig(TypedDict):
     app_id: str
     channel_id: str
     oa_id: str
+    zalo_application_id: str
+    zalo_auto_reply_enabled: bool
+    zalo_info_card_enabled: bool
+    zalo_info_card_title: str
+    zalo_info_card_subtitle: str
+    zalo_info_card_image_url: str
     verify_token: str
     app_secret: str
     oa_access_token: str
+
+
+class ZaloPersonalChannelConfig(TypedDict):
+    tenant_id: str
+    channel_id: str
+    app_id: str
+    verify_token: str
 
 
 class ChannelConfigService:
@@ -102,6 +115,12 @@ class ChannelConfigService:
                 "app_id": config.app_id,
                 "channel_id": config.channel_id,
                 "oa_id": config.page_id,
+                "zalo_application_id": (config.oauth_application_id or "").strip(),
+                "zalo_auto_reply_enabled": bool(config.zalo_auto_reply_enabled),
+                "zalo_info_card_enabled": bool(config.zalo_info_card_enabled),
+                "zalo_info_card_title": (config.zalo_info_card_title or "").strip(),
+                "zalo_info_card_subtitle": (config.zalo_info_card_subtitle or "").strip(),
+                "zalo_info_card_image_url": (config.zalo_info_card_image_url or "").strip(),
                 "verify_token": config.decrypt_verify_token(),
                 "app_secret": config.decrypt_app_secret(),
                 "oa_access_token": access_token,
@@ -109,4 +128,27 @@ class ChannelConfigService:
         except Exception:
             logger.exception("Failed to load Zalo channel config channel_id=%s", channel_id)
             return None
+
+    @staticmethod
+    def get_zalo_personal_channel_config(
+        channel_id: str,
+        *,
+        require_enabled: bool = True,
+    ) -> ZaloPersonalChannelConfig | None:
+        with Session(db.engine, expire_on_commit=False) as session:
+            query = select(OmniChannelConfig).where(
+                OmniChannelConfig.channel_id == channel_id,
+                OmniChannelConfig.channel_type == OmniChannelType.ZALO_PERSONAL,
+            )
+            if require_enabled:
+                query = query.where(OmniChannelConfig.enabled.is_(True))
+            config = session.scalar(query)
+        if not config:
+            return None
+        return {
+            "tenant_id": config.tenant_id,
+            "channel_id": config.channel_id,
+            "app_id": config.app_id,
+            "verify_token": config.decrypt_verify_token(),
+        }
 

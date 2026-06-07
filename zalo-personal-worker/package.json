@@ -1,0 +1,14 @@
+{
+  "name": "zalo-personal-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimal zca-js QR login worker for Dify Zalo Personal channels",
+  "scripts": {
+    "start": "node src/index.mjs"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "zca-js": "^2.0.0"
+  }
+}

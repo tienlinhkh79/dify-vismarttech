@@ -518,7 +518,9 @@ class MiniCrmService:
             if stage is not _MISSING_FIELD:
                 crm_lead_row.stage = OmniChannelCrmLeadStage(str(stage))
             if owner_account_id is not _MISSING_FIELD:
-                crm_lead_row.owner_account_id = (str(owner_account_id) if owner_account_id else None)
+                new_owner = str(owner_account_id) if owner_account_id else None
+                crm_lead_row.owner_account_id = new_owner
+                conversation_row.assignee_account_id = new_owner
             if notes is not _MISSING_FIELD:
                 crm_lead_row.notes = str(notes) if notes is not None else None
             if notes_append is not _MISSING_FIELD and notes_append:
@@ -574,10 +576,70 @@ class MiniCrmService:
             notes_appended=notes_append_value,
             activity_source=resolved_activity_source,
         )
+        if owner_account_id is not _MISSING_FIELD:
+            from services.omnichannel.omnichannel_realtime import publish_omnichannel_change
+
+            publish_omnichannel_change(
+                tenant_id=tenant_id,
+                channel_id=conversation_row.channel_id,
+                conversation_id=conversation_id,
+                kind="conversations",
+            )
         return cls._serialize_lead_row(
             conversation_row=conversation_row,
             crm_lead_row=crm_lead_row,
             channel_display_name=channel_config_name,
+        )
+
+    @classmethod
+    def sync_inbox_conversation_status(
+        cls,
+        *,
+        tenant_id: str,
+        conversation_id: str,
+        status: str,
+    ) -> None:
+        with Session(db.engine, expire_on_commit=False) as session:
+            crm_lead_row = session.scalar(
+                select(OmniChannelCrmLead).where(
+                    OmniChannelCrmLead.tenant_id == tenant_id,
+                    OmniChannelCrmLead.conversation_id == conversation_id,
+                )
+            )
+            current_stage = crm_lead_row.stage if crm_lead_row else OmniChannelCrmLeadStage.NEW
+
+        if status == "resolved":
+            if current_stage == OmniChannelCrmLeadStage.LOST:
+                return
+            cls.patch_lead(
+                tenant_id=tenant_id,
+                conversation_id=conversation_id,
+                stage=OmniChannelCrmLeadStage.WON.value,
+                activity_source="inbox_resolved",
+            )
+            return
+
+        if status == "open" and current_stage == OmniChannelCrmLeadStage.WON:
+            cls.patch_lead(
+                tenant_id=tenant_id,
+                conversation_id=conversation_id,
+                stage=OmniChannelCrmLeadStage.QUALIFIED.value,
+                activity_source="inbox_reopened",
+            )
+
+    @classmethod
+    def sync_inbox_assignee(
+        cls,
+        *,
+        tenant_id: str,
+        conversation_id: str,
+        assignee_account_id: str | None,
+    ) -> None:
+        cls.patch_lead(
+            tenant_id=tenant_id,
+            conversation_id=conversation_id,
+            owner_account_id=assignee_account_id,
+            activity_source="inbox_assignee",
         )
 
     @classmethod

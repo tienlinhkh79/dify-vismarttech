@@ -42,6 +42,14 @@ const PROVIDER_SETUP_CONFIG: Record<string, ProviderSetupConfig> = {
     resourceHintKey: 'settings.channelsZaloResourceHint',
     docsUrl: ZALO_DOCS_URL,
   },
+  zalo_personal: {
+    requiresClientSecret: false,
+    requiresAccessToken: false,
+    requiresOAuthQR: true,
+    showApiVersion: false,
+    resourceHintKey: 'settings.channelsZaloPersonalResourceHint',
+    docsUrl: ZALO_DOCS_URL,
+  },
 }
 
 const DEFAULT_PROVIDER_SETUP_CONFIG: ProviderSetupConfig = {

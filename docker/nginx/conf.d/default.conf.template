@@ -91,40 +91,54 @@ server {
       include proxy.conf;
     }
 
+    # Landing HTML: short CDN TTL so deploys do not leave browsers on stale chunk hashes.
+    # (Next.js may still emit long s-maxage; nginx overrides on the way out.)
     # Serve landing page on root without exposing port 3001.
     location = / {
-      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=3600; SameSite=Lax" always;
+      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=86400; SameSite=Lax" always;
+      add_header Cache-Control "public, max-age=0, s-maxage=300, must-revalidate" always;
+      proxy_hide_header Cache-Control;
       proxy_pass http://landing:3001;
       include proxy.conf;
     }
 
     # Serve landing subpages from the same domain root.
     location ^~ /features {
-      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=3600; SameSite=Lax" always;
+      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=86400; SameSite=Lax" always;
+      add_header Cache-Control "public, max-age=0, s-maxage=300, must-revalidate" always;
+      proxy_hide_header Cache-Control;
       proxy_pass http://landing:3001;
       include proxy.conf;
     }
 
     location ^~ /pricing {
-      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=3600; SameSite=Lax" always;
+      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=86400; SameSite=Lax" always;
+      add_header Cache-Control "public, max-age=0, s-maxage=300, must-revalidate" always;
+      proxy_hide_header Cache-Control;
       proxy_pass http://landing:3001;
       include proxy.conf;
     }
 
     location ^~ /contact {
-      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=3600; SameSite=Lax" always;
+      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=86400; SameSite=Lax" always;
+      add_header Cache-Control "public, max-age=0, s-maxage=300, must-revalidate" always;
+      proxy_hide_header Cache-Control;
       proxy_pass http://landing:3001;
       include proxy.conf;
     }
 
     location ^~ /privacy {
-      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=3600; SameSite=Lax" always;
+      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=86400; SameSite=Lax" always;
+      add_header Cache-Control "public, max-age=0, s-maxage=300, must-revalidate" always;
+      proxy_hide_header Cache-Control;
       proxy_pass http://landing:3001;
       include proxy.conf;
     }
 
     location ^~ /terms {
-      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=3600; SameSite=Lax" always;
+      add_header Set-Cookie "_next_app=landing; Path=/; Max-Age=86400; SameSite=Lax" always;
+      add_header Cache-Control "public, max-age=0, s-maxage=300, must-revalidate" always;
+      proxy_hide_header Cache-Control;
       proxy_pass http://landing:3001;
       include proxy.conf;
     }

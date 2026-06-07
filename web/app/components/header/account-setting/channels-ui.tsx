@@ -121,19 +121,36 @@ export const ProviderSummaryCard = ({
   provider,
   configuredCount,
   t,
+  onAdd,
 }: {
   provider: ChannelProvider
   configuredCount: number
   t: TranslateFn
+  onAdd?: (channelType: string) => void
 }) => {
+  const isComingSoon = provider.status === 'coming_soon'
+  const isZaloPersonal = provider.channel_type === 'zalo_personal'
+  const isZaloOa = provider.channel_type === 'zalo_oa'
   return (
     <div className="rounded-lg border border-divider-subtle px-3 py-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ProviderLogo provider={provider.channel_type} />
-          <div className="system-sm-medium text-text-primary">{provider.display_name}</div>
+          <div>
+            <div className="system-sm-medium text-text-primary">{provider.display_name}</div>
+            {isZaloPersonal && (
+              <div className="system-xs-regular text-text-accent">
+                {t('settings.channelsZaloPersonalCardSubtitle', { ns: 'common' })}
+              </div>
+            )}
+            {isZaloOa && (
+              <div className="system-xs-regular text-text-accent">
+                {t('settings.channelsZaloOaCardSubtitle', { ns: 'common' })}
+              </div>
+            )}
+          </div>
         </div>
-        {provider.status === 'coming_soon'
+        {isComingSoon
           ? (
               <div className="rounded bg-state-warning-hover-alt px-1.5 py-0.5 text-[10px] text-text-warning">
                 {t('settings.channelsComingSoon', { ns: 'common' })}
@@ -145,8 +162,15 @@ export const ProviderSummaryCard = ({
               </div>
             )}
       </div>
-      <div className="mt-1 system-xs-regular text-text-tertiary">
-        {t('settings.channelsConfiguredCount', { ns: 'common', count: configuredCount })}
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <div className="system-xs-regular text-text-tertiary">
+          {t('settings.channelsConfiguredCount', { ns: 'common', count: configuredCount })}
+        </div>
+        {onAdd && !isComingSoon && (
+          <Button size="small" variant="secondary" onClick={() => onAdd(provider.channel_type)}>
+            {t('settings.channelsAdd', { ns: 'common' })}
+          </Button>
+        )}
       </div>
     </div>
   )
@@ -159,6 +183,8 @@ const getChannelConnectionBadge = (channel: Channel, t: TranslateFn) => {
     return { label: t('settings.channelsZaloOAuthPending', { ns: 'common' }), className: 'bg-state-warning-hover-alt text-text-warning' }
   if (channel.channel_type === 'zalo_oa' && channel.oauth_status === 'expired')
     return { label: t('settings.channelsNeedsReauth', { ns: 'common' }), className: 'bg-state-warning-hover-alt text-text-warning' }
+  if (channel.channel_type === 'zalo_personal' && channel.personal_login_status !== 'connected')
+    return { label: t('settings.channelsZaloPersonalQrPending', { ns: 'common' }), className: 'bg-state-warning-hover-alt text-text-warning' }
   if (channel.status === 'inactive')
     return { label: t('settings.channelsNeedsReauth', { ns: 'common' }), className: 'bg-state-warning-hover-alt text-text-warning' }
   return { label: t('settings.channelsConnected', { ns: 'common' }), className: 'bg-state-success-hover text-text-success' }
@@ -292,15 +318,21 @@ export const SetupProviderSelector = ({
 
 export const SetupManualHint = ({
   isZalo,
+  isZaloPersonal,
   t,
 }: {
   isZalo: boolean
+  isZaloPersonal?: boolean
   t: TranslateFn
 }) => (
   <div className="rounded-lg border border-divider-subtle bg-background-default px-3 py-2">
     <div className="mb-1 system-xs-semibold-uppercase text-text-tertiary">{t('settings.channelsManualSetupTitle', { ns: 'common' })}</div>
     <div className="system-xs-regular text-text-secondary">
-      {isZalo ? t('settings.channelsZaloSetupHint', { ns: 'common' }) : t('settings.channelsGenericSetupHint', { ns: 'common' })}
+      {isZaloPersonal
+        ? t('settings.channelsZaloPersonalSetupHint', { ns: 'common' })
+        : isZalo
+          ? t('settings.channelsZaloSetupHint', { ns: 'common' })
+          : t('settings.channelsGenericSetupHint', { ns: 'common' })}
     </div>
   </div>
 )
@@ -318,7 +350,7 @@ export const SetupNavigation = ({
   onNext: () => void
   t: TranslateFn
 }) => (
-  <div className="flex justify-between gap-2 pt-2">
+  <div className="flex justify-between gap-2">
     <Button disabled={setupStep === 1} onClick={onBack}>
       {t('operation.back', { ns: 'common' })}
     </Button>

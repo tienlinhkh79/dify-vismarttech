@@ -407,6 +407,7 @@ x-shared-env: &shared-api-worker-env
   IRIS_TIMEZONE: ${IRIS_TIMEZONE:-UTC}
   UPLOAD_FILE_SIZE_LIMIT: ${UPLOAD_FILE_SIZE_LIMIT:-15}
   UPLOAD_FILE_BATCH_LIMIT: ${UPLOAD_FILE_BATCH_LIMIT:-5}
+  BATCH_UPLOAD_LIMIT: ${BATCH_UPLOAD_LIMIT:-20}
   UPLOAD_FILE_EXTENSION_BLACKLIST: ${UPLOAD_FILE_EXTENSION_BLACKLIST:-}
   SINGLE_CHUNK_ATTACHMENT_LIMIT: ${SINGLE_CHUNK_ATTACHMENT_LIMIT:-10}
   IMAGE_FILE_BATCH_LIMIT: ${IMAGE_FILE_BATCH_LIMIT:-10}
@@ -795,6 +796,14 @@ services:
       - ../api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py
       - ../api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py:/app/api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py
       - ../api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py:/app/api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py
+      - ../api/migrations/versions/2026_06_05_1000-f1a2b3c4d5e6_add_omnichannel_zalo_message_map.py:/app/api/migrations/versions/2026_06_05_1000-f1a2b3c4d5e6_add_omnichannel_zalo_message_map.py
+      - ../api/migrations/versions/2026_06_05_1200-f2b3c4d5e6f7_add_zalo_bridge_jobs_and_settings.py:/app/api/migrations/versions/2026_06_05_1200-f2b3c4d5e6f7_add_zalo_bridge_jobs_and_settings.py
+      - ../api/migrations/versions/2026_06_05_1400-g3h4i5j6k7l8_add_zalo_info_card_settings.py:/app/api/migrations/versions/2026_06_05_1400-g3h4i5j6k7l8_add_zalo_info_card_settings.py
+      - ../api/migrations/versions/2026_06_05_1600-h4i5j6k7l8m9_omnichannel_inbox_parity.py:/app/api/migrations/versions/2026_06_05_1600-h4i5j6k7l8m9_omnichannel_inbox_parity.py
+      - ../api/controllers/trigger/zalo_personal.py:/app/api/controllers/trigger/zalo_personal.py
+      - ../api/controllers/console/workspace/zalo_personal.py:/app/api/controllers/console/workspace/zalo_personal.py
+      - ../api/extensions/ext_celery.py:/app/api/extensions/ext_celery.py
+      - ../api/configs/feature/__init__.py:/app/api/configs/feature/__init__.py
       - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
       - ../api/core/tools/builtin_tool/providers/mini_crm:/app/api/core/tools/builtin_tool/providers/mini_crm
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
@@ -865,6 +874,14 @@ services:
       - ../api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py
       - ../api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py:/app/api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py
       - ../api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py:/app/api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py
+      - ../api/migrations/versions/2026_06_05_1000-f1a2b3c4d5e6_add_omnichannel_zalo_message_map.py:/app/api/migrations/versions/2026_06_05_1000-f1a2b3c4d5e6_add_omnichannel_zalo_message_map.py
+      - ../api/migrations/versions/2026_06_05_1200-f2b3c4d5e6f7_add_zalo_bridge_jobs_and_settings.py:/app/api/migrations/versions/2026_06_05_1200-f2b3c4d5e6f7_add_zalo_bridge_jobs_and_settings.py
+      - ../api/migrations/versions/2026_06_05_1400-g3h4i5j6k7l8_add_zalo_info_card_settings.py:/app/api/migrations/versions/2026_06_05_1400-g3h4i5j6k7l8_add_zalo_info_card_settings.py
+      - ../api/migrations/versions/2026_06_05_1600-h4i5j6k7l8m9_omnichannel_inbox_parity.py:/app/api/migrations/versions/2026_06_05_1600-h4i5j6k7l8m9_omnichannel_inbox_parity.py
+      - ../api/controllers/trigger/zalo_personal.py:/app/api/controllers/trigger/zalo_personal.py
+      - ../api/controllers/console/workspace/zalo_personal.py:/app/api/controllers/console/workspace/zalo_personal.py
+      - ../api/extensions/ext_celery.py:/app/api/extensions/ext_celery.py
+      - ../api/configs/feature/__init__.py:/app/api/configs/feature/__init__.py
       - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
       - ../api/core/tools/builtin_tool/providers/mini_crm:/app/api/core/tools/builtin_tool/providers/mini_crm
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
@@ -928,6 +945,14 @@ services:
       - ../api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py
       - ../api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py:/app/api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py
       - ../api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py:/app/api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py
+      - ../api/migrations/versions/2026_06_05_1000-f1a2b3c4d5e6_add_omnichannel_zalo_message_map.py:/app/api/migrations/versions/2026_06_05_1000-f1a2b3c4d5e6_add_omnichannel_zalo_message_map.py
+      - ../api/migrations/versions/2026_06_05_1200-f2b3c4d5e6f7_add_zalo_bridge_jobs_and_settings.py:/app/api/migrations/versions/2026_06_05_1200-f2b3c4d5e6f7_add_zalo_bridge_jobs_and_settings.py
+      - ../api/migrations/versions/2026_06_05_1400-g3h4i5j6k7l8_add_zalo_info_card_settings.py:/app/api/migrations/versions/2026_06_05_1400-g3h4i5j6k7l8_add_zalo_info_card_settings.py
+      - ../api/migrations/versions/2026_06_05_1600-h4i5j6k7l8m9_omnichannel_inbox_parity.py:/app/api/migrations/versions/2026_06_05_1600-h4i5j6k7l8m9_omnichannel_inbox_parity.py
+      - ../api/controllers/trigger/zalo_personal.py:/app/api/controllers/trigger/zalo_personal.py
+      - ../api/controllers/console/workspace/zalo_personal.py:/app/api/controllers/console/workspace/zalo_personal.py
+      - ../api/extensions/ext_celery.py:/app/api/extensions/ext_celery.py
+      - ../api/configs/feature/__init__.py:/app/api/configs/feature/__init__.py
       - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
       - ../api/core/tools/builtin_tool/providers/mini_crm:/app/api/core/tools/builtin_tool/providers/mini_crm
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
@@ -1801,6 +1826,29 @@ services:
           "python",
           "-c",
           "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  zalo_personal_worker:
+    build:
+      context: ../zalo-personal-worker
+      dockerfile: Dockerfile
+    image: dify-zalo-personal-worker:local
+    pull_policy: never
+    restart: unless-stopped
+    environment:
+      PORT: "3920"
+    ports:
+      - "3920:3920"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3920/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
         ]
       interval: 30s
       timeout: 5s

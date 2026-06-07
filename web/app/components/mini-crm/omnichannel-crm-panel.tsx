@@ -18,9 +18,10 @@ import { StageTag } from './stage-tag'
 type OmnichannelCrmPanelProps = {
   conversationId: string
   channelId: string
+  onLeadSaved?: (lead: MiniCrmLeadRow) => void
 }
 
-export function OmnichannelCrmPanel({ conversationId, channelId }: OmnichannelCrmPanelProps) {
+export function OmnichannelCrmPanel({ conversationId, channelId, onLeadSaved }: OmnichannelCrmPanelProps) {
   const { t } = useTranslation('common')
   const [leadRow, setLeadRow] = useState<MiniCrmLeadRow | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -82,6 +83,7 @@ export function OmnichannelCrmPanel({ conversationId, channelId }: OmnichannelCr
         contact_email: contactEmail || null,
       })
       setLeadRow(response.data)
+      onLeadSaved?.(response.data)
       toast.success(t('miniCrm.saveSuccess'))
     }
     catch {

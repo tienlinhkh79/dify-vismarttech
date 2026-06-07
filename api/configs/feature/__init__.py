@@ -1229,6 +1229,18 @@ class CeleryScheduleTasksConfig(BaseSettings):
         description="Interval in minutes for Zalo OA token refresh batch job",
         default=60,
     )
+    ENABLE_ZALO_BRIDGE_WORKER_TASK: bool = Field(
+        description="Enable periodic drain of durable Zalo OA bridge job queue",
+        default=True,
+    )
+    ZALO_BRIDGE_WORKER_INTERVAL_SECONDS: int = Field(
+        description="Interval in seconds for Zalo bridge worker beat task",
+        default=60,
+    )
+    ZALO_PERSONAL_WORKER_URL: str = Field(
+        description="Base URL of optional zca-js personal Zalo worker (zalo-personal-worker service)",
+        default="http://zalo_personal_worker:3920",
+    )
 
 
 class PositionConfig(BaseSettings):

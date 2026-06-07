@@ -30,22 +30,23 @@ http {
     #gzip  on;
     client_max_body_size ${NGINX_CLIENT_MAX_BODY_SIZE};
 
-    # Console vs landing Next.js both use /_next/; cookie set by nginx location blocks wins over referer.
-    map $http_referer $next_static_upstream {
-        default web;
+    # Console vs landing Next.js both use /_next/. Referer wins over cookie so a stale
+    # _next_app=web cookie cannot serve console chunks for landing pages (and vice versa).
+    map $http_referer $next_static_from_referer {
+        default "";
         ~*"/(apps|explore|omnichannel|mini-crm|datasets|tools|plugins|signin|install|account|activate|reset-password|education-apply)(/|\?|$)" web;
         ~*"/(features|pricing|contact|privacy|terms)(/|\?|$)" landing;
         ~*^https?://[^/]+/?(\?|#|$) landing;
     }
 
-    map $cookie__next_app $next_static_upstream_cookie {
+    map $cookie__next_app $next_static_from_cookie {
         default "";
         web web;
         landing landing;
     }
 
-    map $next_static_upstream_cookie $next_static_upstream_resolved {
-        default $next_static_upstream;
+    map $next_static_from_referer $next_static_upstream_resolved {
+        default $next_static_from_cookie;
         web web;
         landing landing;
     }
