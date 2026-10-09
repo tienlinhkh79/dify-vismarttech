@@ -1,0 +1,157 @@
+          {!!selectedConversationId && messagesHasMore && !isMessagesLoading && (
+            <div className='mb-2 text-[11px] leading-snug text-text-quaternary'>
+              {t('settings.omnichannelLoadOlderHint')}
+            </div>
+          )}
+          {!selectedConversationId && <div className='text-sm text-text-tertiary'>{t('settings.omnichannelSelectConversationHint')}</div>}
+          {selectedConversationId && isMessagesLoading && <div className='text-sm text-text-tertiary'>{t('settings.omnichannelLoadingMessages')}</div>}
+          {selectedConversationId && !isMessagesLoading && !messages.length && <div className='text-sm text-text-tertiary'>{t('settings.omnichannelNoMessages')}</div>}
+
+          {selectedConversationId && !isMessagesLoading && !!messages.length && (
+            <div className='mt-1 flex min-h-0 flex-1 flex-col gap-2'>
+              <input
+                type='search'
+                value={messageSearchQuery}
+                onChange={e => setMessageSearchQuery(e.target.value)}
+                placeholder={t('settings.omnichannelSearchMessagesPlaceholder')}
+                className='system-sm-regular w-full shrink-0 rounded-lg border border-divider-regular bg-components-input-bg-normal px-3 py-2 text-text-primary outline-none placeholder:text-text-quaternary focus:border-state-accent-solid'
+              />
+              <div className='relative flex min-h-0 flex-1 flex-col'>
+                {showJumpToLatest && (
+                  <Button
+                    type='button'
+                    className='absolute bottom-3 right-2 z-10 shadow-md'
+                    size='small'
+                    variant='primary'
+                    onClick={() => scrollMessagesToBottom(true)}
+                  >
+                    {t('settings.omnichannelJumpToLatest')}
+                  </Button>
+                )}
+                <div
+                  ref={messagesScrollRef}
+                  onScroll={onMessagesScroll}
+                  className='min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain rounded-xl border border-divider-subtle bg-background-default/50 px-2 py-3'
+                >
+                  {isLoadingOlderMessages && (
+                    <div className='mb-2 flex justify-center'>
+                      <div className='rounded-full bg-background-default px-3 py-1 text-[11px] text-text-tertiary shadow-sm'>
+                        {t('settings.omnichannelLoadingOlderMessages')}
+                      </div>
+                    </div>
+                  )}
+                  {!messagesHasMore && (
+                    <div className='mb-2 text-center text-[10px] text-text-quaternary'>
+                      {t('settings.omnichannelHistoryStart')}
+                    </div>
+                  )}
+                  {messageTimelineItems.length === 0 && (
+                    <div className='py-6 text-center text-sm text-text-tertiary'>
+                      {t('settings.omnichannelSearchNoResults')}
+                    </div>
+                  )}
+                  {messageTimelineItems.map((item) => {
+                    if (item.kind === 'divider') {
+                      return (
+                        <div key={item.key} className='flex items-center gap-3 py-1'>
+                          <div className='h-px flex-1 bg-divider-regular' />
+                          <span className='shrink-0 text-[10px] font-medium uppercase tracking-wide text-text-quaternary'>{item.label}</span>
+                          <div className='h-px flex-1 bg-divider-regular' />
+                        </div>
+                      )
+                    }
+                    const message = item.message
+                    const isOutbound = message.direction === 'outbound'
+                    const inboundSender = (
+                      (message.sender_display_name && String(message.sender_display_name).trim())
+                      || (selectedConversation?.participant_display_name && String(selectedConversation.participant_display_name).trim())
+                      || message.external_user_id
+                    )
+                    const inboundAvatar = message.sender_profile_pic_url || selectedConversation?.participant_profile_pic_url
+                    const outboundSender = (
+                      (message.channel_actor_name && String(message.channel_actor_name).trim())
+                      || (selectedChannel?.name && String(selectedChannel.name).trim())
+                      || t('settings.omnichannelReplyActorFallback')
+                    )
+                    const outboundAvatar = message.channel_actor_picture_url
+                    const actorLabel = isOutbound ? outboundSender : inboundSender
+                    const inboundInitialsSeed = omnichannelInitialsSeed(inboundSender)
+                    const outboundInitialsSeed = omnichannelInitialsSeed(outboundSender)
+
+                    return (
+                      <div
+                        key={item.key}
+                        className={`flex items-end gap-2 ${isOutbound ? 'justify-end' : 'justify-start'}`}
+                      >
+                        {!isOutbound && (
+                          <OmnichannelAvatar imageUrl={inboundAvatar} initials={inboundInitialsSeed} size={36} />
+                        )}
+                        <div
+                          className={cn(
+                            'max-w-[min(85%,520px)] rounded-2xl border px-3 py-2 text-sm shadow-sm',
+                            isOutbound
+                              ? 'border-transparent bg-text-accent text-text-primary-on-surface'
+                              : 'border-divider-subtle bg-components-panel-bg text-text-primary',
+                          )}
+                        >
+                          <div className='mb-1 space-y-0.5'>
+                            <div className={cn('text-xs font-medium', isOutbound ? 'text-text-primary-on-surface/90' : 'text-text-secondary')}>{actorLabel}</div>
+                            <div className={cn('flex flex-wrap items-center justify-between gap-x-2 text-[10px]', isOutbound ? 'text-text-primary-on-surface/75' : 'text-text-tertiary')}>
+                              <span>{messageDirectionAndSource(message.direction, message.source)}</span>
+                              <span className='shrink-0 tabular-nums'>{toLocaleText(message.created_at)}</span>
+                            </div>
+                          </div>
+                          <div className={cn('whitespace-pre-wrap break-words', isOutbound ? 'text-text-primary-on-surface' : 'text-text-primary')}>{message.content || t('settings.omnichannelMessageEmpty')}</div>
+                          {!!message.attachments?.length && (
+                            <div className='mt-2 grid grid-cols-2 gap-2'>
+                              {message.attachments.slice(0, 4).map((attachment, idx) => {
+                                const url = typeof attachment.url === 'string' ? attachment.url : ''
+                                if (url && isImageUrl(url)) {
+                                  return (
+                                    <a key={`${message.id}-${idx}`} href={url} target='_blank' rel='noreferrer' className='block'>
+                                      <img
+                                        src={url}
+                                        alt={t('settings.omnichannelAttachmentAlt')}
+                                        className='h-24 w-full rounded-lg border border-divider-subtle object-cover'
+                                      />
+                                    </a>
+                                  )
+                                }
+                                return (
+                                  <div key={`${message.id}-${idx}`} className='rounded-lg border border-divider-subtle bg-background-default p-2 text-xs text-text-tertiary'>
+                                    {t('settings.omnichannelAttachment')}
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
+                        {isOutbound && (
+                          <OmnichannelAvatar imageUrl={outboundAvatar} initials={outboundInitialsSeed} size={36} />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+          </div>
+          <div className='shrink-0 border-t border-divider-regular bg-components-panel-bg p-3'>
+            <textarea
+              readOnly
+              disabled
+              rows={3}
+              className='system-sm-regular w-full resize-none rounded-xl border border-divider-regular bg-components-input-bg-normal px-3 py-2.5 text-text-secondary outline-none'
+              placeholder={t('settings.omnichannelComposerPlaceholder')}
+              value=''
+            />
+            <div className='mt-2 flex items-center justify-end'>
+              <Button type='button' variant='primary' size='small' disabled className='min-w-[88px]'>
+                {t('settings.omnichannelSend')}
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+      insightRail={(

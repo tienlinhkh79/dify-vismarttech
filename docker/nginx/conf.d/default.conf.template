@@ -168,6 +168,13 @@ server {
       proxy_pass $api_upstream;
       include proxy.conf;
     }
+
+    location /notebooklm-images/ {
+      set $notebooklm_proxy_upstream notebooklm-retrieval-proxy:8080;
+      rewrite ^/notebooklm-images/(.*) /images/$1 break;
+      proxy_pass http://$notebooklm_proxy_upstream;
+      include proxy.conf;
+    }
     
     # placeholder for acme challenge location
     ${ACME_CHALLENGE_LOCATION}

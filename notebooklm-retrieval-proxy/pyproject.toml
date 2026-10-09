@@ -1,0 +1,25 @@
+[project]
+name = "notebooklm-retrieval-proxy"
+version = "0.1.0"
+description = "Dify External Knowledge adapter for Google NotebookLM via notebooklm-mcp"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "httpx>=0.28.0",
+    "uvicorn[standard]>=0.32.0",
+]
+
+[tool.uv]
+package = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+]

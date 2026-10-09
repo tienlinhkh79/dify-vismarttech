@@ -407,7 +407,7 @@ x-shared-env: &shared-api-worker-env
   IRIS_TIMEZONE: ${IRIS_TIMEZONE:-UTC}
   UPLOAD_FILE_SIZE_LIMIT: ${UPLOAD_FILE_SIZE_LIMIT:-15}
   UPLOAD_FILE_BATCH_LIMIT: ${UPLOAD_FILE_BATCH_LIMIT:-5}
-  BATCH_UPLOAD_LIMIT: ${BATCH_UPLOAD_LIMIT:-20}
+  BATCH_UPLOAD_LIMIT: ${BATCH_UPLOAD_LIMIT:-1000}
   UPLOAD_FILE_EXTENSION_BLACKLIST: ${UPLOAD_FILE_EXTENSION_BLACKLIST:-}
   SINGLE_CHUNK_ATTACHMENT_LIMIT: ${SINGLE_CHUNK_ATTACHMENT_LIMIT:-10}
   IMAGE_FILE_BATCH_LIMIT: ${IMAGE_FILE_BATCH_LIMIT:-10}
@@ -738,8 +738,8 @@ services:
     image: dify-api:local
     pull_policy: never
     build:
-      context: ../api
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: api/Dockerfile
     restart: always
     environment:
       # Use the shared environment variables.
@@ -781,6 +781,8 @@ services:
       - ../api/core/tools/builtin_tool/providers/kiotviet:/app/api/core/tools/builtin_tool/providers/kiotviet
       - ../api/core/tools/builtin_tool/providers/messenger:/app/api/core/tools/builtin_tool/providers/messenger
       - ../api/app_factory.py:/app/api/app_factory.py
+      - ../api/core/app/file_access/controller.py:/app/api/core/app/file_access/controller.py
+      - ../api/core/workflow/node_runtime.py:/app/api/core/workflow/node_runtime.py
       - ../api/controllers/console/__init__.py:/app/api/controllers/console/__init__.py
       - ../api/controllers/console/workspace/tool_providers.py:/app/api/controllers/console/workspace/tool_providers.py
       - ../api/controllers/console/workspace/omnichannel.py:/app/api/controllers/console/workspace/omnichannel.py
@@ -789,11 +791,18 @@ services:
       - ../api/controllers/trigger/zalo.py:/app/api/controllers/trigger/zalo.py
       - ../api/controllers/trigger/__init__.py:/app/api/controllers/trigger/__init__.py
       - ../api/models/trigger.py:/app/api/models/trigger.py
-      - ../api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py
+      - ../api/models/account.py:/app/api/models/account.py
+      - ../api/models/enums.py:/app/api/models/enums.py
+      - ../api/models/__init__.py:/app/api/models/__init__.py
+      - ../api/migrations/versions/2026_07_09_1000-j6k7l8m9n0o1_add_mini_crm_business_line.py:/app/api/migrations/versions/2026_07_09_1000-j6k7l8m9n0o1_add_mini_crm_business_line.py
+      - ../api/controllers/console/workspace/members.py:/app/api/controllers/console/workspace/members.py
+      - ../api/migrations/versions/2026_04_27_1100_c2d4e6f8a9b1_add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100_c2d4e6f8a9b1_add_kiotviet_connections_table.py
+      - ../api/migrations/versions/2026_08_26_2300-l8m9n0o1p2q3_merge_omnichannel_and_1_15_heads.py:/app/api/migrations/versions/2026_08_26_2300-l8m9n0o1p2q3_merge_omnichannel_and_1_15_heads.py
+      - ../api/migrations/versions/2026_08_26_2350-m9n0o1p2q3r4_merge_omnichannel_and_1_16_heads.py:/app/api/migrations/versions/2026_08_26_2350-m9n0o1p2q3r4_merge_omnichannel_and_1_16_heads.py
       - ../api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py:/app/api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py
       - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
-      - ../api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py
-      - ../api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py
+      - ../api/migrations/versions/2026_05_03_1000-o1a2b3c4d5e6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-o1a2b3c4d5e6_add_omnichannel_crm_leads_table.py
+      - ../api/migrations/versions/2026_05_12_1200-o2b3c4d5e6f7_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-o2b3c4d5e6f7_add_omnichannel_last_message_preview.py
       - ../api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py:/app/api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py
       - ../api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py:/app/api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py
       - ../api/migrations/versions/2026_06_05_1000-f1a2b3c4d5e6_add_omnichannel_zalo_message_map.py:/app/api/migrations/versions/2026_06_05_1000-f1a2b3c4d5e6_add_omnichannel_zalo_message_map.py
@@ -802,8 +811,28 @@ services:
       - ../api/migrations/versions/2026_06_05_1600-h4i5j6k7l8m9_omnichannel_inbox_parity.py:/app/api/migrations/versions/2026_06_05_1600-h4i5j6k7l8m9_omnichannel_inbox_parity.py
       - ../api/controllers/trigger/zalo_personal.py:/app/api/controllers/trigger/zalo_personal.py
       - ../api/controllers/console/workspace/zalo_personal.py:/app/api/controllers/console/workspace/zalo_personal.py
+      - ../api/controllers/console/workspace/website_widget.py:/app/api/controllers/console/workspace/website_widget.py
+      - ../api/controllers/web/completion.py:/app/api/controllers/web/completion.py
+      - ../api/controllers/console/app/completion.py:/app/api/controllers/console/app/completion.py
+      - ../api/controllers/console/app/workflow.py:/app/api/controllers/console/app/workflow.py
+      - ../api/controllers/console/explore/completion.py:/app/api/controllers/console/explore/completion.py
+      - ../api/core/app/helpers/chat_query.py:/app/api/core/app/helpers/chat_query.py
+      - ../api/core/app/apps/advanced_chat/app_generator.py:/app/api/core/app/apps/advanced_chat/app_generator.py
+      - ../api/core/app/apps/advanced_chat/generate_task_pipeline.py:/app/api/core/app/apps/advanced_chat/generate_task_pipeline.py
+      - ../api/core/app/apps/chat/app_generator.py:/app/api/core/app/apps/chat/app_generator.py
+      - ../api/core/app/apps/agent_chat/app_generator.py:/app/api/core/app/apps/agent_chat/app_generator.py
+      - ../api/core/app/task_pipeline/easy_ui_based_generate_task_pipeline.py:/app/api/core/app/task_pipeline/easy_ui_based_generate_task_pipeline.py
+      - ../api/fields/message_fields.py:/app/api/fields/message_fields.py
+      - ../api/models/model.py:/app/api/models/model.py
       - ../api/extensions/ext_celery.py:/app/api/extensions/ext_celery.py
       - ../api/configs/feature/__init__.py:/app/api/configs/feature/__init__.py
+      - ../api/clients/agent_backend/__init__.py:/app/api/clients/agent_backend/__init__.py
+      - ../api/clients/agent_backend/session_cleanup.py:/app/api/clients/agent_backend/session_cleanup.py
+      - ../api/clients/agent_backend/request_builder.py:/app/api/clients/agent_backend/request_builder.py
+      - ../api/core/workflow/node_factory.py:/app/api/core/workflow/node_factory.py
+      - ../api/core/rag/retrieval/dataset_retrieval.py:/app/api/core/rag/retrieval/dataset_retrieval.py
+      - ../api/services/external_knowledge_service.py:/app/api/services/external_knowledge_service.py
+      - ../api/core/tools/utils/dataset_retriever/dataset_retriever_tool.py:/app/api/core/tools/utils/dataset_retriever/dataset_retriever_tool.py
       - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
       - ../api/core/tools/builtin_tool/providers/mini_crm:/app/api/core/tools/builtin_tool/providers/mini_crm
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
@@ -825,8 +854,8 @@ services:
     image: dify-api:local
     pull_policy: never
     build:
-      context: ../api
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: api/Dockerfile
     restart: always
     environment:
       # Use the shared environment variables.
@@ -864,14 +893,23 @@ services:
       - ../api/core/tools/builtin_tool/provider.py:/app/api/core/tools/builtin_tool/provider.py
       - ../api/core/tools/builtin_tool/providers/kiotviet:/app/api/core/tools/builtin_tool/providers/kiotviet
       - ../api/core/tools/builtin_tool/providers/messenger:/app/api/core/tools/builtin_tool/providers/messenger
+      - ../api/core/app/file_access/controller.py:/app/api/core/app/file_access/controller.py
+      - ../api/core/workflow/node_runtime.py:/app/api/core/workflow/node_runtime.py
       - ../api/controllers/console/workspace/tool_providers.py:/app/api/controllers/console/workspace/tool_providers.py
       - ../api/controllers/trigger/zalo.py:/app/api/controllers/trigger/zalo.py
       - ../api/models/trigger.py:/app/api/models/trigger.py
-      - ../api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py
+      - ../api/models/account.py:/app/api/models/account.py
+      - ../api/models/enums.py:/app/api/models/enums.py
+      - ../api/models/__init__.py:/app/api/models/__init__.py
+      - ../api/migrations/versions/2026_07_09_1000-j6k7l8m9n0o1_add_mini_crm_business_line.py:/app/api/migrations/versions/2026_07_09_1000-j6k7l8m9n0o1_add_mini_crm_business_line.py
+      - ../api/controllers/console/workspace/members.py:/app/api/controllers/console/workspace/members.py
+      - ../api/migrations/versions/2026_04_27_1100_c2d4e6f8a9b1_add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100_c2d4e6f8a9b1_add_kiotviet_connections_table.py
+      - ../api/migrations/versions/2026_08_26_2300-l8m9n0o1p2q3_merge_omnichannel_and_1_15_heads.py:/app/api/migrations/versions/2026_08_26_2300-l8m9n0o1p2q3_merge_omnichannel_and_1_15_heads.py
+      - ../api/migrations/versions/2026_08_26_2350-m9n0o1p2q3r4_merge_omnichannel_and_1_16_heads.py:/app/api/migrations/versions/2026_08_26_2350-m9n0o1p2q3r4_merge_omnichannel_and_1_16_heads.py
       - ../api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py:/app/api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py
       - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
-      - ../api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py
-      - ../api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py
+      - ../api/migrations/versions/2026_05_03_1000-o1a2b3c4d5e6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-o1a2b3c4d5e6_add_omnichannel_crm_leads_table.py
+      - ../api/migrations/versions/2026_05_12_1200-o2b3c4d5e6f7_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-o2b3c4d5e6f7_add_omnichannel_last_message_preview.py
       - ../api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py:/app/api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py
       - ../api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py:/app/api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py
       - ../api/migrations/versions/2026_06_05_1000-f1a2b3c4d5e6_add_omnichannel_zalo_message_map.py:/app/api/migrations/versions/2026_06_05_1000-f1a2b3c4d5e6_add_omnichannel_zalo_message_map.py
@@ -880,8 +918,28 @@ services:
       - ../api/migrations/versions/2026_06_05_1600-h4i5j6k7l8m9_omnichannel_inbox_parity.py:/app/api/migrations/versions/2026_06_05_1600-h4i5j6k7l8m9_omnichannel_inbox_parity.py
       - ../api/controllers/trigger/zalo_personal.py:/app/api/controllers/trigger/zalo_personal.py
       - ../api/controllers/console/workspace/zalo_personal.py:/app/api/controllers/console/workspace/zalo_personal.py
+      - ../api/controllers/console/workspace/website_widget.py:/app/api/controllers/console/workspace/website_widget.py
+      - ../api/controllers/web/completion.py:/app/api/controllers/web/completion.py
+      - ../api/controllers/console/app/completion.py:/app/api/controllers/console/app/completion.py
+      - ../api/controllers/console/app/workflow.py:/app/api/controllers/console/app/workflow.py
+      - ../api/controllers/console/explore/completion.py:/app/api/controllers/console/explore/completion.py
+      - ../api/core/app/helpers/chat_query.py:/app/api/core/app/helpers/chat_query.py
+      - ../api/core/app/apps/advanced_chat/app_generator.py:/app/api/core/app/apps/advanced_chat/app_generator.py
+      - ../api/core/app/apps/advanced_chat/generate_task_pipeline.py:/app/api/core/app/apps/advanced_chat/generate_task_pipeline.py
+      - ../api/core/app/apps/chat/app_generator.py:/app/api/core/app/apps/chat/app_generator.py
+      - ../api/core/app/apps/agent_chat/app_generator.py:/app/api/core/app/apps/agent_chat/app_generator.py
+      - ../api/core/app/task_pipeline/easy_ui_based_generate_task_pipeline.py:/app/api/core/app/task_pipeline/easy_ui_based_generate_task_pipeline.py
+      - ../api/fields/message_fields.py:/app/api/fields/message_fields.py
+      - ../api/models/model.py:/app/api/models/model.py
       - ../api/extensions/ext_celery.py:/app/api/extensions/ext_celery.py
       - ../api/configs/feature/__init__.py:/app/api/configs/feature/__init__.py
+      - ../api/clients/agent_backend/__init__.py:/app/api/clients/agent_backend/__init__.py
+      - ../api/clients/agent_backend/session_cleanup.py:/app/api/clients/agent_backend/session_cleanup.py
+      - ../api/clients/agent_backend/request_builder.py:/app/api/clients/agent_backend/request_builder.py
+      - ../api/core/workflow/node_factory.py:/app/api/core/workflow/node_factory.py
+      - ../api/core/rag/retrieval/dataset_retrieval.py:/app/api/core/rag/retrieval/dataset_retrieval.py
+      - ../api/services/external_knowledge_service.py:/app/api/services/external_knowledge_service.py
+      - ../api/core/tools/utils/dataset_retriever/dataset_retriever_tool.py:/app/api/core/tools/utils/dataset_retriever/dataset_retriever_tool.py
       - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
       - ../api/core/tools/builtin_tool/providers/mini_crm:/app/api/core/tools/builtin_tool/providers/mini_crm
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
@@ -903,8 +961,8 @@ services:
     image: dify-api:local
     pull_policy: never
     build:
-      context: ../api
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: api/Dockerfile
     restart: always
     environment:
       # Use the shared environment variables.
@@ -938,11 +996,18 @@ services:
       - ../api/controllers/console/workspace/tool_providers.py:/app/api/controllers/console/workspace/tool_providers.py
       - ../api/controllers/trigger/zalo.py:/app/api/controllers/trigger/zalo.py
       - ../api/models/trigger.py:/app/api/models/trigger.py
-      - ../api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100-add_kiotviet_connections_table.py
+      - ../api/models/account.py:/app/api/models/account.py
+      - ../api/models/enums.py:/app/api/models/enums.py
+      - ../api/models/__init__.py:/app/api/models/__init__.py
+      - ../api/migrations/versions/2026_07_09_1000-j6k7l8m9n0o1_add_mini_crm_business_line.py:/app/api/migrations/versions/2026_07_09_1000-j6k7l8m9n0o1_add_mini_crm_business_line.py
+      - ../api/controllers/console/workspace/members.py:/app/api/controllers/console/workspace/members.py
+      - ../api/migrations/versions/2026_04_27_1100_c2d4e6f8a9b1_add_kiotviet_connections_table.py:/app/api/migrations/versions/2026_04_27_1100_c2d4e6f8a9b1_add_kiotviet_connections_table.py
+      - ../api/migrations/versions/2026_08_26_2300-l8m9n0o1p2q3_merge_omnichannel_and_1_15_heads.py:/app/api/migrations/versions/2026_08_26_2300-l8m9n0o1p2q3_merge_omnichannel_and_1_15_heads.py
+      - ../api/migrations/versions/2026_08_26_2350-m9n0o1p2q3r4_merge_omnichannel_and_1_16_heads.py:/app/api/migrations/versions/2026_08_26_2350-m9n0o1p2q3r4_merge_omnichannel_and_1_16_heads.py
       - ../api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py:/app/api/migrations/versions/2026_05_01_1900-e7f8a9b0c1d2_add_zalo_oauth_columns.py
       - ../api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py:/app/api/migrations/versions/2026_05_02_1200-f4e8c9a0b1d2_add_omnichannel_conversation_participant_display.py
-      - ../api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-a1b2c3d4e5f6_add_omnichannel_crm_leads_table.py
-      - ../api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-c3d4e5f6a7b8_add_omnichannel_last_message_preview.py
+      - ../api/migrations/versions/2026_05_03_1000-o1a2b3c4d5e6_add_omnichannel_crm_leads_table.py:/app/api/migrations/versions/2026_05_03_1000-o1a2b3c4d5e6_add_omnichannel_crm_leads_table.py
+      - ../api/migrations/versions/2026_05_12_1200-o2b3c4d5e6f7_add_omnichannel_last_message_preview.py:/app/api/migrations/versions/2026_05_12_1200-o2b3c4d5e6f7_add_omnichannel_last_message_preview.py
       - ../api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py:/app/api/migrations/versions/2026_05_30_1000-d4e5f6a7b8c9_add_omnichannel_crm_lead_tags_contacts.py
       - ../api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py:/app/api/migrations/versions/2026_05_30_1200-e5f6a7b8c9d0_add_omnichannel_crm_lead_activities.py
       - ../api/migrations/versions/2026_06_05_1000-f1a2b3c4d5e6_add_omnichannel_zalo_message_map.py:/app/api/migrations/versions/2026_06_05_1000-f1a2b3c4d5e6_add_omnichannel_zalo_message_map.py
@@ -951,8 +1016,28 @@ services:
       - ../api/migrations/versions/2026_06_05_1600-h4i5j6k7l8m9_omnichannel_inbox_parity.py:/app/api/migrations/versions/2026_06_05_1600-h4i5j6k7l8m9_omnichannel_inbox_parity.py
       - ../api/controllers/trigger/zalo_personal.py:/app/api/controllers/trigger/zalo_personal.py
       - ../api/controllers/console/workspace/zalo_personal.py:/app/api/controllers/console/workspace/zalo_personal.py
+      - ../api/controllers/console/workspace/website_widget.py:/app/api/controllers/console/workspace/website_widget.py
+      - ../api/controllers/web/completion.py:/app/api/controllers/web/completion.py
+      - ../api/controllers/console/app/completion.py:/app/api/controllers/console/app/completion.py
+      - ../api/controllers/console/app/workflow.py:/app/api/controllers/console/app/workflow.py
+      - ../api/controllers/console/explore/completion.py:/app/api/controllers/console/explore/completion.py
+      - ../api/core/app/helpers/chat_query.py:/app/api/core/app/helpers/chat_query.py
+      - ../api/core/app/apps/advanced_chat/app_generator.py:/app/api/core/app/apps/advanced_chat/app_generator.py
+      - ../api/core/app/apps/advanced_chat/generate_task_pipeline.py:/app/api/core/app/apps/advanced_chat/generate_task_pipeline.py
+      - ../api/core/app/apps/chat/app_generator.py:/app/api/core/app/apps/chat/app_generator.py
+      - ../api/core/app/apps/agent_chat/app_generator.py:/app/api/core/app/apps/agent_chat/app_generator.py
+      - ../api/core/app/task_pipeline/easy_ui_based_generate_task_pipeline.py:/app/api/core/app/task_pipeline/easy_ui_based_generate_task_pipeline.py
+      - ../api/fields/message_fields.py:/app/api/fields/message_fields.py
+      - ../api/models/model.py:/app/api/models/model.py
       - ../api/extensions/ext_celery.py:/app/api/extensions/ext_celery.py
       - ../api/configs/feature/__init__.py:/app/api/configs/feature/__init__.py
+      - ../api/clients/agent_backend/__init__.py:/app/api/clients/agent_backend/__init__.py
+      - ../api/clients/agent_backend/session_cleanup.py:/app/api/clients/agent_backend/session_cleanup.py
+      - ../api/clients/agent_backend/request_builder.py:/app/api/clients/agent_backend/request_builder.py
+      - ../api/core/workflow/node_factory.py:/app/api/core/workflow/node_factory.py
+      - ../api/core/rag/retrieval/dataset_retrieval.py:/app/api/core/rag/retrieval/dataset_retrieval.py
+      - ../api/services/external_knowledge_service.py:/app/api/services/external_knowledge_service.py
+      - ../api/core/tools/utils/dataset_retriever/dataset_retriever_tool.py:/app/api/core/tools/utils/dataset_retriever/dataset_retriever_tool.py
       - ../api/controllers/console/workspace/mini_crm.py:/app/api/controllers/console/workspace/mini_crm.py
       - ../api/core/tools/builtin_tool/providers/mini_crm:/app/api/core/tools/builtin_tool/providers/mini_crm
       - ../api/services/tools/builtin_tools_manage_service.py:/app/api/services/tools/builtin_tools_manage_service.py
@@ -1212,6 +1297,7 @@ services:
     restart: always
     volumes:
       - ./ssrf_proxy/squid.conf.template:/etc/squid/squid.conf.template
+      - ./ssrf_proxy/squid-common.conf.template:/etc/squid/dify_common.conf.template
       - ./ssrf_proxy/docker-entrypoint.sh:/docker-entrypoint-mount.sh
     entrypoint:
       [
@@ -1226,6 +1312,8 @@ services:
       REVERSE_PROXY_PORT: ${SSRF_REVERSE_PROXY_PORT:-8194}
       SANDBOX_HOST: ${SSRF_SANDBOX_HOST:-sandbox}
       SANDBOX_PORT: ${SANDBOX_PORT:-8194}
+      SSRF_PROXY_ALLOW_PRIVATE_IPS: ${SSRF_PROXY_ALLOW_PRIVATE_IPS:-}
+      SSRF_PROXY_ALLOW_PRIVATE_DOMAINS: ${SSRF_PROXY_ALLOW_PRIVATE_DOMAINS:-}
     networks:
       - ssrf_proxy_network
       - default
@@ -1287,6 +1375,7 @@ services:
       NGINX_PROXY_READ_TIMEOUT: ${NGINX_PROXY_READ_TIMEOUT:-3600s}
       NGINX_PROXY_SEND_TIMEOUT: ${NGINX_PROXY_SEND_TIMEOUT:-3600s}
       NGINX_ENABLE_CERTBOT_CHALLENGE: ${NGINX_ENABLE_CERTBOT_CHALLENGE:-false}
+      NGINX_SOCKET_IO_UPSTREAM: ${NGINX_SOCKET_IO_UPSTREAM:-api:5001}
       CERTBOT_DOMAIN: ${CERTBOT_DOMAIN:-}
     depends_on:
       api:
@@ -1831,6 +1920,77 @@ services:
       timeout: 5s
       retries: 3
 
+  notebooklm-mcp:
+    profiles:
+      - notebooklm
+    build:
+      context: ./notebooklm-mcp
+      dockerfile: Dockerfile
+    image: dify-notebooklm-mcp:local
+    pull_policy: never
+    restart: unless-stopped
+    command: ["notebooklm-mcp", "--transport", "http", "--port", "8010", "--host", "0.0.0.0"]
+    shm_size: "2gb"
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1
+      - net.ipv6.conf.default.disable_ipv6=1
+    environment:
+      NOTEBOOKLM_TRANSPORT: http
+      NOTEBOOKLM_PORT: "8010"
+      NOTEBOOKLM_HOST: 0.0.0.0
+      NOTEBOOKLM_MCP_TRANSPORT: http
+      NOTEBOOKLM_MCP_PORT: "8010"
+      NOTEBOOKLM_MCP_HOST: 0.0.0.0
+      NOTEBOOKLM_ALLOW_EXTERNAL_BIND: "1"
+      NOTEBOOKLM_AI_MARKER: ${NOTEBOOKLM_AI_MARKER:-false}
+    volumes:
+      - ${NOTEBOOKLM_CREDENTIALS_PATH:-C:/Users/Linh Huynh/.notebooklm-mcp-cli}:/root/.notebooklm-mcp-cli
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import socket; s = socket.create_connection(('127.0.0.1', 8010), timeout=2); s.close()",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  notebooklm-retrieval-proxy:
+    profiles:
+      - notebooklm
+    build:
+      context: ../notebooklm-retrieval-proxy
+      dockerfile: Dockerfile
+    image: dify-notebooklm-retrieval-proxy:local
+    pull_policy: never
+    restart: unless-stopped
+    depends_on:
+      notebooklm-mcp:
+        condition: service_started
+    environment:
+      NOTEBOOKLM_MCP_URL: ${NOTEBOOKLM_MCP_URL:-http://notebooklm-mcp:8010/mcp}
+      NOTEBOOKLM_PROXY_API_KEY: ${NOTEBOOKLM_PROXY_API_KEY:-dev-notebooklm-proxy-key-change-me}
+      NOTEBOOKLM_PROXY_TIMEOUT_SECONDS: ${NOTEBOOKLM_PROXY_TIMEOUT_SECONDS:-120}
+      NOTEBOOKLM_ANSWER_TIMEOUT_MS: ${NOTEBOOKLM_ANSWER_TIMEOUT_MS:-600000}
+      NOTEBOOKLM_IMAGE_DIR: /app/data/images
+      NOTEBOOKLM_PUBLIC_IMAGE_URL: ${NOTEBOOKLM_PUBLIC_IMAGE_URL:-https://chatbotai.vismarttech.com/notebooklm-images}
+    volumes:
+      - ./volumes/notebooklm_images:/app/data/images
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health')",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
   zalo_personal_worker:
     build:
       context: ../zalo-personal-worker
@@ -1840,6 +2000,11 @@ services:
     restart: unless-stopped
     environment:
       PORT: "3920"
+      SESSION_DIR: "/data/sessions"
+      KEEPALIVE_INTERVAL_MS: "300000"
+      SESSION_TARGET_DAYS: "30"
+    volumes:
+      - ./volumes/zalo_personal_sessions:/data/sessions
     ports:
       - "3920:3920"
     healthcheck:
@@ -1869,3 +2034,4 @@ volumes:
   oradata:
   dify_es01_data:
   billing_saas_data:
+  notebooklm_chrome_profile:

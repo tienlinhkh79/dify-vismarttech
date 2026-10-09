@@ -1,0 +1,38 @@
+{
+  "sandbox": {
+    "members": { "limit": 1 },
+    "apps": { "limit": 5 },
+    "vector_space": { "limit": 50 },
+    "documents_upload_quota": { "limit": 50 },
+    "annotation_quota_limit": { "limit": 10 },
+    "trigger_event": { "limit": 3000 },
+    "api_rate_limit": { "limit": 5000 },
+    "knowledge_rate_limit": { "limit": 10 },
+    "omnichannel_channels": { "limit": 3 },
+    "crm_leads": { "limit": 0 }
+  },
+  "professional": {
+    "members": { "limit": 3 },
+    "apps": { "limit": 50 },
+    "vector_space": { "limit": 5120 },
+    "documents_upload_quota": { "limit": 500 },
+    "annotation_quota_limit": { "limit": 2000 },
+    "trigger_event": { "limit": 20000 },
+    "api_rate_limit": { "limit": 0 },
+    "knowledge_rate_limit": { "limit": 100 },
+    "omnichannel_channels": { "limit": 20 },
+    "crm_leads": { "limit": 0 }
+  },
+  "team": {
+    "members": { "limit": 50 },
+    "apps": { "limit": 200 },
+    "vector_space": { "limit": 20480 },
+    "documents_upload_quota": { "limit": 1000 },
+    "annotation_quota_limit": { "limit": 5000 },
+    "trigger_event": { "limit": 0 },
+    "api_rate_limit": { "limit": 0 },
+    "knowledge_rate_limit": { "limit": 1000 },
+    "omnichannel_channels": { "limit": 100 },
+    "crm_leads": { "limit": 0 }
+  }
+}

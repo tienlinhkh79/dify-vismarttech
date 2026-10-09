@@ -1,0 +1,187 @@
+"""Read tenant-scoped omnichannel channel configurations."""
+
+from __future__ import annotations
+
+import logging
+from typing import TypedDict
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from extensions.ext_database import db
+from models.trigger import OmniChannelConfig, OmniChannelType
+from services.omnichannel.omnichannel_auto_reply_policy import OmnichannelAutoReplyPolicy
+from services.omnichannel.zalo_oauth_service import ZaloOAuthService
+
+logger = logging.getLogger(__name__)
+
+
+class MessengerChannelConfig(TypedDict):
+    tenant_id: str
+    app_id: str
+    channel_id: str
+    channel_type: str
+    page_id: str
+    verify_token: str
+    app_secret: str
+    page_access_token: str
+    graph_api_version: str
+
+
+class ZaloChannelConfig(TypedDict):
+    tenant_id: str
+    app_id: str
+    channel_id: str
+    oa_id: str
+    zalo_application_id: str
+    zalo_auto_reply_enabled: bool
+    zalo_info_card_enabled: bool
+    zalo_info_card_title: str
+    zalo_info_card_subtitle: str
+    zalo_info_card_image_url: str
+    verify_token: str
+    app_secret: str
+    oa_access_token: str
+
+
+class ZaloPersonalChannelConfig(OmnichannelAutoReplyPolicy):
+    tenant_id: str
+    channel_id: str
+    app_id: str
+    verify_token: str
+
+
+class WebsiteWidgetChannelConfig(TypedDict):
+    tenant_id: str
+    app_id: str
+    channel_id: str
+    embed_token: str
+    verify_token: str
+
+
+class ChannelConfigService:
+    """Load omnichannel credentials by external channel identifier."""
+
+    @staticmethod
+    def get_meta_channel_config(channel_id: str) -> MessengerChannelConfig | None:
+        with Session(db.engine, expire_on_commit=False) as session:
+            config = session.scalar(
+                select(OmniChannelConfig).where(
+                    OmniChannelConfig.channel_id == channel_id,
+                    OmniChannelConfig.channel_type.in_(
+                        [
+                            OmniChannelType.FACEBOOK_MESSENGER,
+                            OmniChannelType.INSTAGRAM_DM,
+                            OmniChannelType.TIKTOK_MESSAGING,
+                        ]
+                    ),
+                    OmniChannelConfig.enabled.is_(True),
+                )
+            )
+        if not config:
+            return None
+
+        return {
+            "tenant_id": config.tenant_id,
+            "app_id": config.app_id,
+            "channel_id": config.channel_id,
+            "channel_type": config.channel_type.value,
+            "page_id": config.page_id,
+            "verify_token": config.decrypt_verify_token(),
+            "app_secret": config.decrypt_app_secret(),
+            "page_access_token": config.decrypt_page_access_token(),
+            "graph_api_version": config.graph_api_version,
+        }
+
+    @staticmethod
+    def get_messenger_channel_config(channel_id: str) -> MessengerChannelConfig | None:
+        # Backward compatible alias used by existing routes.
+        return ChannelConfigService.get_meta_channel_config(channel_id)
+
+    @staticmethod
+    def get_zalo_channel_config(channel_id: str, *, skip_oauth_refresh: bool = False) -> ZaloChannelConfig | None:
+        try:
+            # Webhook URL checks must answer quickly; token refresh calls Zalo and can cause 408 via tunnel.
+            if not skip_oauth_refresh:
+                ZaloOAuthService.refresh_tokens_for_channel(channel_id, leeway_seconds=3600)
+            with Session(db.engine, expire_on_commit=False) as session:
+                config = session.scalar(
+                    select(OmniChannelConfig).where(
+                        OmniChannelConfig.channel_id == channel_id,
+                        OmniChannelConfig.channel_type == OmniChannelType.ZALO_OA,
+                        OmniChannelConfig.enabled.is_(True),
+                    )
+                )
+            if not config:
+                return None
+
+            access_token = config.decrypt_page_access_token().strip()
+            if not access_token:
+                return None
+
+            return {
+                "tenant_id": config.tenant_id,
+                "app_id": config.app_id,
+                "channel_id": config.channel_id,
+                "oa_id": config.page_id,
+                "zalo_application_id": (config.oauth_application_id or "").strip(),
+                "zalo_auto_reply_enabled": bool(config.zalo_auto_reply_enabled),
+                "zalo_info_card_enabled": bool(config.zalo_info_card_enabled),
+                "zalo_info_card_title": (config.zalo_info_card_title or "").strip(),
+                "zalo_info_card_subtitle": (config.zalo_info_card_subtitle or "").strip(),
+                "zalo_info_card_image_url": (config.zalo_info_card_image_url or "").strip(),
+                "verify_token": config.decrypt_verify_token(),
+                "app_secret": config.decrypt_app_secret(),
+                "oa_access_token": access_token,
+            }
+        except Exception:
+            logger.exception("Failed to load Zalo channel config channel_id=%s", channel_id)
+            return None
+
+    @staticmethod
+    def get_zalo_personal_channel_config(
+        channel_id: str,
+        *,
+        require_enabled: bool = True,
+    ) -> ZaloPersonalChannelConfig | None:
+        with Session(db.engine, expire_on_commit=False) as session:
+            query = select(OmniChannelConfig).where(
+                OmniChannelConfig.channel_id == channel_id,
+                OmniChannelConfig.channel_type == OmniChannelType.ZALO_PERSONAL,
+            )
+            if require_enabled:
+                query = query.where(OmniChannelConfig.enabled.is_(True))
+            config = session.scalar(query)
+        if not config:
+            return None
+        from services.omnichannel.omnichannel_auto_reply_policy import OmnichannelAutoReplyPolicyService
+
+        policy = OmnichannelAutoReplyPolicyService.from_config(config)
+        return {
+            "tenant_id": config.tenant_id,
+            "channel_id": config.channel_id,
+            "app_id": config.app_id,
+            "verify_token": config.decrypt_verify_token(),
+            **policy,
+        }
+
+    @staticmethod
+    def get_website_widget_config(channel_id: str) -> WebsiteWidgetChannelConfig | None:
+        with Session(db.engine, expire_on_commit=False) as session:
+            config = session.scalar(
+                select(OmniChannelConfig).where(
+                    OmniChannelConfig.channel_id == channel_id,
+                    OmniChannelConfig.channel_type == OmniChannelType.WEBSITE_WIDGET,
+                    OmniChannelConfig.enabled.is_(True),
+                )
+            )
+        if not config:
+            return None
+        return {
+            "tenant_id": config.tenant_id,
+            "app_id": config.app_id,
+            "channel_id": config.channel_id,
+            "embed_token": config.page_id,
+            "verify_token": config.decrypt_verify_token(),
+        }
+

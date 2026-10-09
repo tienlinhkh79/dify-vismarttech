@@ -1,0 +1,2612 @@
+{
+  "dataset_id": "e4be60ac-238f-40cf-8fe2-1f7d60edb570",
+  "name": "https://phohousewv...",
+  "description": "useful for when you want to answer queries about the https://phohousewv.com/promotions",
+  "source_website": "https://phohousewv.com",
+  "documents": [
+    {
+      "name": "https://phohousewv.com/promotions",
+      "data_source_type": "website_crawl",
+      "segments": [
+        {
+          "content": "Promotions\n----------",
+          "answer": ""
+        },
+        {
+          "content": "[home](https://phohousewv.com/index.html)\n \n* Promotions",
+          "answer": ""
+        },
+        {
+          "content": "[X](https://phohousewv.com/promotions#)",
+          "answer": ""
+        },
+        {
+          "content": "[![Pho House](https://phohousewv.com/images/logo.webp)](https://phohousewv.com/index.html)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* [Menu](https://phohousewv.com/menu)\n \n* [Gallery](https://phohousewv.com/gallery)\n \n* [Promotions](https://phohousewv.com/promotions)\n \n* [Host A Party](https://phohousewv.com/host-a-party)\n \n* [Happy Hour](https://phohousewv.com/happy-hour)\n \n* [Contact us](https://phohousewv.com/contact)",
+          "answer": ""
+        },
+        {
+          "content": "Contact Info\n------------",
+          "answer": ""
+        },
+        {
+          "content": "2 Crossroads Mall Ste E-1 \n Mount Hope, WV 25880\n* (681) 238-5543\n* (681) 238-5544",
+          "answer": ""
+        },
+        {
+          "content": "[](https://www.facebook.com/phohousemounthopewv/)\n \n* [](https://phohousewv.com/promotions#)\n \n* [](https://share.google/I8INDvKCUYTdBiAvZ)\n \n* [](https://www.instagram.com/phohouse2026/)",
+          "answer": ""
+        },
+        {
+          "content": "\\[X\\]",
+          "answer": ""
+        },
+        {
+          "content": "Restrictions:",
+          "answer": ""
+        },
+        {
+          "content": "One time use only. Must show valid ID with your name at front desk.",
+          "answer": ""
+        },
+        {
+          "content": "Expire:",
+          "answer": ""
+        },
+        {
+          "content": "Serial Number: XXXXXX",
+          "answer": ""
+        },
+        {
+          "content": "Sign Up to receive future promotions to your inbox.",
+          "answer": ""
+        },
+        {
+          "content": "First Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Last Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Email \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Phone \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Birthdate \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Submit",
+          "answer": ""
+        },
+        {
+          "content": "Please wait...",
+          "answer": ""
+        },
+        {
+          "content": "OK",
+          "answer": ""
+        },
+        {
+          "content": "![loader](https://phohousewv.com/images/spinner.gif)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* Call\n \n [(681) 238-5543](tel:6812385543)\n [(681) 238-5544](tel:6812385544)\n \n* [Menu](https://phohousewv.com/menu)\n \n* Direction",
+          "answer": ""
+        },
+        {
+          "content": "SIGN UP",
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "name": "https://phohousewv.com/gallery",
+      "data_source_type": "website_crawl",
+      "segments": [
+        {
+          "content": "[X](https://phohousewv.com/gallery#)",
+          "answer": ""
+        },
+        {
+          "content": "[![Pho House](https://phohousewv.com/images/logo.webp)](https://phohousewv.com/index.html)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* [Menu](https://phohousewv.com/menu)\n \n* [Gallery](https://phohousewv.com/gallery)\n \n* [Promotions](https://phohousewv.com/promotions)\n \n* [Host A Party](https://phohousewv.com/host-a-party)\n \n* [Happy Hour](https://phohousewv.com/happy-hour)\n \n* [Contact us](https://phohousewv.com/contact)",
+          "answer": ""
+        },
+        {
+          "content": "Contact Info\n------------",
+          "answer": ""
+        },
+        {
+          "content": "2 Crossroads Mall Ste E-1 \n Mount Hope, WV 25880\n* (681) 238-5543\n* (681) 238-5544",
+          "answer": ""
+        },
+        {
+          "content": "[](https://www.facebook.com/phohousemounthopewv/)\n \n* [](https://phohousewv.com/gallery#)\n \n* [](https://share.google/I8INDvKCUYTdBiAvZ)\n \n* [](https://www.instagram.com/phohouse2026/)",
+          "answer": ""
+        },
+        {
+          "content": "Our Gallery\n-----------",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/1.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/1.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/2.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/2.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/4.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/4.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/5.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/5.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/6.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/6.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/7.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/7.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/8.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/8.webp)",
+          "answer": ""
+        },
+        {
+          "content": "\\[X\\]",
+          "answer": ""
+        },
+        {
+          "content": "Restrictions:",
+          "answer": ""
+        },
+        {
+          "content": "One time use only. Must show valid ID with your name at front desk.",
+          "answer": ""
+        },
+        {
+          "content": "Expire:",
+          "answer": ""
+        },
+        {
+          "content": "Serial Number: XXXXXX",
+          "answer": ""
+        },
+        {
+          "content": "Sign Up to receive future promotions to your inbox.",
+          "answer": ""
+        },
+        {
+          "content": "First Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Last Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Email \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Phone \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Birthdate \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Submit",
+          "answer": ""
+        },
+        {
+          "content": "Please wait...",
+          "answer": ""
+        },
+        {
+          "content": "OK",
+          "answer": ""
+        },
+        {
+          "content": "![loader](https://phohousewv.com/images/spinner.gif)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* Call\n \n [(681) 238-5543](tel:6812385543)\n [(681) 238-5544](tel:6812385544)\n \n* [Menu](https://phohousewv.com/menu)\n \n* Direction",
+          "answer": ""
+        },
+        {
+          "content": "SIGN UP",
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "name": "https://phohousewv.com/",
+      "data_source_type": "website_crawl",
+      "segments": [
+        {
+          "content": "\\[X\\] Close",
+          "answer": ""
+        },
+        {
+          "content": "![promotion 1](https://phohousewv.com/uploadflyer/photoflyer/signal-2026-06-19-12-09-0.jpg)",
+          "answer": ""
+        },
+        {
+          "content": "[X](https://phohousewv.com/#)",
+          "answer": ""
+        },
+        {
+          "content": "[![Pho House](https://phohousewv.com/images/logo.webp)](https://phohousewv.com/index.html)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* [Menu](https://phohousewv.com/menu)\n \n* [Gallery](https://phohousewv.com/gallery)\n \n* [Promotions](https://phohousewv.com/promotions)\n \n* [Host A Party](https://phohousewv.com/host-a-party)\n \n* [Happy Hour](https://phohousewv.com/happy-hour)\n \n* [Contact us](https://phohousewv.com/contact)",
+          "answer": ""
+        },
+        {
+          "content": "Contact Info\n------------",
+          "answer": ""
+        },
+        {
+          "content": "2 Crossroads Mall Ste E-1 \n Mount Hope, WV 25880\n* (681) 238-5543\n* (681) 238-5544",
+          "answer": ""
+        },
+        {
+          "content": "[](https://www.facebook.com/phohousemounthopewv/)\n \n* [](https://phohousewv.com/#)\n \n* [](https://share.google/I8INDvKCUYTdBiAvZ)\n \n* [](https://www.instagram.com/phohouse2026/)",
+          "answer": ""
+        },
+        {
+          "content": "Welcome to Pho House!\n=====================",
+          "answer": ""
+        },
+        {
+          "content": "Our kitchen focuses on balanced flavors and consistent quality, creating dishes that are both satisfying and memorable.",
+          "answer": ""
+        },
+        {
+          "content": "[Our Menu](https://phohousewv.com/menu.html)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/main-slider/content-image-2.webp)",
+          "answer": ""
+        },
+        {
+          "content": "Welcome toPho House!\n====================",
+          "answer": ""
+        },
+        {
+          "content": "Our team is dedicated to providing attentive and friendly service from the moment you walk in.",
+          "answer": ""
+        },
+        {
+          "content": "[Our Menu](https://phohousewv.com/menu.html)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/main-slider/content-image-3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "Welcome to Pho House!\n=====================",
+          "answer": ""
+        },
+        {
+          "content": "Our signature pho is prepared with broth simmered for hours to achieve depth and clarity of flavor.",
+          "answer": ""
+        },
+        {
+          "content": "[Our Menu](https://phohousewv.com/menu.html)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/main-slider/content-image-1.webp)",
+          "answer": ""
+        },
+        {
+          "content": "Welcome to Pho House!\n=====================",
+          "answer": ""
+        },
+        {
+          "content": "Our kitchen focuses on balanced flavors and consistent quality, creating dishes that are both satisfying and memorable.",
+          "answer": ""
+        },
+        {
+          "content": "[Our Menu](https://phohousewv.com/menu.html)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/main-slider/content-image-2.webp)",
+          "answer": ""
+        },
+        {
+          "content": "Welcome toPho House!\n====================",
+          "answer": ""
+        },
+        {
+          "content": "Our team is dedicated to providing attentive and friendly service from the moment you walk in.",
+          "answer": ""
+        },
+        {
+          "content": "[Our Menu](https://phohousewv.com/menu.html)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/main-slider/content-image-3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "Welcome to Pho House!\n=====================",
+          "answer": ""
+        },
+        {
+          "content": "Our signature pho is prepared with broth simmered for hours to achieve depth and clarity of flavor.",
+          "answer": ""
+        },
+        {
+          "content": "[Our Menu](https://phohousewv.com/menu.html)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/main-slider/content-image-1.webp)",
+          "answer": ""
+        },
+        {
+          "content": "Welcome to Pho House!\n=====================",
+          "answer": ""
+        },
+        {
+          "content": "Our kitchen focuses on balanced flavors and consistent quality, creating dishes that are both satisfying and memorable.",
+          "answer": ""
+        },
+        {
+          "content": "[Our Menu](https://phohousewv.com/menu.html)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/main-slider/content-image-2.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/about/about.webp)",
+          "answer": ""
+        },
+        {
+          "content": "Hospitality with Heart",
+          "answer": ""
+        },
+        {
+          "content": "What Makes Us Different?\n------------------------",
+          "answer": ""
+        },
+        {
+          "content": "Welcome to Pho House, one of the best Vietnamese Cuisine in Mount Hope, WV 25880. At Pho House, we honor Vietnamese culinary traditions while delivering a modern dining experience. Our dishes are prepared using time-tested cooking methods, fresh ingredients, and a dedication to authentic flavors. Combined with a welcoming ambiance and attentive service, we strive to create a restaurant experience that stands out for both quality and comfort.",
+          "answer": ""
+        },
+        {
+          "content": "[Our Menu](https://phohousewv.com/menu)",
+          "answer": ""
+        },
+        {
+          "content": "Best for You",
+          "answer": ""
+        },
+        {
+          "content": "Our Menu\n--------",
+          "answer": ""
+        },
+        {
+          "content": "[![Pho House](https://phohousewv.com/images/menu-home/1.webp)](https://phohousewv.com/menu#pho)",
+          "answer": ""
+        },
+        {
+          "content": "[Pho & Noodle Soups](https://phohousewv.com/menu#pho)",
+          "answer": ""
+        },
+        {
+          "content": "Our pho is the heart of our menu. Each bowl features carefully simmered broth, tender rice noodles, fresh herbs, and flavorful proteins. It’s a nourishing and satisfying meal perfect for any time of day.",
+          "answer": ""
+        },
+        {
+          "content": "[![Vermicelli](https://phohousewv.com/images/menu-home/2.webp)](https://phohousewv.com/menu#Vermicelli)",
+          "answer": ""
+        },
+        {
+          "content": "[Rice & Vermicelli Dishes](https://phohousewv.com/menu#Vermicelli)",
+          "answer": ""
+        },
+        {
+          "content": "Enjoy a variety of rice plates and vermicelli bowls topped with grilled meats, crisp vegetables, and house-made sauces. These balanced dishes offer a delicious combination of textures and flavors.",
+          "answer": ""
+        },
+        {
+          "content": "[![Pho House](https://phohousewv.com/images/menu-home/3.webp)](https://phohousewv.com/menu#Drinks)",
+          "answer": ""
+        },
+        {
+          "content": "[Beverages & Refreshments](https://phohousewv.com/menu#Drinks)",
+          "answer": ""
+        },
+        {
+          "content": "Complement your meal with a selection of refreshing drinks including Vietnamese iced coffee, teas, smoothies, and specialty beverages. Each drink is crafted to enhance your dining enjoyment.",
+          "answer": ""
+        },
+        {
+          "content": "[View All Menu](https://phohousewv.com/menu.html)",
+          "answer": ""
+        },
+        {
+          "content": "Authentic Vietnamese Flavors\n----------------------------",
+          "answer": ""
+        },
+        {
+          "content": "A Bowl of Pho That Feels Like Home",
+          "answer": ""
+        },
+        {
+          "content": "![](https://phohousewv.com/images/coming1.webp) ![](https://phohousewv.com/images/coming2.webp)",
+          "answer": ""
+        },
+        {
+          "content": "Best for You",
+          "answer": ""
+        },
+        {
+          "content": "Best Menu\n---------",
+          "answer": ""
+        },
+        {
+          "content": "![Pho](https://phohousewv.com/images/menu-best/pho.webp)",
+          "answer": ""
+        },
+        {
+          "content": "[Pho & Noodle Soups](https://phohousewv.com/menu#pho)",
+          "answer": ""
+        },
+        {
+          "content": "More Than Pho - Explore Vietnam on a Plate",
+          "answer": ""
+        },
+        {
+          "content": "![Vermicelli](https://phohousewv.com/images/menu-best/Vermicelli.webp)",
+          "answer": ""
+        },
+        {
+          "content": "[Vermicelli Bowls](https://phohousewv.com/menu#Vermicelli)",
+          "answer": ""
+        },
+        {
+          "content": "Tradition, Flavor, and Comfort in Every Bite",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/menu-best/menu-best.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Rice](https://phohousewv.com/images/menu-best/Rice.webp)",
+          "answer": ""
+        },
+        {
+          "content": "[Rice Plates](https://phohousewv.com/menu#Rice)",
+          "answer": ""
+        },
+        {
+          "content": "Freshness You Can Taste in Every Dish",
+          "answer": ""
+        },
+        {
+          "content": "![Coffee](https://phohousewv.com/images/menu-best/Coffee.webp)",
+          "answer": ""
+        },
+        {
+          "content": "[Coffee & Tea](https://phohousewv.com/menu#Drinks)",
+          "answer": ""
+        },
+        {
+          "content": "Bring Friends, Bring Appetite",
+          "answer": ""
+        },
+        {
+          "content": "A Warm Welcome \nAwaits You\n---------------------------",
+          "answer": ""
+        },
+        {
+          "content": "From Street Food Classics to Modern Favorites",
+          "answer": ""
+        },
+        {
+          "content": "[Our Menu](https://phohousewv.com/menu)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/slogan.webp)",
+          "answer": ""
+        },
+        {
+          "content": "Pho House",
+          "answer": ""
+        },
+        {
+          "content": "Our Gallery\n-----------",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/4.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/4.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/5.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/5.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/6.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/6.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/7.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/7.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/1.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/1.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/2.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/2.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/4.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/4.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/5.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/5.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/6.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/6.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/7.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/7.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/1.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/1.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/2.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/2.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/4.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/4.webp)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/gallery/5.webp)",
+          "answer": ""
+        },
+        {
+          "content": "https://phohousewv.com/images/gallery/5.webp)",
+          "answer": ""
+        },
+        {
+          "content": "\\[X\\]",
+          "answer": ""
+        },
+        {
+          "content": "Restrictions:",
+          "answer": ""
+        },
+        {
+          "content": "One time use only. Must show valid ID with your name at front desk.",
+          "answer": ""
+        },
+        {
+          "content": "Expire:",
+          "answer": ""
+        },
+        {
+          "content": "Serial Number: XXXXXX",
+          "answer": ""
+        },
+        {
+          "content": "Sign Up to receive future promotions to your inbox.",
+          "answer": ""
+        },
+        {
+          "content": "First Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Last Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Email \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Phone \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Birthdate \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Submit",
+          "answer": ""
+        },
+        {
+          "content": "Please wait...",
+          "answer": ""
+        },
+        {
+          "content": "OK",
+          "answer": ""
+        },
+        {
+          "content": "![loader](https://phohousewv.com/images/spinner.gif)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* Call\n \n [(681) 238-5543](tel:6812385543)\n [(681) 238-5544](tel:6812385544)\n \n* [Menu](https://phohousewv.com/menu)\n \n* Direction",
+          "answer": ""
+        },
+        {
+          "content": "SIGN UP",
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "name": "https://phohousewv.com/menu",
+      "data_source_type": "website_crawl",
+      "segments": [
+        {
+          "content": "[X](https://phohousewv.com/menu#)",
+          "answer": ""
+        },
+        {
+          "content": "[![Pho House](https://phohousewv.com/images/logo.webp)](https://phohousewv.com/index.html)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* [Menu](https://phohousewv.com/menu)\n \n* [Gallery](https://phohousewv.com/gallery)\n \n* [Promotions](https://phohousewv.com/promotions)\n \n* [Host A Party](https://phohousewv.com/host-a-party)\n \n* [Happy Hour](https://phohousewv.com/happy-hour)\n \n* [Contact us](https://phohousewv.com/contact)",
+          "answer": ""
+        },
+        {
+          "content": "Contact Info\n------------",
+          "answer": ""
+        },
+        {
+          "content": "2 Crossroads Mall Ste E-1 \n Mount Hope, WV 25880\n* (681) 238-5543\n* (681) 238-5544",
+          "answer": ""
+        },
+        {
+          "content": "[](https://www.facebook.com/phohousemounthopewv/)\n \n* [](https://phohousewv.com/menu#)\n \n* [](https://share.google/I8INDvKCUYTdBiAvZ)\n \n* [](https://www.instagram.com/phohouse2026/)",
+          "answer": ""
+        },
+        {
+          "content": "Our Menu\n--------",
+          "answer": ""
+        },
+        {
+          "content": "[home](https://phohousewv.com/index.html)\n \n* Menu",
+          "answer": ""
+        },
+        {
+          "content": "🍜 PHỞ & NOODLE SOUPS\n---------------------",
+          "answer": ""
+        },
+        {
+          "content": "⭐ Regular Pho (All below): $15.99",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Rare Beef Pho/ Phở Tái",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Well-Done Beef Pho/ Phở Chín",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Beef Brisket Pho/ Phở Nạm",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Beef Meatball Pho/ Phở Bò Viên",
+          "answer": ""
+        },
+        {
+          "content": "5\\. Beef Flank Pho/ Phở Gầu",
+          "answer": ""
+        },
+        {
+          "content": "6\\. Rare and Well-Done Beef Pho/ Tái Chín",
+          "answer": ""
+        },
+        {
+          "content": "7\\. Rare Beef and Beef Brisket Pho/ Tái Nạm",
+          "answer": ""
+        },
+        {
+          "content": "8\\. Rare Beef and Beef Meatball Pho/ Tái Bò Viên",
+          "answer": ""
+        },
+        {
+          "content": "9\\. Rare Beef and Beef Flank Pho/ Tái Gầu",
+          "answer": ""
+        },
+        {
+          "content": "10\\. Well-Done Beef and Beef Brisket Pho/ Chín Nạm",
+          "answer": ""
+        },
+        {
+          "content": "11\\. Well-Done Beef and Beef Meatball Pho/ Chín Bò Viên",
+          "answer": ""
+        },
+        {
+          "content": "12\\. Well-Done Beef and Beef Flank Pho/ Chín Gầu",
+          "answer": ""
+        },
+        {
+          "content": "13\\. Beef Brisket and Beef Meatball Pho/ Nạm Bò Viên",
+          "answer": ""
+        },
+        {
+          "content": "14\\. Beef Brisket and Beef Flank Pho/ Nạm Gầu",
+          "answer": ""
+        },
+        {
+          "content": "15\\. Beef Meatball and Beef Flank Pho/ Bò Viên Gầu",
+          "answer": ""
+        },
+        {
+          "content": "⭐ Special Pho:",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Special Pho/ Phở Đặc Biệt",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "⭐ Other Pho: $15.99",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Spicy Pho/ Phở Saté",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Chicken Pho/ Phở Gà",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Shrimp Pho/ Phở Tôm",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Beef Pho/ Phở Bò",
+          "answer": ""
+        },
+        {
+          "content": "5\\. Vegetarian Pho/ Phở Chay",
+          "answer": ""
+        },
+        {
+          "content": "⭐ Premium Soups",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Beef Rib Pho/ Phở Sườn Bò",
+          "answer": ""
+        },
+        {
+          "content": "18.99",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Hue Style Beef Vermicelli/ Bún Bò Huế",
+          "answer": ""
+        },
+        {
+          "content": "18.99",
+          "answer": ""
+        },
+        {
+          "content": "➕ PHỞ EXTRAS",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Steak / Brisket / Flank / Tender",
+          "answer": ""
+        },
+        {
+          "content": "5.00",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Meatball / Chicken",
+          "answer": ""
+        },
+        {
+          "content": "5.00",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Shrimp",
+          "answer": ""
+        },
+        {
+          "content": "5.99",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Beef Broth",
+          "answer": ""
+        },
+        {
+          "content": "5.99",
+          "answer": ""
+        },
+        {
+          "content": "5\\. Noodles",
+          "answer": ""
+        },
+        {
+          "content": "3.99",
+          "answer": ""
+        },
+        {
+          "content": "6\\. Veggies",
+          "answer": ""
+        },
+        {
+          "content": "3.99",
+          "answer": ""
+        },
+        {
+          "content": "![Pho](https://phohousewv.com/images/menu/pho/1.webp) ![Pho](https://phohousewv.com/images/menu/pho/2.webp) ![Bún Bò Huế](https://phohousewv.com/images/menu/pho/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "🍜 VERMICELLI BOWLS\n-------------------",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Pork or Chicken/ Bún Thịt Nướng",
+          "answer": ""
+        },
+        {
+          "content": "14.99",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Pork or Chicken Vermicelli with Egg Rolls/ Bún Thịt Nướng + Chả Giò",
+          "answer": ""
+        },
+        {
+          "content": "15.99",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Grilled Shrimp Vermicelli/ Bún Tôm Nướng",
+          "answer": ""
+        },
+        {
+          "content": "15.99",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Grilled Shrimp Vermicelli with Egg Rolls/ Bún Tôm Nướng + Chả Giò",
+          "answer": ""
+        },
+        {
+          "content": "17.99",
+          "answer": ""
+        },
+        {
+          "content": "5\\. Special Vermicelli/ Bún Đặc Biệt",
+          "answer": ""
+        },
+        {
+          "content": "17.99",
+          "answer": ""
+        },
+        {
+          "content": "6\\. Vegetarian Vermicelli/ Bún Chay",
+          "answer": ""
+        },
+        {
+          "content": "14.99",
+          "answer": ""
+        },
+        {
+          "content": "![Bún Tôm Nướng + Chả Giò](https://phohousewv.com/images/menu/Vermicelli/1.webp) ![Bún Thịt Nướng + Chả Giò](https://phohousewv.com/images/menu/Vermicelli/2.webp) ![Bún Đặc Biệt](https://phohousewv.com/images/menu/Vermicelli/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "🍚 RICE PLATES\n--------------",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Grilled Pork Chop Rice/ Cơm Sườn",
+          "answer": ""
+        },
+        {
+          "content": "14.99",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Grilled Pork Chop with Shredded Pork Skin Rice/ Cơm Sườn Bì",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Grilled Pork Chop with Egg Quiche/ Cơm Sườn Chả",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Rice w. Pork Chop & Egg / Cơm Sườn Chả",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "5\\. Rice w. Pork Chop & Fried Egg / Cơm Sườn Trứng",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "6\\. Rice w. Grilled Lemongrass Chicken / Cơm Gà Nướng Sả",
+          "answer": ""
+        },
+        {
+          "content": "14.99",
+          "answer": ""
+        },
+        {
+          "content": "7\\. Rice w. Lemongrass Chicken & Egg Roll / Cơm Gà Nướng Sả, Chả Giò",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "8\\. Rice w. Lemongrass Chicken & Fried Egg / Cơm Gà Nướng Sả, Ốp La",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "9\\. Rice w. Chicken Wings / Cơm Cánh Gà",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "![Cơm Sườn Bì Chả](https://phohousewv.com/images/menu/Rice/1.webp) ![Cơm Sườn Bì Chả](https://phohousewv.com/images/menu/Rice/2.webp) ![Cơm Sườn Bì Chả](https://phohousewv.com/images/menu/Rice/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "🥢 STARTERS\n-----------",
+          "answer": ""
+        },
+        {
+          "content": "Egg Rolls (Chả Giò)",
+          "answer": ""
+        },
+        {
+          "content": "1\\. 2 Rolls",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "2\\. 4 Rolls",
+          "answer": ""
+        },
+        {
+          "content": "10.99",
+          "answer": ""
+        },
+        {
+          "content": "Spring Rolls (Gỏi Cuốn)",
+          "answer": ""
+        },
+        {
+          "content": "1\\. 2 Rolls",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "2\\. 4 Rolls",
+          "answer": ""
+        },
+        {
+          "content": "10.99",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Veggie Egg Rolls",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Saté Tofu",
+          "answer": ""
+        },
+        {
+          "content": "![Egg Rolls](https://phohousewv.com/images/menu/Starters/1.webp) ![Spring Rolls](https://phohousewv.com/images/menu/Starters/2.webp) ![Veggie Egg Rolls](https://phohousewv.com/images/menu/Starters/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "🍳 FRIED RICE\n-------------",
+          "answer": ""
+        },
+        {
+          "content": "1\\. House Special Fried Rice",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "![Fried Rice](https://phohousewv.com/images/menu/Fried-Rice/1.webp) ![Fried Rice](https://phohousewv.com/images/menu/Fried-Rice/2.webp) ![Fried Rice](https://phohousewv.com/images/menu/Fried-Rice/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "🍗 WINGS / LEGS\n---------------",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Ocean Wings (8) / Legs (4)",
+          "answer": ""
+        },
+        {
+          "content": "15.99",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Mango Wings (8) / Legs (4)",
+          "answer": ""
+        },
+        {
+          "content": "15.99",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Salt & Pepper Wings (8) / Legs (4)",
+          "answer": ""
+        },
+        {
+          "content": "15.99",
+          "answer": ""
+        },
+        {
+          "content": "![Wings](https://phohousewv.com/images/menu/Wings/1.webp) ![Salt & Pepper Wings ](https://phohousewv.com/images/menu/Wings/2.webp) ![Mango Wings](https://phohousewv.com/images/menu/Wings/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "🧋 DRINKS\n---------",
+          "answer": ""
+        },
+        {
+          "content": "Milk Tea",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Classic Milk Tea",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Matcha Latte",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Taro Milk Tea",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "Special Drinks",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Fresh Lemonade",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Passion Fruit Juice",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Sugarcane Juice",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "Fruit tea",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Signature Fruit Tea",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Mango Passion Fruit",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Strawberry Lychee",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Strawberry",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "Soda: $3.00",
+          "answer": ""
+        },
+        {
+          "content": "Coke, Diet Coke, Dr Pepper, Diet Dr Pepper, Sprite, Fanta, Lemonade",
+          "answer": ""
+        },
+        {
+          "content": "Coffee & Tea",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Vietnamese Coffee (Iced)",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Sea Salt Coffee (Iced)",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Thai Tea",
+          "answer": ""
+        },
+        {
+          "content": "5.00",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Jasmine Green Tea",
+          "answer": ""
+        },
+        {
+          "content": "5.00",
+          "answer": ""
+        },
+        {
+          "content": "5\\. Oolong Tea",
+          "answer": ""
+        },
+        {
+          "content": "5.00",
+          "answer": ""
+        },
+        {
+          "content": "6\\. Hot Tea",
+          "answer": ""
+        },
+        {
+          "content": "2.50",
+          "answer": ""
+        },
+        {
+          "content": "7\\. Tea Pot (Jasmine / Oolong)",
+          "answer": ""
+        },
+        {
+          "content": "7.00",
+          "answer": ""
+        },
+        {
+          "content": "8\\. Ginger Hot Tea",
+          "answer": ""
+        },
+        {
+          "content": "2.50",
+          "answer": ""
+        },
+        {
+          "content": "![Taro Milk Tea](https://phohousewv.com/images/menu/Drinks/1.webp) ![Mango Passion Fruit](https://phohousewv.com/images/menu/Drinks/2.webp) ![Vietnamese Coffee](https://phohousewv.com/images/menu/Drinks/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "\\[X\\]",
+          "answer": ""
+        },
+        {
+          "content": "Restrictions:",
+          "answer": ""
+        },
+        {
+          "content": "One time use only. Must show valid ID with your name at front desk.",
+          "answer": ""
+        },
+        {
+          "content": "Expire:",
+          "answer": ""
+        },
+        {
+          "content": "Serial Number: XXXXXX",
+          "answer": ""
+        },
+        {
+          "content": "Sign Up to receive future promotions to your inbox.",
+          "answer": ""
+        },
+        {
+          "content": "First Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Last Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Email \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Phone \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Birthdate \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Submit",
+          "answer": ""
+        },
+        {
+          "content": "Please wait...",
+          "answer": ""
+        },
+        {
+          "content": "OK",
+          "answer": ""
+        },
+        {
+          "content": "![loader](https://phohousewv.com/images/spinner.gif)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* Call\n \n [(681) 238-5543](tel:6812385543)\n [(681) 238-5544](tel:6812385544)\n \n* [Menu](https://phohousewv.com/menu)\n \n* Direction",
+          "answer": ""
+        },
+        {
+          "content": "SIGN UP",
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "name": "https://phohousewv.com/host-a-party",
+      "data_source_type": "website_crawl",
+      "segments": [
+        {
+          "content": "Host A Party\n------------",
+          "answer": ""
+        },
+        {
+          "content": "[home](https://phohousewv.com/index.html)\n \n* Host A Party",
+          "answer": ""
+        },
+        {
+          "content": "[X](https://phohousewv.com/host-a-party#)",
+          "answer": ""
+        },
+        {
+          "content": "[![Pho House](https://phohousewv.com/images/logo.webp)](https://phohousewv.com/index.html)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* [Menu](https://phohousewv.com/menu)\n \n* [Gallery](https://phohousewv.com/gallery)\n \n* [Promotions](https://phohousewv.com/promotions)\n \n* [Host A Party](https://phohousewv.com/host-a-party)\n \n* [Happy Hour](https://phohousewv.com/happy-hour)\n \n* [Contact us](https://phohousewv.com/contact)",
+          "answer": ""
+        },
+        {
+          "content": "Contact Info\n------------",
+          "answer": ""
+        },
+        {
+          "content": "2 Crossroads Mall Ste E-1 \n Mount Hope, WV 25880\n* (681) 238-5543\n* (681) 238-5544",
+          "answer": ""
+        },
+        {
+          "content": "[](https://www.facebook.com/phohousemounthopewv/)\n \n* [](https://phohousewv.com/host-a-party#)\n \n* [](https://share.google/I8INDvKCUYTdBiAvZ)\n \n* [](https://www.instagram.com/phohouse2026/)",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/party1.webp)",
+          "answer": ""
+        },
+        {
+          "content": "Host A Party\n------------",
+          "answer": ""
+        },
+        {
+          "content": "Our Salon is the perfect place to host a bridal shower, birthday celebration, bachelorette/bachelor party, corporate event or just a get-together for friends, family, and co-workers. We have a beautiful and accommodating space, affordable prices to fit everyone's budget, and a large team of technicians to serve your needs so you and your guests can relax and enjoy the party. Please inquire for details by giving us a call or filling out the form.",
+          "answer": ""
+        },
+        {
+          "content": "Your Name\\*:",
+          "answer": ""
+        },
+        {
+          "content": "Your Email\\*:",
+          "answer": ""
+        },
+        {
+          "content": "Phone Number\\*:",
+          "answer": ""
+        },
+        {
+          "content": "Date\\*:",
+          "answer": ""
+        },
+        {
+          "content": "Time\\*:",
+          "answer": ""
+        },
+        {
+          "content": "Party Size\\*:",
+          "answer": ""
+        },
+        {
+          "content": "Please wait...",
+          "answer": ""
+        },
+        {
+          "content": "Submit",
+          "answer": ""
+        },
+        {
+          "content": "OK",
+          "answer": ""
+        },
+        {
+          "content": "\\[X\\]",
+          "answer": ""
+        },
+        {
+          "content": "Restrictions:",
+          "answer": ""
+        },
+        {
+          "content": "One time use only. Must show valid ID with your name at front desk.",
+          "answer": ""
+        },
+        {
+          "content": "Expire:",
+          "answer": ""
+        },
+        {
+          "content": "Serial Number: XXXXXX",
+          "answer": ""
+        },
+        {
+          "content": "Sign Up to receive future promotions to your inbox.",
+          "answer": ""
+        },
+        {
+          "content": "First Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Last Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Email \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Phone \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Birthdate \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Submit",
+          "answer": ""
+        },
+        {
+          "content": "Please wait...",
+          "answer": ""
+        },
+        {
+          "content": "OK",
+          "answer": ""
+        },
+        {
+          "content": "![loader](https://phohousewv.com/images/spinner.gif)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* Call\n \n [(681) 238-5543](tel:6812385543)\n [(681) 238-5544](tel:6812385544)\n \n* [Menu](https://phohousewv.com/menu)\n \n* Direction",
+          "answer": ""
+        },
+        {
+          "content": "SIGN UP",
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "name": "https://phohousewv.com/happy-hour",
+      "data_source_type": "website_crawl",
+      "segments": [
+        {
+          "content": "Happy Hour\n----------",
+          "answer": ""
+        },
+        {
+          "content": "[home](https://phohousewv.com/index.html)\n \n* Happy Hour",
+          "answer": ""
+        },
+        {
+          "content": "[X](https://phohousewv.com/happy-hour#)",
+          "answer": ""
+        },
+        {
+          "content": "[![Pho House](https://phohousewv.com/images/logo.webp)](https://phohousewv.com/index.html)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* [Menu](https://phohousewv.com/menu)\n \n* [Gallery](https://phohousewv.com/gallery)\n \n* [Promotions](https://phohousewv.com/promotions)\n \n* [Host A Party](https://phohousewv.com/host-a-party)\n \n* [Happy Hour](https://phohousewv.com/happy-hour)\n \n* [Contact us](https://phohousewv.com/contact)",
+          "answer": ""
+        },
+        {
+          "content": "Contact Info\n------------",
+          "answer": ""
+        },
+        {
+          "content": "2 Crossroads Mall Ste E-1 \n Mount Hope, WV 25880\n* (681) 238-5543\n* (681) 238-5544",
+          "answer": ""
+        },
+        {
+          "content": "[](https://www.facebook.com/phohousemounthopewv/)\n \n* [](https://phohousewv.com/happy-hour#)\n \n* [](https://share.google/I8INDvKCUYTdBiAvZ)\n \n* [](https://www.instagram.com/phohouse2026/)",
+          "answer": ""
+        },
+        {
+          "content": "\\[X\\]",
+          "answer": ""
+        },
+        {
+          "content": "Restrictions:",
+          "answer": ""
+        },
+        {
+          "content": "One time use only. Must show valid ID with your name at front desk.",
+          "answer": ""
+        },
+        {
+          "content": "Expire:",
+          "answer": ""
+        },
+        {
+          "content": "Serial Number: XXXXXX",
+          "answer": ""
+        },
+        {
+          "content": "Sign Up to receive future promotions to your inbox.",
+          "answer": ""
+        },
+        {
+          "content": "First Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Last Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Email \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Phone \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Birthdate \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Submit",
+          "answer": ""
+        },
+        {
+          "content": "Please wait...",
+          "answer": ""
+        },
+        {
+          "content": "OK",
+          "answer": ""
+        },
+        {
+          "content": "![loader](https://phohousewv.com/images/spinner.gif)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* Call\n \n [(681) 238-5543](tel:6812385543)\n [(681) 238-5544](tel:6812385544)\n \n* [Menu](https://phohousewv.com/menu)\n \n* Direction",
+          "answer": ""
+        },
+        {
+          "content": "SIGN UP",
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "name": "https://phohousewv.com/menu.html",
+      "data_source_type": "website_crawl",
+      "segments": [
+        {
+          "content": "[X](https://phohousewv.com/menu.html#)",
+          "answer": ""
+        },
+        {
+          "content": "[![Pho House](https://phohousewv.com/images/logo.webp)](https://phohousewv.com/index.html)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* [Menu](https://phohousewv.com/menu)\n \n* [Gallery](https://phohousewv.com/gallery)\n \n* [Promotions](https://phohousewv.com/promotions)\n \n* [Host A Party](https://phohousewv.com/host-a-party)\n \n* [Happy Hour](https://phohousewv.com/happy-hour)\n \n* [Contact us](https://phohousewv.com/contact)",
+          "answer": ""
+        },
+        {
+          "content": "Contact Info\n------------",
+          "answer": ""
+        },
+        {
+          "content": "2 Crossroads Mall Ste E-1 \n Mount Hope, WV 25880\n* (681) 238-5543\n* (681) 238-5544",
+          "answer": ""
+        },
+        {
+          "content": "[](https://www.facebook.com/phohousemounthopewv/)\n \n* [](https://phohousewv.com/menu.html#)\n \n* [](https://share.google/I8INDvKCUYTdBiAvZ)\n \n* [](https://www.instagram.com/phohouse2026/)",
+          "answer": ""
+        },
+        {
+          "content": "Our Menu\n--------",
+          "answer": ""
+        },
+        {
+          "content": "[home](https://phohousewv.com/index.html)\n \n* Menu",
+          "answer": ""
+        },
+        {
+          "content": "🍜 PHỞ & NOODLE SOUPS\n---------------------",
+          "answer": ""
+        },
+        {
+          "content": "⭐ Regular Pho (All below): $15.99",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Rare Beef Pho/ Phở Tái",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Well-Done Beef Pho/ Phở Chín",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Beef Brisket Pho/ Phở Nạm",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Beef Meatball Pho/ Phở Bò Viên",
+          "answer": ""
+        },
+        {
+          "content": "5\\. Beef Flank Pho/ Phở Gầu",
+          "answer": ""
+        },
+        {
+          "content": "6\\. Rare and Well-Done Beef Pho/ Tái Chín",
+          "answer": ""
+        },
+        {
+          "content": "7\\. Rare Beef and Beef Brisket Pho/ Tái Nạm",
+          "answer": ""
+        },
+        {
+          "content": "8\\. Rare Beef and Beef Meatball Pho/ Tái Bò Viên",
+          "answer": ""
+        },
+        {
+          "content": "9\\. Rare Beef and Beef Flank Pho/ Tái Gầu",
+          "answer": ""
+        },
+        {
+          "content": "10\\. Well-Done Beef and Beef Brisket Pho/ Chín Nạm",
+          "answer": ""
+        },
+        {
+          "content": "11\\. Well-Done Beef and Beef Meatball Pho/ Chín Bò Viên",
+          "answer": ""
+        },
+        {
+          "content": "12\\. Well-Done Beef and Beef Flank Pho/ Chín Gầu",
+          "answer": ""
+        },
+        {
+          "content": "13\\. Beef Brisket and Beef Meatball Pho/ Nạm Bò Viên",
+          "answer": ""
+        },
+        {
+          "content": "14\\. Beef Brisket and Beef Flank Pho/ Nạm Gầu",
+          "answer": ""
+        },
+        {
+          "content": "15\\. Beef Meatball and Beef Flank Pho/ Bò Viên Gầu",
+          "answer": ""
+        },
+        {
+          "content": "⭐ Special Pho:",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Special Pho/ Phở Đặc Biệt",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "⭐ Other Pho: $15.99",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Spicy Pho/ Phở Saté",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Chicken Pho/ Phở Gà",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Shrimp Pho/ Phở Tôm",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Beef Pho/ Phở Bò",
+          "answer": ""
+        },
+        {
+          "content": "5\\. Vegetarian Pho/ Phở Chay",
+          "answer": ""
+        },
+        {
+          "content": "⭐ Premium Soups",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Beef Rib Pho/ Phở Sườn Bò",
+          "answer": ""
+        },
+        {
+          "content": "18.99",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Hue Style Beef Vermicelli/ Bún Bò Huế",
+          "answer": ""
+        },
+        {
+          "content": "18.99",
+          "answer": ""
+        },
+        {
+          "content": "➕ PHỞ EXTRAS",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Steak / Brisket / Flank / Tender",
+          "answer": ""
+        },
+        {
+          "content": "5.00",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Meatball / Chicken",
+          "answer": ""
+        },
+        {
+          "content": "5.00",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Shrimp",
+          "answer": ""
+        },
+        {
+          "content": "5.99",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Beef Broth",
+          "answer": ""
+        },
+        {
+          "content": "5.99",
+          "answer": ""
+        },
+        {
+          "content": "5\\. Noodles",
+          "answer": ""
+        },
+        {
+          "content": "3.99",
+          "answer": ""
+        },
+        {
+          "content": "6\\. Veggies",
+          "answer": ""
+        },
+        {
+          "content": "3.99",
+          "answer": ""
+        },
+        {
+          "content": "![Pho](https://phohousewv.com/images/menu/pho/1.webp) ![Pho](https://phohousewv.com/images/menu/pho/2.webp) ![Bún Bò Huế](https://phohousewv.com/images/menu/pho/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "🍜 VERMICELLI BOWLS\n-------------------",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Pork or Chicken/ Bún Thịt Nướng",
+          "answer": ""
+        },
+        {
+          "content": "14.99",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Pork or Chicken Vermicelli with Egg Rolls/ Bún Thịt Nướng + Chả Giò",
+          "answer": ""
+        },
+        {
+          "content": "15.99",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Grilled Shrimp Vermicelli/ Bún Tôm Nướng",
+          "answer": ""
+        },
+        {
+          "content": "15.99",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Grilled Shrimp Vermicelli with Egg Rolls/ Bún Tôm Nướng + Chả Giò",
+          "answer": ""
+        },
+        {
+          "content": "17.99",
+          "answer": ""
+        },
+        {
+          "content": "5\\. Special Vermicelli/ Bún Đặc Biệt",
+          "answer": ""
+        },
+        {
+          "content": "17.99",
+          "answer": ""
+        },
+        {
+          "content": "6\\. Vegetarian Vermicelli/ Bún Chay",
+          "answer": ""
+        },
+        {
+          "content": "14.99",
+          "answer": ""
+        },
+        {
+          "content": "![Bún Tôm Nướng + Chả Giò](https://phohousewv.com/images/menu/Vermicelli/1.webp) ![Bún Thịt Nướng + Chả Giò](https://phohousewv.com/images/menu/Vermicelli/2.webp) ![Bún Đặc Biệt](https://phohousewv.com/images/menu/Vermicelli/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "🍚 RICE PLATES\n--------------",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Grilled Pork Chop Rice/ Cơm Sườn",
+          "answer": ""
+        },
+        {
+          "content": "14.99",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Grilled Pork Chop with Shredded Pork Skin Rice/ Cơm Sườn Bì",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Grilled Pork Chop with Egg Quiche/ Cơm Sườn Chả",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Rice w. Pork Chop & Egg / Cơm Sườn Chả",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "5\\. Rice w. Pork Chop & Fried Egg / Cơm Sườn Trứng",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "6\\. Rice w. Grilled Lemongrass Chicken / Cơm Gà Nướng Sả",
+          "answer": ""
+        },
+        {
+          "content": "14.99",
+          "answer": ""
+        },
+        {
+          "content": "7\\. Rice w. Lemongrass Chicken & Egg Roll / Cơm Gà Nướng Sả, Chả Giò",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "8\\. Rice w. Lemongrass Chicken & Fried Egg / Cơm Gà Nướng Sả, Ốp La",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "9\\. Rice w. Chicken Wings / Cơm Cánh Gà",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "![Cơm Sườn Bì Chả](https://phohousewv.com/images/menu/Rice/1.webp) ![Cơm Sườn Bì Chả](https://phohousewv.com/images/menu/Rice/2.webp) ![Cơm Sườn Bì Chả](https://phohousewv.com/images/menu/Rice/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "🥢 STARTERS\n-----------",
+          "answer": ""
+        },
+        {
+          "content": "Egg Rolls (Chả Giò)",
+          "answer": ""
+        },
+        {
+          "content": "1\\. 2 Rolls",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "2\\. 4 Rolls",
+          "answer": ""
+        },
+        {
+          "content": "10.99",
+          "answer": ""
+        },
+        {
+          "content": "Spring Rolls (Gỏi Cuốn)",
+          "answer": ""
+        },
+        {
+          "content": "1\\. 2 Rolls",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "2\\. 4 Rolls",
+          "answer": ""
+        },
+        {
+          "content": "10.99",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Veggie Egg Rolls",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Saté Tofu",
+          "answer": ""
+        },
+        {
+          "content": "![Egg Rolls](https://phohousewv.com/images/menu/Starters/1.webp) ![Spring Rolls](https://phohousewv.com/images/menu/Starters/2.webp) ![Veggie Egg Rolls](https://phohousewv.com/images/menu/Starters/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "🍳 FRIED RICE\n-------------",
+          "answer": ""
+        },
+        {
+          "content": "1\\. House Special Fried Rice",
+          "answer": ""
+        },
+        {
+          "content": "16.99",
+          "answer": ""
+        },
+        {
+          "content": "![Fried Rice](https://phohousewv.com/images/menu/Fried-Rice/1.webp) ![Fried Rice](https://phohousewv.com/images/menu/Fried-Rice/2.webp) ![Fried Rice](https://phohousewv.com/images/menu/Fried-Rice/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "🍗 WINGS / LEGS\n---------------",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Ocean Wings (8) / Legs (4)",
+          "answer": ""
+        },
+        {
+          "content": "15.99",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Mango Wings (8) / Legs (4)",
+          "answer": ""
+        },
+        {
+          "content": "15.99",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Salt & Pepper Wings (8) / Legs (4)",
+          "answer": ""
+        },
+        {
+          "content": "15.99",
+          "answer": ""
+        },
+        {
+          "content": "![Wings](https://phohousewv.com/images/menu/Wings/1.webp) ![Salt & Pepper Wings ](https://phohousewv.com/images/menu/Wings/2.webp) ![Mango Wings](https://phohousewv.com/images/menu/Wings/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "🧋 DRINKS\n---------",
+          "answer": ""
+        },
+        {
+          "content": "Milk Tea",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Classic Milk Tea",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Matcha Latte",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Taro Milk Tea",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "Special Drinks",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Fresh Lemonade",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Passion Fruit Juice",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Sugarcane Juice",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "Fruit tea",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Signature Fruit Tea",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Mango Passion Fruit",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Strawberry Lychee",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Strawberry",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "Soda: $3.00",
+          "answer": ""
+        },
+        {
+          "content": "Coke, Diet Coke, Dr Pepper, Diet Dr Pepper, Sprite, Fanta, Lemonade",
+          "answer": ""
+        },
+        {
+          "content": "Coffee & Tea",
+          "answer": ""
+        },
+        {
+          "content": "1\\. Vietnamese Coffee (Iced)",
+          "answer": ""
+        },
+        {
+          "content": "5.50",
+          "answer": ""
+        },
+        {
+          "content": "2\\. Sea Salt Coffee (Iced)",
+          "answer": ""
+        },
+        {
+          "content": "6.00",
+          "answer": ""
+        },
+        {
+          "content": "3\\. Thai Tea",
+          "answer": ""
+        },
+        {
+          "content": "5.00",
+          "answer": ""
+        },
+        {
+          "content": "4\\. Jasmine Green Tea",
+          "answer": ""
+        },
+        {
+          "content": "5.00",
+          "answer": ""
+        },
+        {
+          "content": "5\\. Oolong Tea",
+          "answer": ""
+        },
+        {
+          "content": "5.00",
+          "answer": ""
+        },
+        {
+          "content": "6\\. Hot Tea",
+          "answer": ""
+        },
+        {
+          "content": "2.50",
+          "answer": ""
+        },
+        {
+          "content": "7\\. Tea Pot (Jasmine / Oolong)",
+          "answer": ""
+        },
+        {
+          "content": "7.00",
+          "answer": ""
+        },
+        {
+          "content": "8\\. Ginger Hot Tea",
+          "answer": ""
+        },
+        {
+          "content": "2.50",
+          "answer": ""
+        },
+        {
+          "content": "![Taro Milk Tea](https://phohousewv.com/images/menu/Drinks/1.webp) ![Mango Passion Fruit](https://phohousewv.com/images/menu/Drinks/2.webp) ![Vietnamese Coffee](https://phohousewv.com/images/menu/Drinks/3.webp)",
+          "answer": ""
+        },
+        {
+          "content": "\\[X\\]",
+          "answer": ""
+        },
+        {
+          "content": "Restrictions:",
+          "answer": ""
+        },
+        {
+          "content": "One time use only. Must show valid ID with your name at front desk.",
+          "answer": ""
+        },
+        {
+          "content": "Expire:",
+          "answer": ""
+        },
+        {
+          "content": "Serial Number: XXXXXX",
+          "answer": ""
+        },
+        {
+          "content": "Sign Up to receive future promotions to your inbox.",
+          "answer": ""
+        },
+        {
+          "content": "First Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Last Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Email \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Phone \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Birthdate \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Submit",
+          "answer": ""
+        },
+        {
+          "content": "Please wait...",
+          "answer": ""
+        },
+        {
+          "content": "OK",
+          "answer": ""
+        },
+        {
+          "content": "![loader](https://phohousewv.com/images/spinner.gif)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* Call\n \n [(681) 238-5543](tel:6812385543)\n [(681) 238-5544](tel:6812385544)\n \n* [Menu](https://phohousewv.com/menu)\n \n* Direction",
+          "answer": ""
+        },
+        {
+          "content": "SIGN UP",
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "name": "https://phohousewv.com/contact",
+      "data_source_type": "website_crawl",
+      "segments": [
+        {
+          "content": "[X](https://phohousewv.com/contact#)",
+          "answer": ""
+        },
+        {
+          "content": "[![Pho House](https://phohousewv.com/images/logo.webp)](https://phohousewv.com/index.html)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* [Menu](https://phohousewv.com/menu)\n \n* [Gallery](https://phohousewv.com/gallery)\n \n* [Promotions](https://phohousewv.com/promotions)\n \n* [Host A Party](https://phohousewv.com/host-a-party)\n \n* [Happy Hour](https://phohousewv.com/happy-hour)\n \n* [Contact us](https://phohousewv.com/contact)",
+          "answer": ""
+        },
+        {
+          "content": "Contact Info\n------------",
+          "answer": ""
+        },
+        {
+          "content": "2 Crossroads Mall Ste E-1 \n Mount Hope, WV 25880\n* (681) 238-5543\n* (681) 238-5544",
+          "answer": ""
+        },
+        {
+          "content": "[](https://www.facebook.com/phohousemounthopewv/)\n \n* [](https://phohousewv.com/contact#)\n \n* [](https://share.google/I8INDvKCUYTdBiAvZ)\n \n* [](https://www.instagram.com/phohouse2026/)",
+          "answer": ""
+        },
+        {
+          "content": "Contact\n-------",
+          "answer": ""
+        },
+        {
+          "content": "[home](https://phohousewv.com/index.html)\n \n* Contact",
+          "answer": ""
+        },
+        {
+          "content": "![Pho House](https://phohousewv.com/images/contact.webp)",
+          "answer": ""
+        },
+        {
+          "content": "Opening Hours",
+          "answer": ""
+        },
+        {
+          "content": "Mon: Closed\n* Tue - Sat: 11AM - 9PM\n* Sun: 11AM - 7PM",
+          "answer": ""
+        },
+        {
+          "content": "681) 238-5543](tel:6812385543)",
+          "answer": ""
+        },
+        {
+          "content": "681) 238-5544](tel:6812385544)",
+          "answer": ""
+        },
+        {
+          "content": "2 Crossroads Mall Ste E-1 \nMount Hope, WV 25880",
+          "answer": ""
+        },
+        {
+          "content": "Send us a message",
+          "answer": ""
+        },
+        {
+          "content": "Send message",
+          "answer": ""
+        },
+        {
+          "content": "OK",
+          "answer": ""
+        },
+        {
+          "content": "\\[X\\]",
+          "answer": ""
+        },
+        {
+          "content": "Restrictions:",
+          "answer": ""
+        },
+        {
+          "content": "One time use only. Must show valid ID with your name at front desk.",
+          "answer": ""
+        },
+        {
+          "content": "Expire:",
+          "answer": ""
+        },
+        {
+          "content": "Serial Number: XXXXXX",
+          "answer": ""
+        },
+        {
+          "content": "Sign Up to receive future promotions to your inbox.",
+          "answer": ""
+        },
+        {
+          "content": "First Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Last Name \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Email \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Phone \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Birthdate \\*:",
+          "answer": ""
+        },
+        {
+          "content": "Submit",
+          "answer": ""
+        },
+        {
+          "content": "Please wait...",
+          "answer": ""
+        },
+        {
+          "content": "OK",
+          "answer": ""
+        },
+        {
+          "content": "![loader](https://phohousewv.com/images/spinner.gif)",
+          "answer": ""
+        },
+        {
+          "content": "[Home](https://phohousewv.com/index.html)\n \n* Call\n \n [(681) 238-5543](tel:6812385543)\n [(681) 238-5544](tel:6812385544)\n \n* [Menu](https://phohousewv.com/menu)\n \n* Direction",
+          "answer": ""
+        },
+        {
+          "content": "SIGN UP",
+          "answer": ""
+        }
+      ]
+    }
+  ]
+}

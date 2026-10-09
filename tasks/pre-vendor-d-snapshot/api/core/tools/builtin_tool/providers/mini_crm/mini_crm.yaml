@@ -1,0 +1,13 @@
+identity:
+  author: Vismarttech
+  name: mini_crm
+  label:
+    en_US: Mini CRM
+    vi_VN: Mini CRM
+  description:
+    en_US: Update omnichannel CRM lead stage, notes, and tags from workflows and agents.
+    vi_VN: Cap nhat giai doan, ghi chu va tag lead CRM tu quy trinh va agent.
+  icon: icon.svg
+  tags:
+    - productivity
+    - social

@@ -247,3 +247,8 @@ scripts/stress-test/reports/
 .agents/
 .claude/
 .gemini/
+
+# Local runtime volumes & temporary artifacts
+docker/volumes/notebooklm_images/
+docker/volumes/zalo_personal_sessions/
+tmp_artifacts/
